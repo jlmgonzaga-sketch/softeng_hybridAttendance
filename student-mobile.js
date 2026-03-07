@@ -6,7 +6,6 @@
 // ═══════════════════════════════════════════════════════════
 
 // ── Student Data (same as student.js desktop) ─────────────
-document.addEventListener('DOMContentLoaded', () => requireAuth('student'));
 const STUDENT = {
     id:      '2026-0031',
     name:    'Mel Reynald Malacas',
@@ -227,73 +226,60 @@ function viewClassDetail(subject, day, time) {
     document.getElementById('classModal').classList.add('show');
 }
 
-// ── QR Scanner ────────────────────────────────────────────
-// ── Real QR Scanner ───────────────────────────────────────
-let _qrScanner   = null;
-let _usingFront  = false;
+// ── QR Scanner (Real Camera) ────────────────────────────────────────────────
+let _html5QrCode = null;
 
 function openQRScanner() {
     document.getElementById('qrModal').classList.add('show');
-    document.getElementById('qr-result').style.display = 'none';
-    startQRCamera();
+    document.getElementById('qrResultBox').style.display = 'none';
+    document.getElementById('qrStatusMsg').textContent = 'Starting camera...';
+    document.getElementById('qrStatusMsg').style.color = '#888';
+    document.getElementById('scanLine').style.display = 'block';
+
+    setTimeout(() => {
+        _html5QrCode = new Html5Qrcode("qr-reader");
+        Html5Qrcode.getCameras().then(cameras => {
+            if (!cameras || cameras.length === 0) {
+                document.getElementById('qrStatusMsg').textContent = 'No camera found.';
+                return;
+            }
+            const cam = cameras.find(c => /back|rear|environment/i.test(c.label)) || cameras[cameras.length - 1];
+            _html5QrCode.start(
+                cam.id,
+                { fps: 10, qrbox: { width: 200, height: 200 } },
+                (decodedText) => {
+                    document.getElementById('qrResultText').textContent = decodedText;
+                    document.getElementById('qrResultBox').style.display = 'block';
+                    document.getElementById('qrStatusMsg').textContent = 'Attendance marked as Present!';
+                    document.getElementById('qrStatusMsg').style.color = '#2e7d32';
+                    document.getElementById('scanLine').style.display = 'none';
+                    _html5QrCode.stop().catch(() => {});
+                },
+                () => {}
+            ).then(() => {
+                document.getElementById('qrStatusMsg').textContent = 'Align QR code in the frame';
+            }).catch(() => {
+                document.getElementById('qrStatusMsg').textContent = 'Camera access denied. Please allow camera permission.';
+                document.getElementById('qrStatusMsg').style.color = '#c62828';
+            });
+        }).catch(() => {
+            document.getElementById('qrStatusMsg').textContent = 'Could not access camera.';
+            document.getElementById('qrStatusMsg').style.color = '#c62828';
+        });
+    }, 300);
 }
 
-function startQRCamera() {
-    if (_qrScanner) { _qrScanner.stop().catch(() => {}); _qrScanner = null; }
-
-    _qrScanner = new Html5Qrcode('qr-reader');
-    Html5Qrcode.getCameras().then(cameras => {
-        if (!cameras.length) { showQRError('No camera found on this device.'); return; }
-
-        // Pick back camera by default, front if flipped
-        const cam = _usingFront
-            ? cameras.find(c => c.label.toLowerCase().includes('front')) || cameras[0]
-            : cameras.find(c => c.label.toLowerCase().includes('back') || c.label.toLowerCase().includes('rear')) || cameras[cameras.length - 1];
-
-        _qrScanner.start(
-            cam.id,
-            { fps: 12, qrbox: { width: 200, height: 200 } },
-            onQRSuccess,
-            () => {} // suppress not-found errors
-        ).catch(err => showQRError('Camera error: ' + err));
-    }).catch(() => showQRError('Could not access camera. Check permissions.'));
+function closeQRModal() {
+    if (_html5QrCode) {
+        _html5QrCode.stop().catch(() => {}).finally(() => {
+            _html5QrCode.clear();
+            _html5QrCode = null;
+        });
+    }
+    document.getElementById('scanLine').style.display = 'block';
+    document.getElementById('qrResultBox').style.display = 'none';
+    document.getElementById('qrModal').classList.remove('show');
 }
-
-function onQRSuccess(text) {
-    // Vibrate on scan
-    if (navigator.vibrate) navigator.vibrate(80);
-
-    // Show result
-    const result = document.getElementById('qr-result');
-    result.textContent   = 'Scanned: ' + text + ' — Attendance marked!';
-    result.style.display = 'block';
-
-    // Stop camera after successful scan
-    if (_qrScanner) { _qrScanner.stop().catch(() => {}); _qrScanner = null; }
-
-    // Auto-close modal after 2 seconds
-    setTimeout(() => closeQRScanner(), 2000);
-}
-
-function flipCamera() {
-    _usingFront = !_usingFront;
-    startQRCamera();
-}
-
-function closeQRScanner() {
-    if (_qrScanner) { _qrScanner.stop().catch(() => {}); _qrScanner = null; }
-    closeModal('qrModal');
-}
-
-function showQRError(msg) {
-    const result = document.getElementById('qr-result');
-    result.textContent   = msg;
-    result.style.color   = '#c62828';
-    result.style.background = '#ffebee';
-    result.style.borderColor = '#ef9a9a';
-    result.style.display = 'block';
-}
-
 // ── Subjects Sheet ────────────────────────────────────────
 function openSubjectsSheet() { document.getElementById('subjectsModal').classList.add('show'); }
 
