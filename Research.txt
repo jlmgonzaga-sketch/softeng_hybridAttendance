@@ -1,0 +1,37 @@
+Main Purpose
+The project aims to replace the traditional manual attendance system (paper roll calls) with an automated digital system using QR codes that students scan via mobile devices to log their attendance.
+Key Problems Being Addressed
+
+Manual attendance is time-consuming and error-prone
+Vulnerability to attendance fraud (students signing in for absent classmates)
+Difficult to track and analyze attendance data in real-time
+Administrative burden on teachers
+
+How the System Works
+Professors generate unique, time-limited QR codes for each class session (Should be Unique QR's, Each but how??)
+Students scan these QR codes using a mobile or web app when they arrive
+The system validates the scan and logs attendance in real-time to a central database
+Both students and faculty get instant confirmation and can view attendance records
+
+Main Benefits
+
+Speed: Faster than manual roll calls
+Accuracy: Reduces human error and prevents proxy attendance
+Real-time tracking: Immediate visibility of who's present
+Data security: Encrypted, centralized digital records
+Efficiency: Automated report generation for teachers
+
+Technical Approach
+
+Uses JavaScript, HTML, and MySQL
+Mobile and web-based platforms
+Cloud storage for scalability
+Session-specific QR codes for security
+
+Target Users
+
+High school students (to mark attendance)
+Faculty (to generate codes and monitor attendance)
+Guidance counselors (to track patterns and intervene when needed)
+Administrators (for reporting and compliance)
+

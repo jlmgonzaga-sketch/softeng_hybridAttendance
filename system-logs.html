@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSC-R System Logs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="student-log.css">
+
+    <!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#8B0000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="sscrmnlofficiallogo.png">
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sscr_attendance/sw.js');
+  }
+</script>
+</head>
+
+<body>
+<div class="container">
+
+    <!-- Header -->
+    <div class="header">
+        <div style="position:relative;z-index:1;">
+            <img src="sscrmnlofficiallogo.png" alt="SSC-R Logo" class="logo-img"
+                 onerror="this.style.display='none'">
+        </div>
+        <div class="header-right">
+            <div class="admin-profile">
+                <div class="admin-avatar">JG</div>
+                <div>
+                    <div class="admin-name">Julliana Louisse Gonzaga</div>
+                    <div class="admin-role">System Administrator</div>
+                </div>
+            </div>
+            <button class="btn-logout" onclick="goBack()">Back to Dashboard</button>
+        </div>
+    </div>
+
+    
+
+    <!-- Stats Row -->
+    <div class="stats-row" id="statsRow">
+        <div class="stat-card total">
+            <div class="stat-val" id="statTotal">—</div>
+            <div class="stat-label">Total Logs</div>
+        </div>
+        <div class="stat-card login">
+            <div class="stat-val" id="statLogin">—</div>
+            <div class="stat-label">Logins</div>
+        </div>
+        <div class="stat-card edit">
+            <div class="stat-val" id="statEdit">—</div>
+            <div class="stat-label">Edits</div>
+        </div>
+        <div class="stat-card export">
+            <div class="stat-val" id="statExport">—</div>
+            <div class="stat-label">Exports</div>
+        </div>
+        <div class="stat-card error">
+            <div class="stat-val" id="statError">—</div>
+            <div class="stat-label">Errors</div>
+        </div>
+        <div class="stat-card logout">
+            <div class="stat-val" id="statLogout">—</div>
+            <div class="stat-label">Logouts</div>
+        </div>
+    </div>
+
+    <!-- Main Card -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <span class="card-title-dot"></span>
+                System Activity Logs
+                <span class="live-dot" style="margin-left:.5rem;">Live</span>
+            </div>
+            <div class="card-actions">
+                <button class="btn btn-dark"    onclick="refreshLogs()">Refresh</button>
+                <button class="btn btn-dark"    onclick="exportLogs()">Export</button>
+                <button class="btn btn-success" onclick="clearLogs()" title="Clear all logs">Clear Logs</button>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-row">
+            <div class="search-wrap">
+                <span class="search-icon"></span>
+                <input type="text" id="searchInput"
+                       placeholder="Search user, action, description…"
+                       oninput="_page=1;renderLogs()">
+            </div>
+            <select class="filter-select" id="filterType"
+                    onchange="_page=1;renderLogs()" style="min-width:130px;">
+                <option value="">All Actions</option>
+                <option value="Login">Login</option>
+                <option value="Logout">Logout</option>
+                <option value="Edit">Edit</option>
+                <option value="Generate">Generate</option>
+                <option value="Export">Export</option>
+                <option value="Print">Print</option>
+                <option value="View">View</option>
+                <option value="Error">Error</option>
+                <option value="System">System</option>
+            </select>
+            <select class="filter-select" id="filterRole"
+                    onchange="_page=1;renderLogs()" style="min-width:130px;">
+                <option value="">All Roles</option>
+                <option value="Administrator">Administrator</option>
+                <option value="Faculty">Faculty</option>
+            </select>
+            <select class="filter-select" id="filterSeverity"
+                    onchange="_page=1;renderLogs()" style="min-width:120px;">
+                <option value="">All Severity</option>
+                <option value="info">Info</option>
+                <option value="warning">Warning</option>
+                <option value="error">Error</option>
+            </select>
+            <input type="date" class="form-input" id="filterDate"
+                   onchange="_page=1;renderLogs()" style="min-width:140px;">
+            <button class="clear-chip" onclick="clearFilters()">&#10005; Clear</button>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width:36px;">#</th>
+                        <th>Timestamp</th>
+                        <th>User</th>
+                        <th>Role</th>
+                        <th>Action</th>
+                        <th>Description</th>
+                        <th>IP Address</th>
+                        <th style="width:60px;">Sev.</th>
+                        <th style="width:70px;">Details</th>
+                    </tr>
+                </thead>
+                <tbody id="logsTableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="pagination" id="paginationWrap"></div>
+    </div>
+
+</div>
+
+<!-- Detail Modal -->
+<div id="detailModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-title">Log Entry Details</div>
+            <button class="modal-close" onclick="closeModal()">&#10005;</button>
+        </div>
+        <div id="modalBody"></div>
+    </div>
+</div>
+
+<script>
+// ── Config ────────────────────────────────────────────────────────────────
+const ROWS_PER_PAGE = 15;
+let _page = 1;
+let _filtered = [];
+
+// ── Generate realistic log data ───────────────────────────────────────────
+const USERS = [
+    { name: 'Julliana Louisse Gonzaga', role: 'Administrator', ip: '192.168.1.10' },
+    { name: 'Agnes Bernal',             role: 'Faculty',       ip: '192.168.1.22' },
+    { name: 'Gary Soriano',             role: 'Faculty',       ip: '192.168.1.35' },
+    { name: 'Rheymard Doneza',          role: 'Faculty',       ip: '192.168.1.47' },
+];
+
+const LOG_TEMPLATES = [
+    { action: 'Login',    severity: 'info',    desc: (u) => `${u.name} logged in successfully.` },
+    { action: 'Logout',   severity: 'info',    desc: (u) => `${u.name} logged out of the system.` },
+    { action: 'Edit',     severity: 'warning', desc: (u) => `${u.name} edited attendance record for student 2026-00${10+Math.floor(Math.random()*40)}.` },
+    { action: 'Generate', severity: 'info',    desc: (u) => `${u.name} generated ${['Daily','Weekly','Monthly'][Math.floor(Math.random()*3)]} attendance report.` },
+    { action: 'Export',   severity: 'info',    desc: (u) => `${u.name} exported attendance data as ${['Excel','CSV'][Math.floor(Math.random()*2)]}.` },
+    { action: 'Print',    severity: 'info',    desc: (u) => `${u.name} printed attendance report for ${['Sec A','Sec B','Sec C'][Math.floor(Math.random()*3)]}.` },
+    { action: 'View',     severity: 'info',    desc: (u) => `${u.name} viewed attendance details for student 2026-00${10+Math.floor(Math.random()*40)}.` },
+    { action: 'Error',    severity: 'error',   desc: (u) => `Failed login attempt detected from IP ${u.ip}. Invalid credentials.` },
+    { action: 'System',   severity: 'info',    desc: () => 'System backup completed successfully.' },
+    { action: 'System',   severity: 'warning', desc: () => 'High memory usage detected. System running at 87% capacity.' },
+    { action: 'Edit',     severity: 'warning', desc: (u) => `${u.name} bulk-updated attendance status for Section ${['A','B','C'][Math.floor(Math.random()*3)]}.` },
+    { action: 'Login',    severity: 'error',   desc: (u) => `${u.name} — session expired. Forced re-login required.` },
+];
+
+function generateLogs() {
+    const logs = [];
+    const now  = new Date();
+
+    for (let i = 0; i < 120; i++) {
+        const minsAgo = i * (3 + Math.floor(Math.random() * 12));
+        const ts      = new Date(now.getTime() - minsAgo * 60000);
+        const user    = USERS[Math.floor(Math.random() * USERS.length)];
+        const tpl     = LOG_TEMPLATES[Math.floor(Math.random() * LOG_TEMPLATES.length)];
+
+        logs.push({
+            id:        'LOG-' + String(120 - i).padStart(5, '0'),
+            timestamp: ts,
+            user:      user.name,
+            role:      user.role,
+            ip:        user.ip,
+            action:    tpl.action,
+            severity:  tpl.severity,
+            desc:      tpl.desc(user),
+        });
+    }
+    return logs;
+}
+
+let ALL_LOGS = generateLogs();
+
+// ── Stats ────────────────────────────────────────────────────────────────
+function updateStats(logs) {
+    document.getElementById('statTotal').textContent  = logs.length;
+    document.getElementById('statLogin').textContent  = logs.filter(l => l.action === 'Login').length;
+    document.getElementById('statEdit').textContent   = logs.filter(l => l.action === 'Edit').length;
+    document.getElementById('statExport').textContent = logs.filter(l => l.action === 'Export' || l.action === 'Print').length;
+    document.getElementById('statError').textContent  = logs.filter(l => l.severity === 'error').length;
+    document.getElementById('statLogout').textContent = logs.filter(l => l.action === 'Logout').length;
+}
+
+// ── Format timestamp ──────────────────────────────────────────────────────
+function fmtTimestamp(dt) {
+    return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
+           ' ' + dt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+
+function fmtDateOnly(dt) {
+    const y = dt.getFullYear();
+    const m = String(dt.getMonth() + 1).padStart(2, '0');
+    const d = String(dt.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + d;
+}
+
+// ── Render logs ───────────────────────────────────────────────────────────
+function renderLogs() {
+    const search   = document.getElementById('searchInput').value.toLowerCase();
+    const fType    = document.getElementById('filterType').value;
+    const fRole    = document.getElementById('filterRole').value;
+    const fSev     = document.getElementById('filterSeverity').value;
+    const fDate    = document.getElementById('filterDate').value;
+
+    _filtered = ALL_LOGS.filter(l => {
+        if (fType && l.action !== fType)                     return false;
+        if (fRole && l.role !== fRole)                       return false;
+        if (fSev  && l.severity !== fSev)                    return false;
+        if (fDate && fmtDateOnly(l.timestamp) !== fDate)     return false;
+        if (search && !(
+            l.user.toLowerCase().includes(search) ||
+            l.action.toLowerCase().includes(search) ||
+            l.desc.toLowerCase().includes(search) ||
+            l.id.toLowerCase().includes(search)
+        )) return false;
+        return true;
+    });
+
+    updateStats(_filtered.length ? _filtered : ALL_LOGS);
+
+    const tbody     = document.getElementById('logsTableBody');
+    const total     = _filtered.length;
+    const totalPages = Math.max(1, Math.ceil(total / ROWS_PER_PAGE));
+    if (_page > totalPages) _page = totalPages;
+
+    tbody.innerHTML = '';
+
+    if (!total) {
+        tbody.innerHTML =
+            '<tr><td colspan="9">' +
+            '<div class="empty-state">' +
+            '<div class="empty-state-icon">&#128269;</div>' +
+            '<div style="font-weight:700;margin-bottom:.3rem;">No logs found</div>' +
+            '<div style="font-size:.82rem;">Try adjusting your filters or search term.</div>' +
+            '</div></td></tr>';
+        buildPagination(0, 0);
+        return;
+    }
+
+    const start    = (_page - 1) * ROWS_PER_PAGE;
+    const pageRows = _filtered.slice(start, start + ROWS_PER_PAGE);
+    const globalIdx = start;
+
+    pageRows.forEach((l, i) => {
+        const actionClass = 'log-' + l.action.toLowerCase();
+        const sevClass    = 'sev-' + l.severity;
+        const roleClass   = l.role === 'Faculty' ? 'role-badge faculty' : 'role-badge';
+
+        const tr = document.createElement('tr');
+        tr.style.cursor = 'pointer';
+        tr.onclick = () => showDetail(l);
+        tr.innerHTML =
+            '<td style="color:#bbb;font-size:.75rem;">' + (globalIdx + i + 1) + '</td>' +
+            '<td style="font-size:.78rem;color:#555;white-space:nowrap;">' + fmtTimestamp(l.timestamp) + '</td>' +
+            '<td style="font-weight:600;font-size:.83rem;">' + l.user + '</td>' +
+            '<td><span class="' + roleClass + '">' + l.role + '</span></td>' +
+            '<td><span class="log-badge ' + actionClass + '">' + l.action + '</span></td>' +
+            '<td style="font-size:.82rem;color:#444;max-width:300px;">' + l.desc + '</td>' +
+            '<td style="font-family:monospace;font-size:.75rem;color:#888;">' + l.ip + '</td>' +
+            '<td style="text-align:center;"><span class="sev ' + sevClass + '" title="' + l.severity + '"></span></td>' +
+            '<td><button class="btn btn-dark" style="padding:3px 10px;font-size:.72rem;" onclick="event.stopPropagation();showDetail(logs_ref_' + (globalIdx + i) + ')">View</button></td>';
+
+        // store reference for button click
+        window['logs_ref_' + (globalIdx + i)] = l;
+        tbody.appendChild(tr);
+    });
+
+    buildPagination(totalPages, total);
+}
+
+// ── Detail Modal ──────────────────────────────────────────────────────────
+function showDetail(log) {
+    const sevColors = { info: '#2e7d32', warning: '#e65100', error: '#c62828' };
+    const actionClass = 'log-' + log.action.toLowerCase();
+
+    document.getElementById('modalBody').innerHTML =
+        drow('Log ID',      '<code style="font-size:.85rem;background:#f5f5f5;padding:2px 6px;border-radius:4px;">' + log.id + '</code>') +
+        drow('Timestamp',   fmtTimestamp(log.timestamp)) +
+        drow('User',        '<strong>' + log.user + '</strong>') +
+        drow('Role',        '<span class="role-badge' + (log.role === 'Faculty' ? ' faculty' : '') + '">' + log.role + '</span>') +
+        drow('Action',      '<span class="log-badge ' + actionClass + '">' + log.action + '</span>') +
+        drow('Severity',    '<span style="font-weight:700;color:' + sevColors[log.severity] + ';">' + log.severity.charAt(0).toUpperCase() + log.severity.slice(1) + '</span>') +
+        drow('IP Address',  '<code style="font-size:.85rem;">' + log.ip + '</code>') +
+        '<div class="detail-desc">' + log.desc + '</div>';
+
+    document.getElementById('detailModal').classList.add('show');
+}
+
+function drow(label, val) {
+    return '<div class="detail-row"><div class="detail-label">' + label + '</div><div class="detail-val">' + val + '</div></div>';
+}
+
+function closeModal() {
+    document.getElementById('detailModal').classList.remove('show');
+}
+
+// ── Pagination ────────────────────────────────────────────────────────────
+function buildPagination(totalPages, totalRows) {
+    const wrap = document.getElementById('paginationWrap');
+    wrap.innerHTML = '';
+    if (!totalRows) return;
+
+    const mk = (label, pg, disabled, active) => {
+        const btn = document.createElement('button');
+        btn.className = 'page-btn' + (active ? ' active' : '');
+        btn.textContent = label;
+        btn.disabled = disabled;
+        btn.onclick = () => { _page = pg; renderLogs(); };
+        wrap.appendChild(btn);
+    };
+
+    mk('\u2039', _page - 1, _page === 1, false);
+    const max = 5;
+    let s = Math.max(1, _page - Math.floor(max / 2));
+    let e = Math.min(totalPages, s + max - 1);
+    if (e - s < max - 1) s = Math.max(1, e - max + 1);
+    for (let p = s; p <= e; p++) mk(p, p, false, p === _page);
+    mk('\u203a', _page + 1, _page === totalPages, false);
+
+    const start = (_page - 1) * ROWS_PER_PAGE + 1;
+    const end   = Math.min(_page * ROWS_PER_PAGE, totalRows);
+    const lbl   = document.createElement('span');
+    lbl.style.cssText = 'font-size:.8rem;color:#999;margin-left:.75rem;line-height:32px;';
+    lbl.textContent = start + '–' + end + ' of ' + totalRows + ' logs';
+    wrap.appendChild(lbl);
+}
+
+// ── Actions ───────────────────────────────────────────────────────────────
+function refreshLogs() {
+    // Prepend a new real-time log entry to simulate live activity
+    const user = USERS[0];
+    const now  = new Date();
+    ALL_LOGS.unshift({
+        id:        'LOG-' + String(ALL_LOGS.length + 1).padStart(5, '0'),
+        timestamp: now,
+        user:      user.name,
+        role:      user.role,
+        ip:        user.ip,
+        action:    'System',
+        severity:  'info',
+        desc:      'Logs refreshed manually by ' + user.name + '.',
+    });
+    _page = 1;
+    renderLogs();
+}
+
+function clearFilters() {
+    document.getElementById('searchInput').value  = '';
+    document.getElementById('filterType').value   = '';
+    document.getElementById('filterRole').value   = '';
+    document.getElementById('filterSeverity').value = '';
+    document.getElementById('filterDate').value   = '';
+    _page = 1;
+    renderLogs();
+}
+
+function clearLogs() {
+    if (!confirm('Are you sure you want to clear all system logs? This cannot be undone.')) return;
+    ALL_LOGS = [{
+        id:        'LOG-00001',
+        timestamp: new Date(),
+        user:      'Julliana Louisse Gonzaga',
+        role:      'Administrator',
+        ip:        '192.168.1.10',
+        action:    'System',
+        severity:  'warning',
+        desc:      'All system logs cleared by Administrator.',
+    }];
+    _page = 1;
+    renderLogs();
+}
+
+function exportLogs() {
+    const rows = _filtered.length ? _filtered : ALL_LOGS;
+    if (!rows.length) { alert('No logs to export.'); return; }
+
+    const wsData = [['Log ID', 'Timestamp', 'User', 'Role', 'Action', 'Description', 'IP Address', 'Severity']];
+    rows.forEach(l => wsData.push([
+        l.id, fmtTimestamp(l.timestamp), l.user, l.role,
+        l.action, l.desc, l.ip, l.severity
+    ]));
+
+    if (typeof XLSX !== 'undefined') {
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        ws['!cols'] = [{wch:12},{wch:22},{wch:28},{wch:14},{wch:10},{wch:55},{wch:14},{wch:10}];
+        XLSX.utils.book_append_sheet(wb, ws, 'System Logs');
+        XLSX.writeFile(wb, 'SSC-R_SystemLogs_' + fmtDateOnly(new Date()) + '.xlsx');
+    } else {
+        // Fallback CSV
+        const csv = wsData.map(r => r.map(v => '"' + String(v).replace(/"/g,'""') + '"').join(',')).join('\n');
+        const a = document.createElement('a');
+        a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+        a.download = 'SSC-R_SystemLogs_' + fmtDateOnly(new Date()) + '.csv';
+        a.click();
+    }
+}
+
+function goBack() {
+    window.location.href = 'admin.html';
+}
+
+// ── Close modal on backdrop click ─────────────────────────────────────────
+window.onclick = function(e) {
+    const modal = document.getElementById('detailModal');
+    if (e.target === modal) closeModal();
+};
+
+// ── Init ──────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+    updateStats(ALL_LOGS);
+    renderLogs();
+});
+</script>
+</body>
+</html>

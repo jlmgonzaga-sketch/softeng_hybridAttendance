@@ -1,0 +1,16 @@
+Faculty
+Notification Updates
+- In the notification, there should be a Circle with picture of who is it in the notif. 
+
+- Student List doest click and the classes
+
+
+Student
+- Attendance Pages
+- Notification - No Context.
+- Attendance History Theme. And when i Clicked other modal, it should not change the sizes. 
+
+
+
+Subjects Data Update, JS
+

@@ -1,0 +1,412 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSC-R Faculty Dashboard - Attendance System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="faculty.css">
+    <style>
+        /* Notification dropdown — drops directly below the bell, right-aligned to it */
+        .notification-wrapper {
+            position: relative !important;
+        }
+        .notif-dropdown {
+            position: absolute !important;
+            top: calc(100% + 8px) !important;
+            right: 0 !important;
+            left: auto !important;
+            width: 320px !important;
+            z-index: 9999 !important;
+            /* reset any transform faculty.css might apply */
+            transform: none !important;
+            margin: 0 !important;
+        }
+    </style>
+    
+    <!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#8B0000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="sscrmnlofficiallogo.png">
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sscr_attendance/sw.js');
+  }
+</script>
+</head>
+<body>
+    <div class="container">
+
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <div class="logo-container">
+                    <img src="sscrmnlofficiallogo.png" alt="SSC-R Logo" class="logo-img">
+                </div>
+                <div class="header-actions">
+                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=sscr.attendance@gmail.com&su=Faculty%20Inquiry" target="_blank" style="text-decoration:none;">
+                        <button class="quick-action-btn">
+                            <span class="quick-action-icon"></span>
+                            <span>Contact</span>
+                        </button>
+                    </a>
+                    <button class="quick-action-btn" onclick="openStudentListModal()">
+                        <span class="quick-action-icon"></span>
+                        <span>Student List</span>
+                    </button>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="notification-wrapper" id="notifWrapper">
+                    <button class="notification-btn" onclick="toggleNotifications(event)">
+                        🔔
+                        <span class="notification-badge" id="notificationCount">3</span>
+                    </button>
+                    <div class="notif-dropdown" id="notifDropdown">
+                        <div class="notif-header">
+                            <span class="notif-header-title">Notifications</span>
+                            <button class="notif-mark-all" onclick="markAllRead()">Mark all as read</button>
+                        </div>
+                        <div class="notif-list" id="notifList"></div>
+                        <div class="notif-footer" onclick="closeNotifications()">View all notifications</div>
+                    </div>
+                </div>
+                <div class="faculty-profile">
+                    <div class="faculty-avatar">AB</div>
+                    <div>
+                        <div class="faculty-name">Agnes Bernal</div>
+                        <div class="faculty-role">Software Engineering</div>
+                    </div>
+                </div>
+                <button class="btn-logout" onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <!-- Classes -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Classes</div>
+            </div>
+            <div class="stats-grid">
+                <div class="mgmt-btn" onclick="openClassModal('Math')"><div class="mgmt-btn-title">Math</div></div>
+                <div class="mgmt-btn" onclick="openClassModal('English')"><div class="mgmt-btn-title">English</div></div>
+                <div class="mgmt-btn" onclick="openClassModal('Science')"><div class="mgmt-btn-title">Science</div></div>
+                <div class="mgmt-btn" onclick="openClassModal('Filipino')"><div class="mgmt-btn-title">Filipino</div></div>
+            </div>
+        </div>
+
+        <!-- Generate Reports + Schedule -->
+        <div class="grid-2">
+
+            <!-- Generate Reports -->
+            <div class="card">
+                <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+                    <div class="card-title">Reports</div>
+                    <button class="btn btn-success" onclick="downloadReport()" style="padding:6px 18px;font-size:0.82rem;">Download</button>
+                </div>
+
+                <!-- Filters — all live, no Generate button -->
+                <div class="filter-row">
+                    <select class="form-select" id="rptType" onchange="refreshScanPreview()">
+                        <option value="">All</option>
+                        <option value="Present">Present</option>
+                        <option value="Late">Late</option>
+                        <option value="Absent">Absent</option>
+                    </select>
+                    <select class="form-select" id="rptSubject" onchange="refreshScanPreview()">
+                        <option value="">All Subjects</option>
+                        <option value="Math">Math</option>
+                        <option value="English">English</option>
+                        <option value="Science">Science</option>
+                        <option value="Filipino">Filipino</option>
+                    </select>
+                    <select class="form-select" id="rptSection" onchange="refreshScanPreview()">
+                        <option value="">All Sections</option>
+                        <option value="Sec A">Sec A</option>
+                        <option value="Sec B">Sec B</option>
+                        <option value="Sec C">Sec C</option>
+                    </select>
+                </div>
+
+                <!-- Recent Scans Preview — live filtered table -->
+                <div style="margin-top:1rem;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.55rem;">
+                        <div style="font-size:0.72rem;color:#999;" id="scanPreviewLabel">Showing all · Feb 2026</div>
+                    </div>
+                    <input type="text" id="scanSearch" placeholder="  Search by name or ID…" oninput="filterScanSearch()"
+                        style="width:100%;box-sizing:border-box;padding:7px 12px;margin-bottom:0.5rem;border:1.5px solid #ddd;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;outline:none;">
+                    <div style="max-height:270px;overflow-y:auto;border-radius:10px;border:2px solid var(--gold);position:relative;">
+                        <table class="data-table" style="width:100%;">
+                            <thead style="position:sticky;top:0;z-index:2;">
+                                <tr>
+                                    <th style="font-size:0.71rem;">ID</th>
+                                    <th style="font-size:0.71rem;">Name</th>
+                                    <th style="font-size:0.71rem;">Subject</th>
+                                    <th style="font-size:0.71rem;">Sec</th>
+                                    <th style="font-size:0.71rem;">Time In</th>
+                                    <th style="font-size:0.71rem;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scanPreviewBody">
+                                <tr><td colspan="6" style="text-align:center;color:#bbb;font-style:italic;padding:1.2rem;">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="margin-top:0.4rem;font-size:0.72rem;color:#bbb;text-align:right;">
+                        Showing <strong id="scanShownCount">0</strong> of <strong id="scanTotalCount">0</strong> records
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schedule -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Schedule</div>
+                </div>
+                <div class="schedule-grid">
+                    <div class="schedule-header">Time</div>
+                    <div class="schedule-header">Monday</div>
+                    <div class="schedule-header">Tuesday</div>
+                    <div class="schedule-header">Wednesday</div>
+                    <div class="schedule-header">Thursday</div>
+                    <div class="schedule-header">Friday</div>
+                    <div class="schedule-header">Saturday</div>
+
+                    <div class="schedule-time-cell">07:00 AM</div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('MATH-A','Monday','07:00 AM')">
+                        <div class="class-code">MATH</div><div class="class-name">Mathematics</div><div class="class-room">Sec A · Room 101</div>
+                    </div>
+                    <div class="schedule-class-cell"></div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('MATH-B','Wednesday','07:00 AM')">
+                        <div class="class-code">MATH</div><div class="class-name">Mathematics</div><div class="class-room">Sec B · Room 101</div>
+                    </div>
+                    <div class="schedule-class-cell"></div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('MATH-C','Friday','07:00 AM')">
+                        <div class="class-code">MATH</div><div class="class-name">Mathematics</div><div class="class-room">Sec C · Room 101</div>
+                    </div>
+                    <div class="schedule-class-cell"></div>
+
+                    <div class="schedule-time-cell">08:30 AM</div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('ENG-B','Monday','08:30 AM')">
+                        <div class="class-code">ENG</div><div class="class-name">English</div><div class="class-room">Sec B · Room 102</div>
+                    </div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('SCI-A','Tuesday','08:30 AM')">
+                        <div class="class-code">SCI</div><div class="class-name">Science</div><div class="class-room">Sec A · Lab 201</div>
+                    </div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('ENG-C','Wednesday','08:30 AM')">
+                        <div class="class-code">ENG</div><div class="class-name">English</div><div class="class-room">Sec C · Room 102</div>
+                    </div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('ENG-A','Thursday','08:30 AM')">
+                        <div class="class-code">ENG</div><div class="class-name">English</div><div class="class-room">Sec A · Room 102</div>
+                    </div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('SCI-B','Friday','08:30 AM')">
+                        <div class="class-code">SCI</div><div class="class-name">Science</div><div class="class-room">Sec B · Lab 201</div>
+                    </div>
+                    <div class="schedule-class-cell"></div>
+
+                    <div class="schedule-time-cell">10:00 AM</div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('SCI-C','Monday','10:00 AM')">
+                        <div class="class-code">SCI</div><div class="class-name">Science</div><div class="class-room">Sec C · Lab 201</div>
+                    </div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('FIL-B','Tuesday','10:00 AM')">
+                        <div class="class-code">FIL</div><div class="class-name">Filipino</div><div class="class-room">Sec B · Room 103</div>
+                    </div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('FIL-A','Wednesday','10:00 AM')">
+                        <div class="class-code">FIL</div><div class="class-name">Filipino</div><div class="class-room">Sec A · Room 103</div>
+                    </div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('FIL-C','Thursday','10:00 AM')">
+                        <div class="class-code">FIL</div><div class="class-name">Filipino</div><div class="class-room">Sec C · Room 103</div>
+                    </div>
+                    <div class="schedule-class-cell"></div>
+                    <div class="schedule-class-cell"></div>
+
+                    <div class="schedule-time-cell">01:00 PM</div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('FIL-A','Monday','01:00 PM')">
+                        <div class="class-code">FIL</div><div class="class-name">Filipino</div><div class="class-room">Sec A · Room 103</div>
+                    </div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('MATH-C','Tuesday','01:00 PM')">
+                        <div class="class-code">MATH</div><div class="class-name">Mathematics</div><div class="class-room">Sec C · Room 101</div>
+                    </div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('SCI-B','Wednesday','01:00 PM')">
+                        <div class="class-code">SCI</div><div class="class-name">Science</div><div class="class-room">Sec B · Lab 201</div>
+                    </div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('MATH-B','Thursday','01:00 PM')">
+                        <div class="class-code">MATH</div><div class="class-name">Mathematics</div><div class="class-room">Sec B · Room 101</div>
+                    </div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('MATH-A','Friday','01:00 PM')">
+                        <div class="class-code">MATH</div><div class="class-name">Mathematics</div><div class="class-room">Sec A · Room 101</div>
+                    </div>
+                    <div class="schedule-class-cell"></div>
+
+                    <div class="schedule-time-cell">02:30 PM</div>
+                    <div class="schedule-class-cell"></div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('ENG-A','Tuesday','02:30 PM')">
+                        <div class="class-code">ENG</div><div class="class-name">English</div><div class="class-room">Sec A · Room 102</div>
+                    </div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('SCI-C','Wednesday','02:30 PM')">
+                        <div class="class-code">SCI</div><div class="class-name">Science</div><div class="class-room">Sec C · Lab 201</div>
+                    </div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('ENG-C','Thursday','02:30 PM')">
+                        <div class="class-code">ENG</div><div class="class-name">English</div><div class="class-room">Sec C · Room 102</div>
+                    </div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('FIL-C','Friday','02:30 PM')">
+                        <div class="class-code">FIL</div><div class="class-name">Filipino</div><div class="class-room">Sec C · Room 103</div>
+                    </div>
+                    <div class="schedule-class-cell"></div>
+
+                    <div class="schedule-time-cell">04:00 PM</div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('ENG-C','Monday','04:00 PM')">
+                        <div class="class-code">ENG</div><div class="class-name">English</div><div class="class-room">Sec C · Room 102</div>
+                    </div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('SCI-C','Tuesday','04:00 PM')">
+                        <div class="class-code">SCI</div><div class="class-name">Science</div><div class="class-room">Sec C · Lab 201</div>
+                    </div>
+                    <div class="schedule-class-cell"></div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('SCI-A','Thursday','04:00 PM')">
+                        <div class="class-code">SCI</div><div class="class-name">Science</div><div class="class-room">Sec A · Lab 201</div>
+                    </div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('FIL-B','Friday','04:00 PM')">
+                        <div class="class-code">FIL</div><div class="class-name">Filipino</div><div class="class-room">Sec B · Room 103</div>
+                    </div>
+                    <div class="schedule-class-cell"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: Class Details (QR + Student List) -->
+        <div id="classModal" class="modal">
+            <div class="modal-content modal-large">
+                <div class="modal-header">
+                    <div class="modal-title" id="classModalTitle">Class Details</div>
+                    <button class="modal-close" onclick="closeModal('classModal')">×</button>
+                </div>
+                <div id="classModalBody">
+                    <div class="class-modal-grid">
+                        <div class="qr-section">
+                            <h3 style="margin-bottom:1rem;color:var(--black);">Attendance QR Code</h3>
+                            <div class="qr-container" onclick="enlargeQR()">
+                                <img id="classQRCode" src="" alt="QR Code" class="qr-image">
+                                <p style="margin-top:0.5rem;font-size:0.85rem;color:#666;">Click to enlarge</p>
+                            </div>
+                            <div style="margin-top:1rem;padding:1rem;background:#f8f9fa;border-radius:10px;">
+                                <p style="font-weight:600;margin-bottom:0.5rem;">Session Info:</p>
+                                <p style="font-size:0.9rem;margin-bottom:0.3rem;"><strong>Class:</strong> <span id="sessionClass"></span></p>
+                                <p style="font-size:0.9rem;margin-bottom:0.3rem;"><strong>Section:</strong> <span id="sessionSection"></span></p>
+                                <p style="font-size:0.9rem;margin-bottom:0.3rem;"><strong>Date:</strong> <span id="sessionDate"></span></p>
+                                <p style="font-size:0.9rem;"><strong>Time:</strong> <span id="sessionTime"></span></p>
+                            </div>
+                        </div>
+                        <div class="student-list-section">
+                            <div style="display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap;align-items:center;">
+                                <h3 style="color:var(--black);margin-right:0.5rem;">Students —</h3>
+                                <button class="section-tab active" id="tab-SecA" onclick="switchSection('Sec A')">Sec A <span class="tab-count" id="count-SecA"></span></button>
+                                <button class="section-tab" id="tab-SecB" onclick="switchSection('Sec B')">Sec B <span class="tab-count" id="count-SecB"></span></button>
+                                <button class="section-tab" id="tab-SecC" onclick="switchSection('Sec C')">Sec C <span class="tab-count" id="count-SecC"></span></button>
+                            </div>
+                            <div class="attendance-summary">
+                                <div class="summary-item"><span class="summary-label">Total:</span><span class="summary-value" id="totalStudents">0</span></div>
+                                <div class="summary-item present"><span class="summary-label">Present:</span><span class="summary-value" id="presentCount">0</span></div>
+                                <div class="summary-item absent"><span class="summary-label">Absent:</span><span class="summary-value" id="absentCount">0</span></div>
+                                <div class="summary-item late"><span class="summary-label">Late:</span><span class="summary-value" id="lateCount">0</span></div>
+                            </div>
+                            <div class="table-container" style="max-height:380px;overflow-y:auto;">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr><th>#</th><th>Student ID</th><th>Name</th><th>Time In</th><th>Status</th></tr>
+                                    </thead>
+                                    <tbody id="studentListBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: Student Roster -->
+        <div id="studentListModal" class="modal">
+            <div class="modal-content modal-large">
+                <div class="modal-header">
+                    <div class="modal-title">Students</div>
+                    <button class="modal-close" onclick="closeModal('studentListModal')">×</button>
+                </div>
+                <div style="padding:1rem 0 0.5rem;">
+                    <div style="display:flex;gap:0.75rem;margin-bottom:1rem;flex-wrap:wrap;">
+                        <input type="text" id="rosterSearch" placeholder="  Search by name or ID…" oninput="filterRoster()"
+                            style="flex:1;padding:8px 12px;border:1.5px solid #ddd;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;min-width:200px;">
+                        <select id="rosterSectionFilter" onchange="filterRoster()"
+                            style="padding:8px 12px;border:1.5px solid #ddd;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.88rem;cursor:pointer;">
+                            <option value="">All Sections</option>
+                            <option value="Sec A">Sec A</option>
+                            <option value="Sec B">Sec B</option>
+                            <option value="Sec C">Sec C</option>
+                        </select>
+                    </div>
+                    <div style="font-size:0.82rem;color:#888;margin-bottom:0.5rem;">
+                        Showing <strong id="rosterShownCount">0</strong> of <strong id="rosterTotalCount">0</strong> students
+                    </div>
+                    <div style="max-height:460px;overflow-y:auto;border-radius:10px;border:1px solid #eee;">
+                        <table class="data-table" style="width:100%;">
+                            <thead>
+                                <tr><th>#</th><th>Student ID</th><th>Full Name</th><th>Section</th><th>Subjects</th></tr>
+                            </thead>
+                            <tbody id="rosterTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: Schedule Click -->
+        <div id="detailsModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">Class Details</div>
+                    <button class="modal-close" onclick="closeModal('detailsModal')">×</button>
+                </div>
+                <div id="modalBody"></div>
+            </div>
+        </div>
+
+        <!-- MODAL: QR Enlarged -->
+        <div id="qrEnlargedModal" class="modal">
+            <div class="modal-content modal-qr-enlarged">
+                <div class="modal-header">
+                    <div class="modal-title">QR Code</div>
+                    <button class="modal-close" onclick="closeModal('qrEnlargedModal')">×</button>
+                </div>
+                <div style="text-align:center;padding:2rem;">
+                    <img id="enlargedQRImage" src="" alt="Enlarged QR Code" style="max-width:100%;height:auto;">
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: Schedule Details -->
+        <div id="scheduleModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">Class Schedule Details</div>
+                    <button class="modal-close" onclick="closeModal('scheduleModal')">×</button>
+                </div>
+                <div id="scheduleModalBody"></div>
+            </div>
+        </div>
+
+    </div><!-- /container -->
+
+    <!--
+        Script load order matters:
+        1. students-data.js  — defines SSCR_STUDENTS, attendanceDB, etc.
+        2. faculty-scans.js  — defines RECENT_SCANS (depends on nothing)
+        3. faculty.js        — app logic (depends on both above)
+    -->
+    <script src="auth.js"></script>
+<script src="students-data.js"></script>
+    <script src="faculty-scans.js"></script>
+    <script src="faculty.js"></script>
+
+</body>
+</html>

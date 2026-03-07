@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SSC-R Student — Mobile</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<script src="auth.js"></script>
+<script src="students-data.js"></script>
+<link rel="stylesheet" href="student-mobile.css">
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#8B0000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="sscrmnlofficiallogo.png">
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sscr_attendance/sw.js');
+  }
+</script>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="top-bar">
+  <img src="sscrmnlofficiallogo.png" alt="SSC-R" class="top-logo">
+  <div class="top-right">
+    <!-- Notifications -->
+    <div class="notif-wrapper" id="notifWrapper">
+      <button class="tb-btn" onclick="toggleNotifications(event)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-badge" id="notificationCount">3</span>
+      </button>
+      <div class="notif-dropdown" id="notifDropdown">
+        <div class="nd-hdr">
+          <span class="nd-title">Notifications</span>
+          <button class="nd-mark" onclick="markAllRead()">Mark all read</button>
+        </div>
+        <div class="nd-list" id="notifList"></div>
+        <div class="nd-footer" onclick="closeNotifications()">Dismiss</div>
+      </div>
+    </div>
+    <div class="student-avatar-sm">ML</div>
+  </div>
+</header>
+
+<!-- PAGE: HOME -->
+<div class="page active" id="page-home">
+  <!-- Profile Card -->
+  <div class="profile-strip">
+    <div class="avatar-lg">ML</div>
+    <div class="profile-info">
+      <div class="profile-name">Mel Reynald Malacas</div>
+      <div class="profile-role">2026-0031 · Grade 7 Section B</div>
+    </div>
+    <button class="btn-logout" onclick="logout()">Logout</button>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="stats-grid">
+    <div class="stat-card sc-p">
+      <div class="stat-label-top">Attendance Rate</div>
+      <div class="stat-value">94.6%</div>
+      <div class="stat-label">Overall Feb 2026</div>
+    </div>
+    <div class="stat-card sc-s">
+      <div class="stat-label-top">Classes Attended</div>
+      <div class="stat-value">106</div>
+      <div class="stat-label">Out of 112 Total</div>
+    </div>
+    <div class="stat-card sc-w">
+      <div class="stat-label-top">Absences</div>
+      <div class="stat-value">6</div>
+      <div class="stat-label">February 2026</div>
+    </div>
+    <div class="stat-card sc-i">
+      <div class="stat-label-top">Late Arrivals</div>
+      <div class="stat-value">15</div>
+      <div class="stat-label">This Month</div>
+    </div>
+  </div>
+
+  <!-- QR Scan CTA -->
+  <div class="qr-cta" onclick="openQRScanner()">
+    <div class="qr-cta-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    </div>
+    <div class="qr-cta-text">
+      <div class="title">Scan QR Code</div>
+      <div class="sub">Mark your attendance now</div>
+    </div>
+    <div class="qr-cta-arrow">›</div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="section">
+    <div class="section-hdr"><div class="section-title">Quick Actions</div></div>
+    <div class="quick-grid">
+      <div class="quick-btn" onclick="goPage('attendance')">
+        <svg class="qb-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span class="qb-label">Attendance</span>
+      </div>
+      <div class="quick-btn" onclick="goPage('schedule')">
+        <svg class="qb-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span class="qb-label">Schedule</span>
+      </div>
+      <div class="quick-btn" onclick="openSubjectsSheet()">
+        <svg class="qb-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <span class="qb-label">Subjects</span>
+      </div>
+      <div class="quick-btn" onclick="goPage('settings')">
+        <svg class="qb-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span class="qb-label">Settings</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Attendance -->
+  <div class="section" style="margin-top:.75rem;">
+    <div class="section-hdr">
+      <div class="section-title">Recent Attendance</div>
+      <button class="section-action" onclick="goPage('attendance')">View All</button>
+    </div>
+    <div id="recentAttendanceList"></div>
+  </div>
+  <div class="spacer"></div>
+</div>
+
+<!-- PAGE: ATTENDANCE -->
+<div class="page" id="page-attendance">
+  <div class="section">
+    <div class="section-hdr">
+      <div class="section-title">My Attendance</div>
+      <span style="font-size:.72rem;color:#888;" id="attCountLabel"></span>
+    </div>
+
+    <!-- Filters -->
+    <div class="controls">
+      <input type="text" class="search-input" id="attSearch" placeholder="Search subject or date…" oninput="renderAttTable()">
+      <select class="fsel" id="attStatus" onchange="renderAttTable()">
+        <option value="">All Status</option>
+        <option value="P">Present</option>
+        <option value="L">Late</option>
+        <option value="A">Absent</option>
+      </select>
+      <select class="fsel" id="attSubject" onchange="renderAttTable()">
+        <option value="">All Subjects</option>
+        <option value="Math">Math</option>
+        <option value="English">English</option>
+        <option value="Science">Science</option>
+        <option value="Filipino">Filipino</option>
+      </select>
+    </div>
+
+    <!-- Attendance Cards List -->
+    <div id="attCardList"></div>
+    <div class="pagination" id="attPagination"></div>
+  </div>
+  <div class="spacer"></div>
+</div>
+
+<!-- PAGE: SCHEDULE -->
+<div class="page" id="page-schedule">
+  <div class="section">
+    <div class="section-hdr"><div class="section-title">My Schedule</div></div>
+    <div class="sched-outer">
+      <div class="sched-grid">
+        <div class="sg-hdr">Time</div>
+        <div class="sg-hdr">Mon</div>
+        <div class="sg-hdr">Tue</div>
+        <div class="sg-hdr">Wed</div>
+        <div class="sg-hdr">Thu</div>
+        <div class="sg-hdr">Fri</div>
+        <div class="sg-hdr">Sat</div>
+        <!-- 07:00 -->
+        <div class="sg-time">07:00</div>
+        <div class="sg-cell has-cls" onclick="viewClassDetail('Math','Monday','07:00 AM')"><div class="sg-code">MATH</div><div class="sg-sec">Sec B</div><div class="sg-room">Rm 101</div></div>
+        <div class="sg-cell"></div>
+        <div class="sg-cell has-cls" onclick="viewClassDetail('Math','Wednesday','07:00 AM')"><div class="sg-code">MATH</div><div class="sg-sec">Sec B</div><div class="sg-room">Rm 101</div></div>
+        <div class="sg-cell"></div>
+        <div class="sg-cell has-cls" onclick="viewClassDetail('Math','Friday','07:00 AM')"><div class="sg-code">MATH</div><div class="sg-sec">Sec B</div><div class="sg-room">Rm 101</div></div>
+        <div class="sg-cell"></div>
+        <!-- 08:30 -->
+        <div class="sg-time">08:30</div>
+        <div class="sg-cell has-cls" onclick="viewClassDetail('English','Monday','08:30 AM')"><div class="sg-code">ENG</div><div class="sg-sec">Sec B</div><div class="sg-room">Rm 102</div></div>
+        <div class="sg-cell has-cls" onclick="viewClassDetail('Science','Tuesday','08:30 AM')"><div class="sg-code">SCI</div><div class="sg-sec">Sec B</div><div class="sg-room">Lab 201</div></div>
+        <div class="sg-cell has-cls" onclick="viewClassDetail('English','Wednesday','08:30 AM')"><div class="sg-code">ENG</div><div class="sg-sec">Sec B</div><div class="sg-room">Rm 102</div></div>
+        <div class="sg-cell has-cls" onclick="viewClassDetail('English','Thursday','08:30 AM')"><div class="sg-code">ENG</div><div class="sg-sec">Sec B</div><div class="sg-room">Rm 102</div></div>
+        <div class="sg-cell has-cls" onclick="viewClassDetail('Science','Friday','08:30 AM')"><div class="sg-code">SCI</div><div class="sg-sec">Sec B</div><div class="sg-room">Lab 201</div></div>
+        <div class="sg-cell"></div>
+        <!-- 10:00 -->
+        <div class="sg-time">10:00</div>
+        <div class="sg-cell"></div>
+        <div class="sg-cell has-cls" onclick="viewClassDetail('Filipino','Tuesday','10:00 AM')"><div class="sg-code">FIL</div><div class="sg-sec">Sec B</div><div class="sg-room">Rm 103</div></div>
+        <div class="sg-cell"></div>
+        <div class="sg-cell"></div>
+        <div class="sg-cell"></div>
+        <div class="sg-cell"></div>
+        <!-- 01:00 -->
+        <div class="sg-time">13:00</div>
+        <div class="sg-cell"></div>
+        <div class="sg-cell has-cls" onclick="viewClassDetail('Math','Tuesday','01:00 PM')"><div class="sg-code">MATH</div><div class="sg-sec">Sec B</div><div class="sg-room">Rm 101</div></div>
+        <div class="sg-cell"></div>
+        <div class="sg-cell has-cls" onclick="viewClassDetail('Math','Thursday','01:00 PM')"><div class="sg-code">MATH</div><div class="sg-sec">Sec B</div><div class="sg-room">Rm 101</div></div>
+        <div class="sg-cell"></div>
+        <div class="sg-cell"></div>
+        <!-- 02:30 -->
+        <div class="sg-time">14:30</div>
+        <div class="sg-cell"></div>
+        <div class="sg-cell has-cls" onclick="viewClassDetail('English','Tuesday','02:30 PM')"><div class="sg-code">ENG</div><div class="sg-sec">Sec B</div><div class="sg-room">Rm 102</div></div>
+        <div class="sg-cell"></div>
+        <div class="sg-cell has-cls" onclick="viewClassDetail('English','Thursday','02:30 PM')"><div class="sg-code">ENG</div><div class="sg-sec">Sec B</div><div class="sg-room">Rm 102</div></div>
+        <div class="sg-cell"></div>
+        <div class="sg-cell"></div>
+        <!-- 04:00 -->
+        <div class="sg-time">16:00</div>
+        <div class="sg-cell has-cls" onclick="viewClassDetail('English','Monday','04:00 PM')"><div class="sg-code">ENG</div><div class="sg-sec">Sec B</div><div class="sg-room">Rm 102</div></div>
+        <div class="sg-cell"></div>
+        <div class="sg-cell"></div>
+        <div class="sg-cell"></div>
+        <div class="sg-cell has-cls" onclick="viewClassDetail('Filipino','Friday','04:00 PM')"><div class="sg-code">FIL</div><div class="sg-sec">Sec B</div><div class="sg-room">Rm 103</div></div>
+        <div class="sg-cell"></div>
+      </div>
+    </div>
+  </div>
+  <div class="spacer"></div>
+</div>
+
+<!-- PAGE: SETTINGS -->
+<div class="page" id="page-settings">
+  <div class="section">
+    <div class="section-hdr"><div class="section-title">Settings</div></div>
+    <div class="settings-section">
+      <div class="settings-section-title">Student Profile</div>
+      <div class="settings-form-row"><label>Full Name</label><input class="settings-input" id="settingsName" value="Mel Reynald Malacas"></div>
+      <div class="settings-form-row"><label>Student ID</label><input class="settings-input" value="2026-0031" readonly style="background:#f5f5f5"></div>
+      <div class="settings-form-row"><label>Grade & Section</label><input class="settings-input" id="settingsSection" value="Grade 7 · Section B" readonly style="background:#f5f5f5"></div>
+      <button class="btn btn-primary btn-full" style="margin-top:.5rem" onclick="alert('Profile saved!')">Save Changes</button>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title">Security</div>
+      <div class="settings-form-row"><label>Current Password</label><input class="settings-input" type="password" placeholder="••••••••"></div>
+      <div class="settings-form-row"><label>New Password</label><input class="settings-input" type="password" placeholder="••••••••"></div>
+      <button class="btn btn-primary btn-full" style="margin-top:.5rem" onclick="alert('Password updated!')">Update Password</button>
+    </div>
+    <button class="btn btn-danger btn-full" style="margin-top:.5rem" onclick="logout()">Logout</button>
+  </div>
+  <div class="spacer"></div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="nav-home" onclick="goPage('home')">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span class="nav-label">Home</span>
+  </button>
+  <button class="nav-btn" id="nav-attendance" onclick="goPage('attendance')">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <span class="nav-label">Attendance</span>
+  </button>
+  <button class="nav-btn" id="nav-schedule" onclick="goPage('schedule')">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span class="nav-label">Schedule</span>
+  </button>
+  <button class="nav-btn" id="nav-settings" onclick="goPage('settings')">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <span class="nav-label">Settings</span>
+  </button>
+</nav>
+
+<!-- MODAL: Attendance Detail -->
+<div id="detailsModal" class="modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-hdr">
+      <div class="modal-ttl">Attendance Details</div>
+      <button class="modal-close" onclick="closeModal('detailsModal')">×</button>
+    </div>
+    <div class="modal-body" id="detailsModalBody"></div>
+  </div>
+</div>
+
+<!-- MODAL: Class Details -->
+<div id="classModal" class="modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-hdr">
+      <div class="modal-ttl">Class Details</div>
+      <button class="modal-close" onclick="closeModal('classModal')">×</button>
+    </div>
+    <div class="modal-body" id="classModalBody"></div>
+  </div>
+</div>
+
+<!-- MODAL: QR Scanner -->
+<div id="qrModal" class="modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-hdr">
+      <div class="modal-ttl">Scan QR Code</div>
+      <button class="modal-close" onclick="closeModal('qrModal')">×</button>
+    </div>
+    <div class="modal-body" style="text-align:center;">
+  <p style="font-size:.82rem;color:#666;margin-bottom:0.75rem;">
+    Align the QR code inside the frame
+  </p>
+  <!-- Real camera renders here -->
+  <div id="qr-reader" style="width:100%;border-radius:12px;overflow:hidden;border:2.5px solid var(--gold);"></div>
+  <!-- Result shown after scan -->
+  <div id="qr-result" style="display:none;margin-top:0.85rem;padding:0.65rem 1rem;
+       background:#e8f5e9;border:1.5px solid #a5d6a7;border-radius:10px;
+       font-size:0.85rem;font-weight:700;color:#2e7d32;"></div>
+  <button class="btn btn-primary btn-full" id="qrFlipBtn"
+    onclick="flipCamera()" style="margin-top:0.75rem;">
+    Flip Camera
+  </button>
+  <button class="btn btn-full" id="qrStopBtn"
+    onclick="closeQRScanner()" style="margin-top:0.5rem;background:#f5f5f5;color:#555;border:none;">
+    Close
+  </button>
+</div>
+  </div>
+</div>
+
+<!-- MODAL: Subjects -->
+<div id="subjectsModal" class="modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-hdr">
+      <div class="modal-ttl">Enrolled Subjects</div>
+      <button class="modal-close" onclick="closeModal('subjectsModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="subject-list">
+        <div class="subject-item"><div class="subj-dot" style="background:#6366f1"></div><div class="subj-info"><div class="subj-name">Mathematics</div><div class="subj-meta">Mr. Rheymard Doneza · Room 101</div></div></div>
+        <div class="subject-item"><div class="subj-dot" style="background:#0ea5e9"></div><div class="subj-info"><div class="subj-name">English</div><div class="subj-meta">Mr. Gary Soriano · Room 102</div></div></div>
+        <div class="subject-item"><div class="subj-dot" style="background:#10b981"></div><div class="subj-info"><div class="subj-name">Science</div><div class="subj-meta">Ms. Agnes Bernal · Lab 201</div></div></div>
+        <div class="subject-item"><div class="subj-dot" style="background:#f59e0b"></div><div class="subj-info"><div class="subj-name">Filipino</div><div class="subj-meta">Mr. Gerome Carpio · Room 103</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="student-mobile.js"></script>
+</body>
+</html>
