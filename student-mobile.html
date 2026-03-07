@@ -5,22 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>SSC-R Student — Mobile</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
-<script src="auth.js"></script>
 <script src="students-data.js"></script>
-<link rel="stylesheet" href="student-mobile.css">
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-
-<!-- PWA -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#8B0000">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="sscrmnlofficiallogo.png">
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sscr_attendance/sw.js');
-  }
-</script>
+<link rel="stylesheet" href="student-mobile.css">
 </head>
 <body>
 
@@ -301,29 +288,50 @@
     <div class="modal-handle"></div>
     <div class="modal-hdr">
       <div class="modal-ttl">Scan QR Code</div>
-      <button class="modal-close" onclick="closeModal('qrModal')">×</button>
+      <button class="modal-close" onclick="closeQRModal()">×</button>
     </div>
     <div class="modal-body" style="text-align:center;">
-  <p style="font-size:.82rem;color:#666;margin-bottom:0.75rem;">
-    Align the QR code inside the frame
-  </p>
-  <!-- Real camera renders here -->
-  <div id="qr-reader" style="width:100%;border-radius:12px;overflow:hidden;border:2.5px solid var(--gold);"></div>
-  <!-- Result shown after scan -->
-  <div id="qr-result" style="display:none;margin-top:0.85rem;padding:0.65rem 1rem;
-       background:#e8f5e9;border:1.5px solid #a5d6a7;border-radius:10px;
-       font-size:0.85rem;font-weight:700;color:#2e7d32;"></div>
-  <button class="btn btn-primary btn-full" id="qrFlipBtn"
-    onclick="flipCamera()" style="margin-top:0.75rem;">
-    Flip Camera
-  </button>
-  <button class="btn btn-full" id="qrStopBtn"
-    onclick="closeQRScanner()" style="margin-top:0.5rem;background:#f5f5f5;color:#555;border:none;">
-    Close
-  </button>
-</div>
+      <p style="font-size:.85rem;color:#666;margin-bottom:.75rem;">Point your camera at the class QR code</p>
+
+      <!-- Live camera viewfinder -->
+      <div style="position:relative;width:260px;height:260px;margin:0 auto .75rem;border-radius:16px;overflow:hidden;border:3px solid var(--gold);background:#000;">
+        <div id="qr-reader" style="width:100%;height:100%;"></div>
+        <!-- Corner brackets overlay -->
+        <div style="position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;">
+          <div style="position:absolute;top:12px;left:12px;width:32px;height:32px;border-top:3px solid #FFD700;border-left:3px solid #FFD700;border-radius:4px 0 0 0;"></div>
+          <div style="position:absolute;top:12px;right:12px;width:32px;height:32px;border-top:3px solid #FFD700;border-right:3px solid #FFD700;border-radius:0 4px 0 0;"></div>
+          <div style="position:absolute;bottom:12px;left:12px;width:32px;height:32px;border-bottom:3px solid #FFD700;border-left:3px solid #FFD700;border-radius:0 0 0 4px;"></div>
+          <div style="position:absolute;bottom:12px;right:12px;width:32px;height:32px;border-bottom:3px solid #FFD700;border-right:3px solid #FFD700;border-radius:0 0 4px 0;"></div>
+          <!-- Scanning line animation -->
+          <div id="scanLine" style="position:absolute;left:12px;right:12px;height:2px;background:linear-gradient(90deg,transparent,#FFD700,transparent);animation:scanAnim 2s linear infinite;top:50%;"></div>
+        </div>
+      </div>
+
+      <div id="qrStatusMsg" style="font-size:.82rem;color:#888;margin-bottom:.75rem;">Starting camera...</div>
+
+      <!-- Result box (hidden until scan) -->
+      <div id="qrResultBox" style="display:none;background:#e8f5e9;border:1.5px solid #4caf50;border-radius:12px;padding:.75rem;margin-bottom:.75rem;">
+        <div style="font-size:.78rem;color:#2e7d32;font-weight:700;margin-bottom:.25rem;">✅ QR Code Scanned!</div>
+        <div id="qrResultText" style="font-size:.75rem;color:#444;word-break:break-all;"></div>
+      </div>
+
+      <button class="btn btn-danger btn-full" style="margin-top:.25rem;" onclick="closeQRModal()">Cancel</button>
+    </div>
   </div>
 </div>
+
+<style>
+@keyframes scanAnim {
+  0%   { top: 12px; }
+  50%  { top: calc(100% - 14px); }
+  100% { top: 12px; }
+}
+#qr-reader video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
+#qr-reader img  { display: none !important; }
+/* Hide the default html5-qrcode UI we don't need */
+#qr-reader__scan_region { width:100% !important; height:100% !important; }
+#qr-reader__dashboard    { display: none !important; }
+</style>
 
 <!-- MODAL: Subjects -->
 <div id="subjectsModal" class="modal">
