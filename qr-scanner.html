@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SSC-R QR Scanner</title>
+
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+<style>
+body{
+    font-family: sans-serif;
+    background:#111;
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.scanner-box{
+    width:280px;
+    height:280px;
+    border:3px solid gold;
+    border-radius:16px;
+    overflow:hidden;
+    position:relative;
+}
+
+#qr-reader{
+    width:100%;
+    height:100%;
+}
+
+.scan-line{
+    position:absolute;
+    left:0;
+    right:0;
+    height:2px;
+    background:gold;
+    animation:scan 2s linear infinite;
+}
+
+@keyframes scan{
+    0%{top:0}
+    50%{top:95%}
+    100%{top:0}
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="scanner-box">
+    <div id="qr-reader"></div>
+    <div class="scan-line"></div>
+</div>
+
+<script>
+
+let scanner;
+
+function startScanner(){
+
+    scanner = new Html5Qrcode("qr-reader");
+
+    scanner.start(
+        { facingMode: "environment" }, // back camera
+        {
+            fps: 10,
+            qrbox: 250
+        },
+        qrSuccess,
+        qrError
+    );
+}
+
+function qrSuccess(decodedText){
+
+    alert("QR Code scanned:\n" + decodedText);
+
+    scanner.stop();
+
+}
+
+function qrError(error){}
+
+startScanner();
+
+</script>
+
+</body>
+</html>
