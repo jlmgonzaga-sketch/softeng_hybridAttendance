@@ -385,6 +385,17 @@
     // ── Student choices ───────────────────────────────────
     function openScanner() { window.location.href = 'qr-scanner.html'; }
     function goDashboard()  { redirectAfterLogin('student'); }
+
+    // detect if returning from scanner
+window.addEventListener("DOMContentLoaded", () => {
+
+const params = new URLSearchParams(window.location.search);
+
+if(params.get("step") === "choice"){
+showStep("step-choice");
+}
+
+});
 </script>
 </body>
 </html>
