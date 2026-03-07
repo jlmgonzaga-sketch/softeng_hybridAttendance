@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SSC-R QR Scanner</title>
@@ -11,8 +12,7 @@
 
 :root{
 --gold:#FFD700;
---gold-dark:#DAA520;
---red:#8B0000;
+--dark:#111;
 }
 
 *{
@@ -25,11 +25,11 @@ body{
 font-family:'DM Sans',sans-serif;
 background:#111;
 color:white;
+height:100vh;
 display:flex;
 flex-direction:column;
-align-items:center;
 justify-content:center;
-height:100vh;
+align-items:center;
 padding:20px;
 }
 
@@ -94,58 +94,56 @@ font-size:14px;
 text-align:center;
 }
 
-/* buttons */
+/* button */
 
 .btn{
 margin-top:20px;
-padding:12px 18px;
+padding:12px 20px;
 border:none;
 border-radius:12px;
 font-weight:700;
 font-size:14px;
 cursor:pointer;
-}
-
-.btn-back{
 background:#333;
 color:white;
 }
 
-.btn-back:hover{
+.btn:hover{
 background:#444;
 }
 
 </style>
+
 </head>
 
 <body>
 
 <div class="title">Scan QR Code</div>
-<div class="subtitle">Point camera at classroom QR</div>
+<div class="subtitle">Point your camera at the classroom QR</div>
 
 <div class="scanner-box">
 <div id="qr-reader"></div>
 <div class="scan-line"></div>
 </div>
 
-<div class="result-box" id="resultBox">
+<div id="resultBox" class="result-box">
 Attendance Recorded
 </div>
 
-<button class="btn btn-back" onclick="goBack()">Back</button>
+<button class="btn" onclick="goBack()">Back</button>
 
 <script>
 
 let scanner;
 
-/* detect device */
+/* detect mobile */
 
 function isMobile(){
 return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
 || window.innerWidth <= 768;
 }
 
-/* redirect */
+/* redirect to dashboard */
 
 function redirectDashboard(){
 
@@ -161,7 +159,7 @@ window.location.href="student.html";
 
 }
 
-/* success */
+/* QR success */
 
 function onScanSuccess(decodedText){
 
@@ -177,7 +175,7 @@ redirectDashboard();
 
 }
 
-/* start scanner */
+/* start camera */
 
 function startScanner(){
 
@@ -196,15 +194,11 @@ onScanSuccess
 
 startScanner();
 
-/* back */
+/* back button */
 
 function goBack(){
 
-if(isMobile()){
-window.location.href="student-mobile.html";
-}else{
-window.location.href="student.html";
-}
+window.location.href="login.html?step=choice";
 
 }
 
