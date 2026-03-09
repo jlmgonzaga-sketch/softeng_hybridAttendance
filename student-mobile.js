@@ -17,10 +17,10 @@ const RAW_ATTENDANCE = {
 };
 
 const SUBJECT_INFO = {
-    Math:    { full: 'Mathematics', faculty: 'Rheymard Doneza', room: 'Room 101', section: 'Sec B' },
-    English: { full: 'English',     faculty: 'Gary Soriano',    room: 'Room 102', section: 'Sec B' },
-    Science: { full: 'Science',     faculty: 'Agnes Bernal',    room: 'Lab 201',  section: 'Sec B' },
-    Filipino:{ full: 'Filipino',    faculty: 'Gerome Carpio',   room: 'Room 103', section: 'Sec B' },
+    Math:    { full: 'Mathematics', faculty: 'Rheymard Doneza', room: 'Room 101', section: 'Sec B', time: '07:00 AM' },
+    English: { full: 'English',     faculty: 'Gary Soriano',    room: 'Room 102', section: 'Sec B', time: '08:30 AM' },
+    Science: { full: 'Science',     faculty: 'Agnes Bernal',    room: 'Lab 201',  section: 'Sec B', time: '10:00 AM' },
+    Filipino:{ full: 'Filipino',    faculty: 'Gerome Carpio',   room: 'Room 103', section: 'Sec B', time: '01:00 PM' },
 };
 
 for (const [subj, days] of Object.entries(RAW_ATTENDANCE)) {
@@ -90,7 +90,7 @@ document.addEventListener('click', e => {
 function buildCard(r) {
     const badgeClass = { P: 'status-present', L: 'status-late', A: 'status-absent' };
     const badgeLabel = { P: 'Present', L: 'Late', A: 'Absent' };
-    return `<div class="att-card" onclick="showAttDetail('${r.subject}','${r.date}','${r.weekday}','${r.status}')"><div class="att-info"><div class="att-subj-name">${SUBJECT_INFO[r.subject].full}</div><div class="att-meta">${r.date} · ${r.weekday}</div></div><span class="status-badge ${badgeClass[r.status]}">${badgeLabel[r.status]}</span></div>`;
+    return `<div class="att-card" onclick="showAttDetail('${r.subject}','${r.date}','${r.weekday}','${r.status}')"><div class="att-info"><div class="att-subj-name">${SUBJECT_INFO[r.subject].full}</div><div class="att-meta">${r.date} · ${r.weekday} · ${SUBJECT_INFO[r.subject].time}</div></div><span class="status-badge ${badgeClass[r.status]}">${badgeLabel[r.status]}</span></div>`;
 }
 
 // ── Recent Attendance (Home) ───────────────────────────────
@@ -168,7 +168,7 @@ function showAttDetail(subject, date, weekday, status) {
     const sc   = status === 'P' ? 'status-present' : status === 'L' ? 'status-late' : 'status-absent';
     document.getElementById('detailsModalBody').innerHTML =
         row('Subject', info.full) + row('Faculty', info.faculty) + row('Room', info.room) +
-        row('Section', info.section) + row('Date', date) + row('Day', weekday) +
+        row('Section', info.section) + row('Date', date) + row('Day', weekday) + row('Time', info.time) +
         `<div class="detail-row"><span class="dr-lbl">Status</span><span class="dr-val"><span class="status-badge ${sc}">${sl}</span></span></div>`;
     openModal('detailsModal');
 }
@@ -224,16 +224,20 @@ function _startQR() {
             cam.id,
             { fps: 10, qrbox: { width: 200, height: 200 } },
             (decodedText) => {
-                // QR scanned — stop camera, show result, keep modal open so user can read it
-                _html5QrCode.stop().catch(() => {}).finally(() => {
-                    _html5QrCode = null;
+                // QR scanned — stop camera fully, clear div, show result
+                const inst = _html5QrCode;
+                _html5QrCode = null;
+                inst.stop().catch(() => {}).finally(() => {
+                    try { inst.clear(); } catch(e) {}
+                    // Wipe the reader div so no stale video elements remain
+                    const rd = document.getElementById('qr-reader');
+                    if (rd) rd.innerHTML = '';
                     document.getElementById('qrResultText').textContent  = decodedText;
                     document.getElementById('qrResultBox').style.display = 'block';
-                    document.getElementById('qrStatusMsg').textContent   = 'Attendance marked as Present!';
+                    document.getElementById('qrStatusMsg').textContent   = '✅ Attendance marked as Present!';
                     document.getElementById('qrStatusMsg').style.color   = '#2e7d32';
                     document.getElementById('scanLine').style.display    = 'none';
-                    // Re-enable buttons — camera is fully stopped
-                    _qrClosing = false;
+                    _qrClosing = false;  // unlock so Cancel/X work
                 });
             },
             () => {} // per-frame errors ignored
@@ -303,6 +307,13 @@ function logout() {
 
 // ── Init ──────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+    // PORTAL: physically move notification dropdown to <body> root
+    // so NO parent stacking context can ever clip it
+    const dd = document.getElementById('notifDropdown');
+    if (dd && dd.parentElement !== document.body) {
+        document.body.appendChild(dd);
+    }
+
     const params = new URLSearchParams(window.location.search);
     if (params.get('scan') === '1') setTimeout(() => openQRScanner(), 400);
     renderNotifications();
