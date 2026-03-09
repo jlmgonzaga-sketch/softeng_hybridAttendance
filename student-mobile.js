@@ -2,7 +2,6 @@
 //  SSC-R Student — Mobile JS
 // ═══════════════════════════════════════════════════════════
 
-// ── Student Data ──────────────────────────────────────────
 const STUDENT = {
     id:      '2026-0031',
     name:    'Mel Reynald Malacas',
@@ -19,21 +18,19 @@ const RAW_ATTENDANCE = {
 
 const SUBJECT_INFO = {
     Math:    { full: 'Mathematics', faculty: 'Rheymard Doneza', room: 'Room 101', section: 'Sec B' },
-    English: { full: 'English',     faculty: 'Gary Soriano',   room: 'Room 102', section: 'Sec B' },
-    Science: { full: 'Science',     faculty: 'Agnes Bernal',   room: 'Lab 201',  section: 'Sec B' },
-    Filipino:{ full: 'Filipino',    faculty: 'Gerome Carpio',  room: 'Room 103', section: 'Sec B' },
+    English: { full: 'English',     faculty: 'Gary Soriano',    room: 'Room 102', section: 'Sec B' },
+    Science: { full: 'Science',     faculty: 'Agnes Bernal',    room: 'Lab 201',  section: 'Sec B' },
+    Filipino:{ full: 'Filipino',    faculty: 'Gerome Carpio',   room: 'Room 103', section: 'Sec B' },
 };
 
 // Pre-compute stats
 const SUBJECT_STATS = {};
-let grandPresent = 0, grandLate = 0, grandAbsent = 0;
 for (const [subj, days] of Object.entries(RAW_ATTENDANCE)) {
     const p = days.filter(s => s === 'P').length;
     const l = days.filter(s => s === 'L').length;
     const a = days.filter(s => s === 'A').length;
     const total = p + l + a;
     SUBJECT_STATS[subj] = { present: p, late: l, absent: a, total, rate: Math.round((p + l) / total * 1000) / 10 };
-    grandPresent += p; grandLate += l; grandAbsent += a;
 }
 
 // Build flat attendance records (newest first)
@@ -91,25 +88,28 @@ document.addEventListener('click', e => {
     if (w && !w.contains(e.target)) closeNotifications();
 });
 
-// ── Recent Attendance (Home page) — no colors ─────────────
-function renderRecentAttendance() {
-    const list     = document.getElementById('recentAttendanceList');
-    const recent   = ATTENDANCE_RECORDS.slice(0, 8);
+// ── Card HTML builder (no icon dot) ──────────────────────
+function buildCard(r) {
     const badgeClass = { P: 'status-present', L: 'status-late', A: 'status-absent' };
     const badgeLabel = { P: 'Present', L: 'Late', A: 'Absent' };
-
-    list.innerHTML = recent.map(r => `
+    return `
         <div class="att-card" onclick="showAttDetail('${r.subject}','${r.date}','${r.weekday}','${r.status}')">
-            <div class="att-subj-dot">${r.subject.substring(0,3).toUpperCase()}</div>
             <div class="att-info">
                 <div class="att-subj-name">${SUBJECT_INFO[r.subject].full}</div>
                 <div class="att-meta">${r.date} · ${r.weekday}</div>
             </div>
             <span class="status-badge ${badgeClass[r.status]}">${badgeLabel[r.status]}</span>
-        </div>`).join('');
+        </div>`;
 }
 
-// ── Attendance Page — no colors ───────────────────────────
+// ── Recent Attendance (Home page) ─────────────────────────
+function renderRecentAttendance() {
+    const wrap   = document.getElementById('recentAttendanceList');
+    const recent = ATTENDANCE_RECORDS.slice(0, 8);
+    wrap.innerHTML = recent.map(buildCard).join('');
+}
+
+// ── Attendance Page ───────────────────────────────────────
 const ATT_PER_PAGE = 12;
 let attPage = 1;
 
@@ -134,27 +134,16 @@ function renderAttPage() {
     const start = (attPage - 1) * ATT_PER_PAGE;
     const slice = records.slice(start, start + ATT_PER_PAGE);
 
-    const badgeClass = { P: 'status-present', L: 'status-late', A: 'status-absent' };
-    const badgeLabel = { P: 'Present', L: 'Late', A: 'Absent' };
-
-    const container = document.getElementById('attCardList');
+    const wrap = document.getElementById('attCardList');
     document.getElementById('attCountLabel').textContent = records.length + ' records';
 
     if (!slice.length) {
-        container.innerHTML = '<div style="text-align:center;color:#aaa;padding:2rem;font-size:.85rem;">No records found.</div>';
+        wrap.innerHTML = '<div style="padding:2rem;text-align:center;color:#aaa;font-size:.85rem;background:#fff;">No records found.</div>';
         document.getElementById('attPagination').innerHTML = '';
         return;
     }
 
-    container.innerHTML = slice.map(r => `
-        <div class="att-card" onclick="showAttDetail('${r.subject}','${r.date}','${r.weekday}','${r.status}')">
-            <div class="att-subj-dot">${r.subject.substring(0,3).toUpperCase()}</div>
-            <div class="att-info">
-                <div class="att-subj-name">${SUBJECT_INFO[r.subject].full}</div>
-                <div class="att-meta">${r.date} · ${r.weekday}</div>
-            </div>
-            <span class="status-badge ${badgeClass[r.status]}">${badgeLabel[r.status]}</span>
-        </div>`).join('');
+    wrap.innerHTML = slice.map(buildCard).join('');
 
     // Pagination
     const pg = document.getElementById('attPagination');
@@ -184,12 +173,8 @@ function showAttDetail(subject, date, weekday, status) {
     const sl   = status === 'P' ? 'Present' : status === 'L' ? 'Late' : 'Absent';
     const sc   = status === 'P' ? 'status-present' : status === 'L' ? 'status-late' : 'status-absent';
     document.getElementById('detailsModalBody').innerHTML =
-        `<div class="detail-row"><span class="dr-lbl">Subject</span><span class="dr-val">${info.full}</span></div>` +
-        `<div class="detail-row"><span class="dr-lbl">Faculty</span><span class="dr-val">${info.faculty}</span></div>` +
-        `<div class="detail-row"><span class="dr-lbl">Room</span><span class="dr-val">${info.room}</span></div>` +
-        `<div class="detail-row"><span class="dr-lbl">Section</span><span class="dr-val">${info.section}</span></div>` +
-        `<div class="detail-row"><span class="dr-lbl">Date</span><span class="dr-val">${date}</span></div>` +
-        `<div class="detail-row"><span class="dr-lbl">Day</span><span class="dr-val">${weekday}</span></div>` +
+        row('Subject', info.full) + row('Faculty', info.faculty) + row('Room', info.room) +
+        row('Section', info.section) + row('Date', date) + row('Day', weekday) +
         `<div class="detail-row"><span class="dr-lbl">Status</span><span class="dr-val"><span class="status-badge ${sc}">${sl}</span></span></div>`;
     openModal('detailsModal');
 }
@@ -198,13 +183,13 @@ function showAttDetail(subject, date, weekday, status) {
 function viewClassDetail(subject, day, time) {
     const info = SUBJECT_INFO[subject];
     document.getElementById('classModalBody').innerHTML =
-        `<div class="detail-row"><span class="dr-lbl">Subject</span><span class="dr-val">${info.full}</span></div>` +
-        `<div class="detail-row"><span class="dr-lbl">Faculty</span><span class="dr-val">${info.faculty}</span></div>` +
-        `<div class="detail-row"><span class="dr-lbl">Room</span><span class="dr-val">${info.room}</span></div>` +
-        `<div class="detail-row"><span class="dr-lbl">Section</span><span class="dr-val">${info.section}</span></div>` +
-        `<div class="detail-row"><span class="dr-lbl">Day</span><span class="dr-val">${day}</span></div>` +
-        `<div class="detail-row"><span class="dr-lbl">Time</span><span class="dr-val">${time}</span></div>`;
+        row('Subject', info.full) + row('Faculty', info.faculty) + row('Room', info.room) +
+        row('Section', info.section) + row('Day', day) + row('Time', time);
     openModal('classModal');
+}
+
+function row(lbl, val) {
+    return `<div class="detail-row"><span class="dr-lbl">${lbl}</span><span class="dr-val">${val}</span></div>`;
 }
 
 // ── Modal open / close ────────────────────────────────────
@@ -253,7 +238,7 @@ function openQRScanner() {
             ).then(() => {
                 document.getElementById('qrStatusMsg').textContent = 'Align QR code in the frame';
             }).catch(() => {
-                document.getElementById('qrStatusMsg').textContent = 'Camera access denied. Please allow camera permission.';
+                document.getElementById('qrStatusMsg').textContent = 'Camera access denied.';
                 document.getElementById('qrStatusMsg').style.color = '#c62828';
             });
         }).catch(() => {
@@ -294,12 +279,8 @@ function logout() {
 
 // ── Init ──────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-    // Auto-open scanner if ?scan=1
     const params = new URLSearchParams(window.location.search);
-    if (params.get('scan') === '1') {
-        setTimeout(() => openQRScanner(), 400);
-    }
-
+    if (params.get('scan') === '1') setTimeout(() => openQRScanner(), 400);
     renderNotifications();
     renderRecentAttendance();
     renderAttPage();
