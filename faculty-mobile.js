@@ -144,7 +144,7 @@ function buildPagination(containerId, total, perPage, currentPage, onPageChange)
 // ═══════════════════════════════════════════════════════════
 //  SCAN / REPORTS  (with pagination)
 // ═══════════════════════════════════════════════════════════
-const REPORT_PER_PAGE = 10;
+const REPORT_PER_PAGE = 5;
 let _reportPage    = 1;
 let _filteredScans = [];
 
