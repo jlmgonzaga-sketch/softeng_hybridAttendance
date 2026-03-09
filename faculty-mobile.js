@@ -81,7 +81,13 @@ function renderNotifications() {
 
 function toggleNotifications(e) {
     e.stopPropagation();
-    const dd = document.getElementById('notifDropdown');
+    const dd  = document.getElementById('notifDropdown');
+    const btn = document.getElementById('notifBtn');
+    const rect = btn.getBoundingClientRect();
+    // Position dropdown below the bell button, flush to right edge
+    dd.style.top   = (rect.bottom + 8) + 'px';
+    dd.style.right = (window.innerWidth - rect.right) + 'px';
+    dd.style.left  = 'auto';
     dd.classList.toggle('open');
     if (dd.classList.contains('open')) renderNotifications();
 }
@@ -91,7 +97,10 @@ function markAllRead() { _notifications.forEach(n => n.unread = false); renderNo
 
 document.addEventListener('click', e => {
     const wrapper = document.getElementById('notifWrapper');
-    if (wrapper && !wrapper.contains(e.target)) closeNotifications();
+    const dd      = document.getElementById('notifDropdown');
+    if (wrapper && !wrapper.contains(e.target) && dd && !dd.contains(e.target)) {
+        closeNotifications();
+    }
 });
 
 
