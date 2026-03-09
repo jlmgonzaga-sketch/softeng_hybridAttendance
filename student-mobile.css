@@ -44,7 +44,7 @@ body::before {
 /* Safety: hide any stray choice overlay if old HTML is cached */
 #choiceOverlay { display: none !important; }
 
-.page, header.top-bar { position: relative; z-index: 1; }
+.page { position: relative; z-index: 1; }
 
 /* ════════════════════════════════════════
    TOP BAR
@@ -84,18 +84,19 @@ body::before {
 }
 
 /* ════════════════════════════════════════
-   NOTIFICATION DROPDOWN — always on top
+   NOTIFICATION DROPDOWN — body-level, ALWAYS on top
    ════════════════════════════════════════ */
-.notif-wrapper { position: relative; }
+.notif-wrapper { position: static; }
 .notif-dropdown {
   display: none;
   position: fixed;
   top: 62px; right: 12px;
   width: 310px; background: #fff;
   border-radius: 16px; border: 2px solid var(--gold);
-  box-shadow: 0 10px 40px rgba(0,0,0,0.45);
-  z-index: 99999;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.65);
+  z-index: 2147483647;
   overflow: hidden;
+  isolation: isolate;
 }
 .notif-dropdown.open { display: block; animation: fadeDown 0.2s ease; }
 .nd-hdr   { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: var(--primary); border-bottom: 2px solid var(--gold); }
@@ -184,17 +185,16 @@ body::before {
 
 /* Filter bar beneath header on attendance page */
 .filter-bar {
-  background: rgba(255,255,255,0.97);
+  background: #ffffff;
   border: 2px solid var(--gold);
   border-top: 1px solid rgba(255,215,0,0.3);
   border-bottom: none;
-  padding: 0.6rem 0.65rem;
-  display: flex; gap: 0.4rem; flex-wrap: wrap;
-  backdrop-filter: blur(8px);
+  padding: 0.55rem 0.65rem;
+  display: flex; gap: 0.35rem; flex-wrap: nowrap; align-items: center;
 }
-.filter-bar .search-input { flex: 1; min-width: 130px; padding: 0.5rem 0.75rem; border: 1.5px solid var(--gold); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.78rem; outline: none; background: #fff; }
+.filter-bar .search-input { flex: 1; min-width: 0; padding: 0.45rem 0.6rem; border: 1.5px solid var(--gold); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.75rem; outline: none; background: #fff; }
 .filter-bar .search-input:focus { border-color: var(--red); }
-.filter-bar .fsel { padding: 0.5rem 0.5rem; border: 1.5px solid var(--gold); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.72rem; background: #fff; cursor: pointer; outline: none; color: var(--primary); font-weight: 600; }
+.filter-bar .fsel { flex-shrink: 0; padding: 0.45rem 0.35rem; border: 1.5px solid var(--gold); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.7rem; background: #fff; cursor: pointer; outline: none; color: var(--primary); font-weight: 600; max-width: 95px; }
 
 /* ════════════════════════════════════════
    ATTENDANCE CARDS — no icon, stacked list
@@ -211,7 +211,7 @@ body::before {
 .att-card {
   background: #fff;
   border: none;
-  border-bottom: 1px solid rgba(255,215,0,0.2);
+  border-bottom: 1.5px solid rgba(255,215,0,0.45);
   margin-bottom: 0;
   display: flex; align-items: center; gap: 0.65rem;
   padding: 0.72rem 0.85rem;
