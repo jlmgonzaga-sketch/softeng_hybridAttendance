@@ -47,7 +47,7 @@ body::before {
 
 /* ── TOP BAR ── */
 .top-bar {
-  position: sticky; top: 0; z-index: 500;
+  position: sticky; top: 0; z-index: 9000;
   background: linear-gradient(135deg, #8B0000ee, #1a1a1aee);
   backdrop-filter: blur(12px);
   border-bottom: 2.5px solid var(--gold);
@@ -87,7 +87,7 @@ body::before {
   width: 300px; background: #fff;
   border-radius: 16px; border: 2px solid var(--gold);
   box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-  z-index: 9999; overflow: hidden;
+  z-index: 99999; overflow: hidden;
   animation: fadeDown 0.2s ease;
 }
 .notif-dropdown.open { display: block; }
@@ -156,6 +156,9 @@ body::before {
 
 /* ── SECTION ── */
 .section { padding: 1rem 0.75rem 0; position: relative; z-index: 1; }
+/* Roster page gets a solid background to avoid the body bg showing through */
+#page-roster { background: rgba(255,255,255,0.0); }
+#page-roster .section { background: transparent; }
 .section-hdr {
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 0.65rem; padding-bottom: 0.55rem; border-bottom: 2px solid var(--gold);
@@ -270,7 +273,7 @@ body::before {
   border: 1.5px solid var(--gold); border-radius: 9px;
   font-family: 'DM Sans', sans-serif; font-size: 0.8rem; outline: none; background: #fff;
 }
-.stu-table-wrap { border: 2px solid var(--gold); border-radius: 10px; overflow: auto; max-height: 420px; }
+.stu-table-wrap { border: 2px solid var(--gold); border-radius: 10px; overflow: auto; max-height: 520px; background: #fff; }
 .stu-table { width: 100%; border-collapse: collapse; min-width: 380px; }
 .stu-table thead { background: var(--primary); color: var(--gold); position: sticky; top: 0; z-index: 2; }
 .stu-table th {
@@ -279,9 +282,14 @@ body::before {
 }
 .stu-table td { padding: 0.38rem 0.65rem; border-bottom: 1px solid rgba(255,215,0,0.15); font-size: 0.78rem; vertical-align: middle; }
 .stu-table tbody tr:hover { background: rgba(255,215,0,0.07); }
+/* Subjects cell — single line, truncated with ellipsis */
 .subj-tag {
-  display: inline-block; padding: 1px 6px; border-radius: 5px; margin: 1px;
-  background: rgba(255,215,0,0.15); color: #8a6a00; font-size: 0.68rem; font-weight: 700;
+  display: inline; padding: 0; margin: 0;
+  background: none; color: #8a6a00; font-size: 0.72rem; font-weight: 600;
+}
+.subj-cell {
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 110px; font-size: 0.72rem; color: #8a6a00; font-weight: 600;
 }
 .status-sel {
   border: none; border-radius: 20px; padding: 3px 8px;
@@ -330,9 +338,9 @@ body::before {
   cursor: pointer; padding: 4px 0; border: none; background: none;
   color: rgba(255,255,255,0.35); transition: color 0.2s; font-family: 'DM Sans', sans-serif;
 }
-.nav-btn.active { color: var(--gold); }
-.nav-btn.active .nav-icon { filter: drop-shadow(0 0 4px rgba(255,215,0,0.6)); }
-.nav-btn:active { color: var(--gold); }
+.nav-btn.active { color: var(--red); }
+.nav-btn.active .nav-icon { filter: drop-shadow(0 0 4px rgba(220,20,60,0.7)); }
+.nav-btn:active { color: var(--red); }
 .nav-icon { width: 22px; height: 22px; }
 .nav-label { font-size: 0.57rem; font-weight: 700; }
 
@@ -470,35 +478,37 @@ body::before {
 
 /* ── Add Student Form ── */
 .add-stu-form .afs-row {
-  display: flex; flex-direction: column; gap: 0.22rem; margin-bottom: 0.65rem;
+  display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.75rem;
 }
 .add-stu-form label {
-  font-size: 0.78rem; font-weight: 600; color: #555;
+  font-family: 'Syne', sans-serif; font-size: 0.78rem; font-weight: 700; color: var(--primary);
 }
 .add-stu-form .afs-hint {
-  color: #aaa; font-size: 0.7rem; font-weight: 400;
+  color: #aaa; font-size: 0.7rem; font-weight: 400; font-family: 'DM Sans', sans-serif;
 }
 .add-stu-form input,
 .add-stu-form select {
-  padding: 0.6rem 0.85rem;
-  border: 1.5px solid var(--gold); border-radius: 10px;
-  font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+  padding: 0.65rem 0.9rem;
+  border: 2px solid var(--gold); border-radius: 10px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
   outline: none; width: 100%; background: #fff;
+  color: var(--primary); transition: border-color 0.2s;
 }
 .add-stu-form input:focus,
-.add-stu-form select:focus { border-color: var(--red); }
+.add-stu-form select:focus { border-color: var(--red); box-shadow: 0 0 0 3px rgba(255,215,0,0.15); }
 .subj-checks {
-  display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.3rem;
+  display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.35rem;
 }
 .subj-check-label {
-  display: flex; align-items: center; gap: 0.3rem;
-  padding: 0.32rem 0.75rem; border-radius: 20px;
-  border: 1.5px solid var(--gold); background: #fff;
-  font-size: 0.78rem; font-weight: 700; cursor: pointer;
-  transition: all 0.15s; color: var(--primary);
-  user-select: none;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0.42rem 1rem; border-radius: 22px;
+  border: 2px solid var(--gold); background: #fff;
+  font-family: 'Syne', sans-serif; font-size: 0.8rem; font-weight: 700;
+  cursor: pointer; transition: all 0.18s; color: var(--primary);
+  user-select: none; min-width: 72px;
 }
 .subj-check-label input[type=checkbox] { display: none; }
 .subj-check-label.checked {
-  background: var(--gradient-gold); border-color: var(--gold-dark); color: var(--black);
+  background: var(--gradient-gold); border-color: var(--gold-dark);
+  color: var(--black); box-shadow: 0 3px 10px rgba(255,215,0,0.4);
 }
