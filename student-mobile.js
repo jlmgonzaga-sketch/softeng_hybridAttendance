@@ -79,8 +79,11 @@ function markRead(id)  { const n = _notifications.find(n => n.id === id); if (n)
 function markAllRead() { _notifications.forEach(n => n.unread = false); renderNotifications(); }
 
 document.addEventListener('click', e => {
-    const w = document.getElementById('notifWrapper');
-    if (w && !w.contains(e.target)) closeNotifications();
+    const btn = document.getElementById('notifWrapper');
+    const dd  = document.getElementById('notifDropdown');
+    if (btn && dd && !btn.contains(e.target) && !dd.contains(e.target)) {
+        closeNotifications();
+    }
 });
 
 // ── Card builder — NO abbreviation box, just subject name + date ──
