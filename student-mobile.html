@@ -19,72 +19,23 @@
 .sfc-info{font-size:.58rem;color:#aaa}
 .sfc-mail{font-size:.58rem;font-weight:600;color:#8B0000!important;text-decoration:none;white-space:nowrap;flex-shrink:0}
 
-/* ── Stats grid — 2×2 matching desktop layout ── */
-.stats-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: .65rem;
-    margin: .75rem 0;
-}
-.stat-card {
-    background: #fff;
-    border-radius: 14px;
-    padding: .9rem 1rem;
-    position: relative;
-    overflow: hidden;
-    border: 2px solid rgba(255,215,0,0.5);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-    transition: all 0.2s;
-}
-.stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 4px;
-}
-/* History card — red top bar, clickable */
+/* ── Stats grid — same 2×2 original size, history replaces late ── */
 .stat-card.sc-hist::before { background: linear-gradient(135deg,#DC143C,#8B0000); }
-.stat-card.sc-hist {
-    cursor: pointer;
-    grid-column: 1 / -1; /* full width — mirrors desktop "first" card */
-}
+.stat-card.sc-hist { cursor: pointer; }
 .stat-card.sc-hist:active { transform: scale(0.98); }
-
-/* Other cards */
-.stat-card.sc-p::before { background: linear-gradient(135deg,#1a1a1a,#FFD700); }
-.stat-card.sc-s::before { background: linear-gradient(135deg,#FFD700,#FFA500); }
-.stat-card.sc-w::before { background: linear-gradient(135deg,#DC143C,#FFD700); }
-
-.stat-label-top {
-    font-size: .62rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .8px;
-    color: #888;
-    margin-bottom: .25rem;
-}
-.stat-value {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.8rem;
-    font-weight: 800;
-    background: linear-gradient(135deg,#DC143C,#FFD700);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    line-height: 1.1;
-}
-/* History card value — solid red, smaller to fit "Attendance History" */
 .stat-card.sc-hist .stat-value {
-    font-size: 1.2rem !important;
+    font-size: .95rem !important;
     -webkit-text-fill-color: #8B0000 !important;
     background: none !important;
-    line-height: 1.25;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    line-height: 1.2;
 }
 .stat-hist-sub {
-    font-size: .7rem;
+    font-size: .6rem;
     font-weight: 700;
     color: #DC143C;
-    margin-top: .3rem;
+    margin-top: .2rem;
 }
 </style>
 </head>
@@ -126,11 +77,11 @@
   <!-- ── STATS — matches desktop: History · Rate · Attended · Absences ── -->
   <div class="stats-grid">
 
-    <!-- 1. Attendance History — full width, clickable -->
+    <!-- 1. Attendance History -->
     <div class="stat-card sc-hist" onclick="openModal('attendanceHistoryModal')" title="View Full History">
-      <div class="stat-label-top">View All Records</div>
-      <div class="stat-value">Attendance<br>History</div>
-      <div class="stat-hist-sub">View All Records →</div>
+      <div class="stat-label-top">Att. History</div>
+      <div class="stat-value">View<br>All</div>
+      <div class="stat-hist-sub">Feb 2026 →</div>
     </div>
 
     <!-- 2. Attendance Rate -->
@@ -295,10 +246,10 @@
     </div>
     <div class="sfc-wrap">
       <div class="sfc-title">Enrolled Subjects</div>
-      <div class="sfc-row"><div class="sfc-left"><div class="sfc-name">Mathematics</div><div class="sfc-info">R. Doneza · Rm 101 · 07:00 AM</div></div><a href="mailto:rdoneza@sscr.edu.ph" class="sfc-mail">rdoneza@sscr.edu.ph</a></div>
-      <div class="sfc-row"><div class="sfc-left"><div class="sfc-name">English</div><div class="sfc-info">G. Soriano · Rm 102 · 08:30 AM</div></div><a href="mailto:gsoriano@sscr.edu.ph" class="sfc-mail">gsoriano@sscr.edu.ph</a></div>
-      <div class="sfc-row"><div class="sfc-left"><div class="sfc-name">Science</div><div class="sfc-info">A. Bernal · Lab 201 · 10:00 AM</div></div><a href="mailto:abernal@sscr.edu.ph" class="sfc-mail">abernal@sscr.edu.ph</a></div>
-      <div class="sfc-row"><div class="sfc-left"><div class="sfc-name">Filipino</div><div class="sfc-info">G. Carpio · Rm 103 · 01:00 PM</div></div><a href="mailto:gcarpio@sscr.edu.ph" class="sfc-mail">gcarpio@sscr.edu.ph</a></div>
+      <div class="sfc-row"><div class="sfc-left"><div class="sfc-name">Mathematics</div><div class="sfc-info">R. Doneza · Rm 101 · 07:00 AM</div></div><a href="/cdn-cgi/l/email-protection#b6c4d2d9d8d3ccd7f6c5c5d5c498d3d2c398c6de" class="sfc-mail"><span class="__cf_email__" data-cfemail="7705131819120d1637040414055912130259071f">[email&#160;protected]</span></a></div>
+      <div class="sfc-row"><div class="sfc-left"><div class="sfc-name">English</div><div class="sfc-info">G. Soriano · Rm 102 · 08:30 AM</div></div><a href="/cdn-cgi/l/email-protection#3552465a475c545b5a75464656471b5051401b455d" class="sfc-mail"><span class="__cf_email__" data-cfemail="5e392d312c373f30311e2d2d3d2c703b3a2b702e36">[email&#160;protected]</span></a></div>
+      <div class="sfc-row"><div class="sfc-left"><div class="sfc-name">Science</div><div class="sfc-info">A. Bernal · Lab 201 · 10:00 AM</div></div><a href="/cdn-cgi/l/email-protection#7f1e1d1a0d111e133f0c0c1c0d511a1b0a510f17" class="sfc-mail"><span class="__cf_email__" data-cfemail="cbaaa9aeb9a5aaa78bb8b8a8b9e5aeafbee5bba3">[email&#160;protected]</span></a></div>
+      <div class="sfc-row"><div class="sfc-left"><div class="sfc-name">Filipino</div><div class="sfc-info">G. Carpio · Rm 103 · 01:00 PM</div></div><a href="/cdn-cgi/l/email-protection#5631353724263f3916252535247833322378263e" class="sfc-mail"><span class="__cf_email__" data-cfemail="6700040615170e0827141404154902031249170f">[email&#160;protected]</span></a></div>
     </div>
   </div>
   <div class="spacer"></div>
@@ -387,19 +338,4 @@
         <div class="qr-corners">
           <div class="qr-corner tl"></div><div class="qr-corner tr"></div>
           <div class="qr-corner bl"></div><div class="qr-corner br"></div>
-          <div id="scanLine" class="qr-scan-line"></div>
-        </div>
-      </div>
-      <div id="qrStatusMsg" class="qr-status">Starting camera...</div>
-      <div id="qrResultBox" class="qr-result" style="display:none;">
-        <div class="qr-result-title">✅ QR Code Scanned!</div>
-        <div id="qrResultText" class="qr-result-text"></div>
-      </div>
-      <button class="btn btn-danger btn-full" style="margin-top:.5rem" onclick="closeQRModal()">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<script src="student-mobile.js"></script>
-</body>
-</html>
+          <div id="
