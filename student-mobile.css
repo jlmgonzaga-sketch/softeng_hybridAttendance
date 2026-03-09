@@ -37,10 +37,13 @@ body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background: rgba(255,255,255,0.55);
+  background: rgba(255,255,255,0.78);
   z-index: 0;
   pointer-events: none;
 }
+
+/* Safety: hide any stray choice overlay if old HTML is cached */
+#choiceOverlay { display: none !important; }
 .page, header.top-bar { position: relative; z-index: 1; }
 
 /* ════════════════════════════════════════
