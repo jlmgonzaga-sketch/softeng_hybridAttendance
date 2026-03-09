@@ -399,16 +399,19 @@ function openStudentDetail(id) {
     const all = _getAllRosterStudents();
     const s = all.find(s => s.id === id);
     if (!s) return;
-    const subjs = Array.isArray(s.subjects) ? s.subjects.join(', ') : (s.subjects || '—');
-    const secBg = s.section === 'Sec A' ? '#e8f5e9;color:#2e7d32'
-                : s.section === 'Sec B' ? '#e3f2fd;color:#1565c0'
-                : '#fff3e0;color:#e65100';
+    const subjArr = Array.isArray(s.subjects) ? s.subjects : (s.subjects ? [s.subjects] : ['Math','English','Science','Filipino']);
+    const subjPills = subjArr.map(sub =>
+        '<span style="display:inline-block;background:linear-gradient(135deg,#FFD700,#FFA500);color:#1a1a1a;border-radius:20px;padding:3px 12px;font-size:0.78rem;font-weight:700;margin:2px;">' + sub + '</span>'
+    ).join('');
+    const secColor = s.section === 'Sec A' ? 'background:#e8f5e9;color:#2e7d32'
+                   : s.section === 'Sec B' ? 'background:#e3f2fd;color:#1565c0'
+                   : 'background:#fff3e0;color:#e65100';
     document.getElementById('studentDetailBody').innerHTML =
         '<div style="padding:0.5rem 1rem 1rem;">' +
         '<div class="sdet-row"><span class="sdet-lbl">Student ID</span><span class="sdet-val" style="font-family:monospace;">' + s.id + '</span></div>' +
         '<div class="sdet-row"><span class="sdet-lbl">Full Name</span><span class="sdet-val">' + s.name + '</span></div>' +
-        '<div class="sdet-row"><span class="sdet-lbl">Section</span><span class="sdet-val"><span style="background:' + secBg + ';border-radius:20px;padding:3px 14px;font-size:.85rem;font-weight:700;display:inline-block;">' + s.section + '</span></span></div>' +
-        '<div class="sdet-row"><span class="sdet-lbl">Subjects</span><span class="sdet-val">' + subjs + '</span></div>' +
+        '<div class="sdet-row"><span class="sdet-lbl">Section</span><span class="sdet-val"><span style="' + secColor + ';border-radius:20px;padding:3px 14px;font-size:.85rem;font-weight:700;display:inline-block;">' + s.section + '</span></span></div>' +
+        '<div class="sdet-row" style="flex-direction:column;align-items:flex-start;gap:0.5rem;"><span class="sdet-lbl">Subjects Enrolled</span><div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:0.25rem;">' + subjPills + '</div></div>' +
         '</div>';
     document.getElementById('studentDetailModal').classList.add('show');
 }
