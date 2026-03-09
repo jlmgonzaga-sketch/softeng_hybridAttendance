@@ -180,22 +180,25 @@ function _rebuildScanTable() {
     tbody.innerHTML = '';
 
     if (!_filteredScans.length) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#bbb;font-style:italic;padding:1.2rem;">No records match the selected filters.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#bbb;font-style:italic;padding:1.2rem;">No records match the selected filters.</td></tr>';
     } else {
         paginated.forEach(r => {
-            const bs = r.status === 'Present'
-                ? 'background:rgba(255,215,0,.15);color:#DAA520;border:1.5px solid #FFD700;'
-                : r.status === 'Late'
-                ? 'background:rgba(255,140,0,.1);color:#CC6600;border:1.5px solid #FFA500;'
-                : 'background:rgba(220,20,60,.1);color:#8B0000;border:1.5px solid #DC143C;';
+            const statusCls = r.status === 'Present' ? 'Present' : r.status === 'Late' ? 'Late' : 'Absent';
             const tr = document.createElement('tr');
             tr.innerHTML =
-                '<td style="font-size:.72rem;font-weight:700;color:#888;">' + r.id + '</td>' +
-                '<td style="font-size:.78rem;font-weight:600;">' + r.name + '</td>' +
-                '<td style="font-size:.75rem;">' + r.subject + '</td>' +
-                '<td style="font-size:.75rem;">' + r.section + '</td>' +
-                '<td style="font-size:.75rem;font-weight:600;">' + (r.timeIn || '—') + '</td>' +
-                '<td><span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:.7rem;font-weight:700;' + bs + '">' + r.status + '</span></td>';
+                // Col 1: ID + Last name + Section stacked
+                '<td>' +
+                  '<div class="rpt-student-id">' + r.id + '</div>' +
+                  '<div class="rpt-student-name">' + r.name.split(',')[0] + (r.name.includes(',') ? ',' + r.name.split(',').slice(1).join(',') : '') + '</div>' +
+                  '<div class="rpt-student-sec">' + r.section + '</div>' +
+                '</td>' +
+                // Col 2: Subject
+                '<td style="font-size:.74rem;font-weight:600;">' + r.subject + '</td>' +
+                // Col 3: Time + Status badge
+                '<td>' +
+                  '<div style="font-size:.74rem;font-weight:700;">' + (r.timeIn || '—') + '</div>' +
+                  '<span class="rpt-status ' + statusCls + '">' + r.status + '</span>' +
+                '</td>';
             tbody.appendChild(tr);
         });
     }
@@ -371,18 +374,17 @@ function _rebuildRosterTable() {
     tbody.innerHTML = '';
 
     if (!paginated.length) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#bbb;font-style:italic;padding:1.2rem;">No students found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#bbb;font-style:italic;padding:1.2rem;">No students found.</td></tr>';
     } else {
         paginated.forEach((s, idx) => {
-            const subjs = s.subjects || (typeof SSCR_SUBJECTS !== 'undefined' ? SSCR_SUBJECTS : []);
-            const subjText = Array.isArray(subjs) ? subjs.join(', ') : subjs;
             const tr = document.createElement('tr');
+            // Store student data as JSON on the row for the detail modal
+            const safeId = s.id.replace(/'/g, "\\'");
             tr.innerHTML =
-                '<td style="color:#999;font-size:.75rem;">' + (start + idx + 1) + '</td>' +
-                '<td style="font-weight:700;font-size:.72rem;color:#555;">' + s.id + '</td>' +
-                '<td style="font-size:.8rem;">' + s.name + '</td>' +
-                '<td><span style="display:inline-block;background:#eee;border-radius:20px;padding:2px 8px;font-size:.72rem;font-weight:700;">' + s.section + '</span></td>' +
-                '<td class="subj-cell">' + subjText + '</td>';
+                '<td style="color:#999;font-size:.72rem;text-align:center;">' + (start + idx + 1) + '</td>' +
+                '<td style="font-weight:700;font-size:.68rem;color:#555;font-family:monospace;">' + s.id + '</td>' +
+                '<td style="font-size:.78rem;font-weight:600;">' + s.name + '</td>' +
+                '<td style="text-align:center;"><button class="btn-view-stu" onclick="openStudentDetail(\'' + safeId + '\')">View</button></td>';
             tbody.appendChild(tr);
         });
     }
@@ -391,6 +393,24 @@ function _rebuildRosterTable() {
         _rosterPage = p;
         _rebuildRosterTable();
     });
+}
+
+function openStudentDetail(id) {
+    const all = _getAllRosterStudents();
+    const s = all.find(s => s.id === id);
+    if (!s) return;
+    const subjs = Array.isArray(s.subjects) ? s.subjects.join(', ') : (s.subjects || '—');
+    const secBg = s.section === 'Sec A' ? '#e8f5e9;color:#2e7d32'
+                : s.section === 'Sec B' ? '#e3f2fd;color:#1565c0'
+                : '#fff3e0;color:#e65100';
+    document.getElementById('studentDetailBody').innerHTML =
+        '<div style="padding:0.5rem 1rem 1rem;">' +
+        '<div class="sdet-row"><span class="sdet-lbl">Student ID</span><span class="sdet-val" style="font-family:monospace;">' + s.id + '</span></div>' +
+        '<div class="sdet-row"><span class="sdet-lbl">Full Name</span><span class="sdet-val">' + s.name + '</span></div>' +
+        '<div class="sdet-row"><span class="sdet-lbl">Section</span><span class="sdet-val"><span style="background:' + secBg + ';border-radius:20px;padding:3px 14px;font-size:.85rem;font-weight:700;display:inline-block;">' + s.section + '</span></span></div>' +
+        '<div class="sdet-row"><span class="sdet-lbl">Subjects</span><span class="sdet-val">' + subjs + '</span></div>' +
+        '</div>';
+    document.getElementById('studentDetailModal').classList.add('show');
 }
 
 function filterRoster() {
