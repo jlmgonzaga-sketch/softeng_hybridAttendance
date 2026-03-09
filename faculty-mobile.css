@@ -225,19 +225,61 @@ body::before {
 }
 .search-row input:focus { border-color: var(--red); }
 .scan-label { font-size: 0.7rem; color: #888; margin-bottom: 0.4rem; }
-.scan-table-wrap { border: 2px solid var(--gold); border-radius: 10px; overflow: auto; max-height: 240px; }
-.scan-table { width: 100%; border-collapse: collapse; background: #fff; min-width: 420px; }
+.scan-table-wrap { border: 2px solid var(--gold); border-radius: 10px; overflow: hidden; background: #fff; }
+.scan-table { width: 100%; border-collapse: collapse; background: #fff; table-layout: fixed; }
 .scan-table thead { background: var(--primary); color: var(--gold); position: sticky; top: 0; z-index: 2; }
 .scan-table th {
-  padding: 0.45rem 0.6rem; font-family: 'Syne', sans-serif;
-  font-size: 0.68rem; font-weight: 700; text-align: left; white-space: nowrap;
+  padding: 0.45rem 0.5rem; font-family: 'Syne', sans-serif;
+  font-size: 0.68rem; font-weight: 700; text-align: left; white-space: nowrap; overflow: hidden;
 }
+/* Column widths: Student info | Subject | Time·Status */
+.rpt-col-info { width: 45%; }
+.rpt-col-subj { width: 22%; }
+.rpt-col-time { width: 33%; }
 .scan-table td {
-  padding: 0.38rem 0.6rem; border-bottom: 1px solid rgba(255,215,0,0.15);
-  font-size: 0.77rem; color: var(--primary); vertical-align: middle;
+  padding: 0.42rem 0.5rem; border-bottom: 1px solid rgba(255,215,0,0.15);
+  font-size: 0.74rem; color: var(--primary); vertical-align: middle;
+  overflow: hidden; word-break: break-word;
 }
 .scan-table tbody tr:hover { background: rgba(255,215,0,0.07); }
+/* Student info cell stacked layout */
+.rpt-student-id   { font-size: 0.65rem; font-weight: 700; color: #888; }
+.rpt-student-name { font-size: 0.76rem; font-weight: 700; color: var(--primary); line-height: 1.25; }
+.rpt-student-sec  { font-size: 0.65rem; color: #aaa; font-weight: 600; }
+/* Status badge inline */
+.rpt-status {
+  display: inline-block; padding: 2px 7px; border-radius: 20px;
+  font-size: 0.65rem; font-weight: 700; border: 1px solid;
+}
+.rpt-status.Present { background: rgba(255,215,0,.15); color: #DAA520; border-color: #FFD700; }
+.rpt-status.Late    { background: rgba(255,140,0,.1);  color: #CC6600; border-color: #FFA500; }
+.rpt-status.Absent  { background: rgba(220,20,60,.1);  color: #8B0000; border-color: #DC143C; }
 .scan-count { font-size: 0.7rem; color: #bbb; text-align: right; margin-top: 0.35rem; }
+
+/* ── STUDENT LIST TABLE — fixed 4-column layout ── */
+.stu-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.stu-col-num  { width: 8%; }
+.stu-col-id   { width: 24%; }
+.stu-col-name { width: 48%; }
+.stu-col-view { width: 20%; text-align: center; }
+.stu-table td { overflow: hidden; word-break: break-word; }
+/* View Details button */
+.btn-view-stu {
+  padding: 0.28rem 0.5rem; border: 1.5px solid var(--gold);
+  border-radius: 7px; background: #fff; color: var(--gold-dark);
+  font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.62rem;
+  cursor: pointer; white-space: nowrap; transition: all 0.15s;
+}
+.btn-view-stu:active { background: var(--gradient-gold); border-color: var(--gold-dark); }
+
+/* ── STUDENT DETAIL MODAL ROWS ── */
+.sdet-row {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 0.6rem 0; border-bottom: 1px solid rgba(255,215,0,0.2); gap: 0.5rem;
+}
+.sdet-row:last-child { border-bottom: none; }
+.sdet-lbl { font-size: 0.75rem; color: #888; font-weight: 600; flex-shrink: 0; }
+.sdet-val { font-size: 0.85rem; font-weight: 700; text-align: right; color: var(--primary); }
 .btn-dl {
   padding: 0.55rem 1.1rem; background: var(--gradient-red-gold); color: #fff;
   border: 2px solid var(--gold); border-radius: 9px;
@@ -255,30 +297,31 @@ body::before {
 .s-unmarked{ background: #f0f0f0; color: #999; border-color: #ddd; }
 
 /* ── SCHEDULE ── */
-.sched-outer { overflow-x: auto; border-radius: 12px; border: 2px solid var(--gold); }
+.sched-outer { border-radius: 12px; border: 2px solid var(--gold); overflow: hidden; }
 .sched-grid {
-  display: grid; grid-template-columns: 50px repeat(6,1fr);
-  gap: 1px; background: #e5e5e5; min-width: 480px;
+  display: grid;
+  grid-template-columns: 38px repeat(6, 1fr);
+  gap: 1px; background: #e5e5e5; width: 100%;
 }
 .sg-hdr {
-  background: var(--primary); color: var(--gold); padding: 0.4rem 0.25rem;
-  font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.63rem;
+  background: var(--primary); color: var(--gold); padding: 0.3rem 0.1rem;
+  font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.55rem;
   text-align: center; display: flex; align-items: center; justify-content: center;
 }
 .sg-time {
-  background: #f8f8f8; padding: 0.35rem 0.3rem;
-  font-size: 0.62rem; font-weight: 700; color: #555;
+  background: #f8f8f8; padding: 0.2rem 0.15rem;
+  font-size: 0.52rem; font-weight: 700; color: #555;
   display: flex; align-items: center; white-space: nowrap;
 }
 .sg-cell {
-  background: #fff; padding: 0.3rem 0.25rem;
-  min-height: 44px; display: flex; flex-direction: column; justify-content: flex-start;
+  background: #fff; padding: 0.2rem 0.15rem;
+  min-height: 36px; display: flex; flex-direction: column; justify-content: flex-start;
 }
-.sg-cell.has-cls { background: #fff9e6; border-left: 3px solid var(--gold-dark); cursor: pointer; }
+.sg-cell.has-cls { background: #fff9e6; border-left: 2px solid var(--gold-dark); cursor: pointer; }
 .sg-cell.has-cls:active { background: #fff3cc; }
-.sg-code { font-family: 'Syne', sans-serif; font-weight: 800; color: var(--red-dark); font-size: 0.63rem; }
-.sg-sec  { font-size: 0.58rem; color: #666; }
-.sg-room { font-size: 0.55rem; color: #999; }
+.sg-code { font-family: 'Syne', sans-serif; font-weight: 800; color: var(--red-dark); font-size: 0.52rem; }
+.sg-sec  { font-size: 0.47rem; color: #666; }
+.sg-room { font-size: 0.44rem; color: #999; }
 
 /* ── STUDENT ROSTER ── */
 .roster-search-row { display: flex; gap: 0.5rem; margin-bottom: 0.6rem; }
