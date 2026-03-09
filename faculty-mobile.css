@@ -267,7 +267,7 @@ body::before {
 .stu-col-id   { width: 26%; }
 .stu-col-name { width: 45%; }
 .stu-col-view { width: 20%; text-align: center; }
-.stu-table td { overflow: hidden; word-break: break-word; padding: 0.4rem 0.4rem; font-size: 0.76rem; vertical-align: middle; border-bottom: 1px solid rgba(255,215,0,0.15); }
+.stu-table td { overflow: hidden; word-break: break-word; padding: 0.4rem 0.4rem; font-size: 0.7rem; vertical-align: middle; border-bottom: 1px solid rgba(255,215,0,0.15); }
 .stu-table tbody tr:hover { background: rgba(255,215,0,0.07); }
 /* View Details button */
 .btn-view-stu {
@@ -545,7 +545,7 @@ body::before {
 /* ── Add Student Button ── */
 .btn-add-stu {
   padding: 0.38rem 0.9rem;
-  background: var(--gradient-gold); color: var(--black);
+  background: #fff; color: var(--black);
   border: 2px solid var(--gold-dark); border-radius: 9px;
   font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.74rem;
   cursor: pointer; display: flex; align-items: center; gap: 0.3rem; white-space: nowrap;
