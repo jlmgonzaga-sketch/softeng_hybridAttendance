@@ -1,415 +1,533 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>SSC-R Faculty — Mobile</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
-<script src="students-data.js"></script>
-<script src="faculty-scans.js"></script>
-<link rel="stylesheet" href="faculty-mobile.css">
+// ═══════════════════════════════════════════════════════════
+//  SSC-R Faculty — Mobile JS
+//  Same logic as faculty.js desktop
+//  Depends on: students-data.js, faculty-scans.js
+// ═══════════════════════════════════════════════════════════
 
-<!-- PWA -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#8B0000">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="sscrmnlofficiallogo.png">
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sscr_attendance/sw.js');
-  }
-</script>
-</head>
-<body>
+// ── Auth ──────────────────────────────────────────────────
+requireAuth('faculty');
 
-<!-- TOP BAR -->
-<header class="top-bar">
-  <img src="sscrmnlofficiallogo.png" alt="SSC-R" class="top-logo">
-  <div class="top-right">
-    <div class="notif-wrapper" id="notifWrapper">
-      <button class="tb-btn" onclick="toggleNotifications(event)" id="notifBtn">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        <span class="notif-badge" id="notificationCount">3</span>
-      </button>
-    </div>
-    <div class="avatar-sm">AB</div>
-  </div>
-</header>
+// ── Toast / Snackbar System ──────────────────────────────
+(function() {
+    var container = document.createElement('div');
+    container.id = 'toast-container';
+    document.body.appendChild(container);
+    var ICONS = { success:'✓', error:'✕', info:'ℹ', warn:'⚠' };
+    window.showToast = function(msg, type, duration) {
+        type = type || 'info'; duration = duration || 3200;
+        var toast = document.createElement('div');
+        toast.className = 'toast toast-' + type;
+        toast.innerHTML =
+            '<span class="toast-icon">' + (ICONS[type]||'ℹ') + '</span>' +
+            '<span class="toast-msg">' + msg + '</span>' +
+            '<button class="toast-close" onclick="this.parentElement._dismiss()">×</button>';
+        toast._dismiss = function() {
+            toast.classList.add('toast-out');
+            setTimeout(function(){ toast.remove(); }, 280);
+        };
+        container.appendChild(toast);
+        var t = setTimeout(function(){ toast._dismiss(); }, duration);
+        toast.addEventListener('mouseenter', function(){ clearTimeout(t); });
+        toast.addEventListener('mouseleave', function(){ t = setTimeout(function(){ toast._dismiss(); }, 1500); });
+    };
+})();
 
-<!-- Notification dropdown rendered OUTSIDE top-bar to avoid sticky stacking context -->
-<div class="notif-dropdown" id="notifDropdown">
-  <div class="nd-hdr">
-    <span class="nd-title">Notifications</span>
-    <button class="nd-mark" onclick="markAllRead()">Mark all read</button>
-  </div>
-  <div class="nd-list" id="notifList"></div>
-  <div class="nd-footer" onclick="closeNotifications()">View all notifications</div>
-</div>
 
-<!-- PAGE: HOME -->
-<div class="page active" id="page-home">
-  <div class="profile-strip" onclick="goPage('settings')" title="Edit Profile" style="cursor:pointer;">
-    <div class="avatar-lg" id="homeAvatar">AB</div>
-    <div class="profile-info">
-      <div class="profile-name" id="homeName">Agnes Bernal</div>
-      <div class="profile-role" id="homeRole">Software Engineering</div>
-    </div>
-    <button class="btn-logout" onclick="event.stopPropagation();logout()">Logout</button>
-  </div>
+// ── Shared Class Info ────────────────────────────────────
+const CLASS_INFO = {
+    'MATH-A': { name:'Mathematics', room:'Room 101', section:'Sec A' },
+    'MATH-B': { name:'Mathematics', room:'Room 101', section:'Sec B' },
+    'MATH-C': { name:'Mathematics', room:'Room 101', section:'Sec C' },
+    'ENG-A':  { name:'English',     room:'Room 102', section:'Sec A' },
+    'ENG-B':  { name:'English',     room:'Room 102', section:'Sec B' },
+    'ENG-C':  { name:'English',     room:'Room 102', section:'Sec C' },
+    'SCI-A':  { name:'Science',     room:'Lab 201',  section:'Sec A' },
+    'SCI-B':  { name:'Science',     room:'Lab 201',  section:'Sec B' },
+    'SCI-C':  { name:'Science',     room:'Lab 201',  section:'Sec C' },
+    'FIL-A':  { name:'Filipino',    room:'Room 103', section:'Sec A' },
+    'FIL-B':  { name:'Filipino',    room:'Room 103', section:'Sec B' },
+    'FIL-C':  { name:'Filipino',    room:'Room 103', section:'Sec C' },
+};
 
-  <!-- Classes — single card, one row -->
-  <div class="section">
-    <div class="classes-card">
-      <div class="classes-card-hdr">
-        <span class="classes-card-title">Classes</span>
-      </div>
-      <div class="class-pill-row">
-        <button class="class-pill" onclick="openClassModal('Math')">Math</button>
-        <button class="class-pill" onclick="openClassModal('English')">English</button>
-        <button class="class-pill" onclick="openClassModal('Science')">Science</button>
-        <button class="class-pill" onclick="openClassModal('Filipino')">Filipino</button>
-      </div>
-    </div>
-  </div>
 
-  <!-- Reports -->
-  <div class="section" style="margin-top:.75rem;">
-    <div class="card">
-      <div class="card-hdr">
-        <div class="card-title">Reports</div>
-        <button class="btn-dl" onclick="downloadReport()">Download</button>
-      </div>
-      <div class="filter-row">
-        <select class="fsel" id="rptType" onchange="refreshScanPreview()">
-          <option value="">All</option>
-          <option value="Present">Present</option>
-          <option value="Late">Late</option>
-          <option value="Absent">Absent</option>
-        </select>
-        <select class="fsel" id="rptSubject" onchange="refreshScanPreview()">
-          <option value="">All Subjects</option>
-          <option value="Math">Math</option>
-          <option value="English">English</option>
-          <option value="Science">Science</option>
-          <option value="Filipino">Filipino</option>
-        </select>
-        <select class="fsel" id="rptSection" onchange="refreshScanPreview()">
-          <option value="">All Sections</option>
-          <option value="Sec A">Sec A</option>
-          <option value="Sec B">Sec B</option>
-          <option value="Sec C">Sec C</option>
-        </select>
-      </div>
-      <div class="search-row">
-        <input type="text" id="scanSearch" placeholder="Search by name or ID…" oninput="filterScanSearch()">
-      </div>
-      <div class="scan-label" id="scanPreviewLabel">Showing all · Feb 2026</div>
-      <div class="scan-table-wrap">
-        <table class="scan-table">
-          <thead>
-            <tr>
-              <th class="rpt-col-info">Student</th>
-              <th class="rpt-col-subj">Subject</th>
-              <th class="rpt-col-time">Time · Status</th>
-            </tr>
-          </thead>
-          <tbody id="scanPreviewBody">
-            <tr><td colspan="3" style="text-align:center;color:#bbb;font-style:italic;padding:1.2rem;">Loading...</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="scan-count">Showing <strong id="scanShownCount">0</strong> of <strong id="scanTotalCount">0</strong> records</div>
-      <!-- Report Pagination -->
-      <div class="pagination-wrap" id="reportPagination"></div>
-    </div>
-  </div>
-  <div class="spacer"></div>
-</div>
+// ── Notifications ─────────────────────────────────────────
+const NOTIFICATIONS = [
+    { id:1, unread:true,  type:'alert',   avatar:'SB', avatarColor:'#c62828,#ffcdd2', text:'<strong>3 students</strong> from Sec B exceeded absences in <strong>Math</strong>.', time:'2 mins ago' },
+    { id:2, unread:true,  type:'info',    avatar:'SY', avatarColor:'#1565c0,#bbdefb', text:'<strong>Attendance report</strong> for English — Sec A generated successfully.', time:'15 mins ago' },
+    { id:3, unread:true,  type:'warn',    avatar:'KG', avatarColor:'#e65100,#ffe0b2', text:'<strong>GONZAGA, Krystine</strong> was marked Late in Science today.', time:'42 mins ago' },
+    { id:4, unread:false, type:'success', avatar:'QR', avatarColor:'#2e7d32,#c8e6c9', text:'QR session for <strong>Filipino — Sec C</strong> completed. 11/11 recorded.', time:'1 hr ago' },
+    { id:5, unread:false, type:'info',    avatar:'AD', avatarColor:'#1565c0,#bbdefb', text:'Reminder: Submit <strong>monthly attendance reports</strong> by Feb 28, 2026.', time:'3 hrs ago' },
+    { id:6, unread:false, type:'alert',   avatar:'SY', avatarColor:'#7b1fa2,#e1bee7', text:'System maintenance on <strong>Feb 22, 2026 at 11:00 PM</strong>.', time:'Yesterday' },
+];
+let _notifications = [...NOTIFICATIONS];
 
-<!-- PAGE: SCHEDULE -->
-<div class="page" id="page-schedule">
-  <div class="section">
-    <div class="sched-outer">
-      <div class="sched-grid">
-        <div class="sg-hdr">Time</div>
-        <div class="sg-hdr">Mon</div>
-        <div class="sg-hdr">Tue</div>
-        <div class="sg-hdr">Wed</div>
-        <div class="sg-hdr">Thu</div>
-        <div class="sg-hdr">Fri</div>
-        <div class="sg-hdr">Sat</div>
-        <!-- 07:00 -->
-        <div class="sg-time">07:00</div>
-        <div class="sg-cell has-cls" onclick="viewClassDetails('MATH-A','Monday','07:00 AM')"><div class="sg-code">MATH</div><div class="sg-sec">Sec A</div><div class="sg-room">Rm 101</div></div>
-        <div class="sg-cell"></div>
-        <div class="sg-cell has-cls" onclick="viewClassDetails('MATH-B','Wednesday','07:00 AM')"><div class="sg-code">MATH</div><div class="sg-sec">Sec B</div><div class="sg-room">Rm 101</div></div>
-        <div class="sg-cell"></div>
-        <div class="sg-cell has-cls" onclick="viewClassDetails('MATH-C','Friday','07:00 AM')"><div class="sg-code">MATH</div><div class="sg-sec">Sec C</div><div class="sg-room">Rm 101</div></div>
-        <div class="sg-cell"></div>
-        <!-- 08:30 -->
-        <div class="sg-time">08:30</div>
-        <div class="sg-cell has-cls" onclick="viewClassDetails('ENG-B','Monday','08:30 AM')"><div class="sg-code">ENG</div><div class="sg-sec">Sec B</div><div class="sg-room">Rm 102</div></div>
-        <div class="sg-cell has-cls" onclick="viewClassDetails('SCI-A','Tuesday','08:30 AM')"><div class="sg-code">SCI</div><div class="sg-sec">Sec A</div><div class="sg-room">Lab 201</div></div>
-        <div class="sg-cell has-cls" onclick="viewClassDetails('ENG-C','Wednesday','08:30 AM')"><div class="sg-code">ENG</div><div class="sg-sec">Sec C</div><div class="sg-room">Rm 102</div></div>
-        <div class="sg-cell has-cls" onclick="viewClassDetails('ENG-A','Thursday','08:30 AM')"><div class="sg-code">ENG</div><div class="sg-sec">Sec A</div><div class="sg-room">Rm 102</div></div>
-        <div class="sg-cell has-cls" onclick="viewClassDetails('SCI-B','Friday','08:30 AM')"><div class="sg-code">SCI</div><div class="sg-sec">Sec B</div><div class="sg-room">Lab 201</div></div>
-        <div class="sg-cell"></div>
-        <!-- 10:00 -->
-        <div class="sg-time">10:00</div>
-        <div class="sg-cell has-cls" onclick="viewClassDetails('SCI-C','Monday','10:00 AM')"><div class="sg-code">SCI</div><div class="sg-sec">Sec C</div><div class="sg-room">Lab 201</div></div>
-        <div class="sg-cell has-cls" onclick="viewClassDetails('FIL-B','Tuesday','10:00 AM')"><div class="sg-code">FIL</div><div class="sg-sec">Sec B</div><div class="sg-room">Rm 103</div></div>
-        <div class="sg-cell has-cls" onclick="viewClassDetails('FIL-A','Wednesday','10:00 AM')"><div class="sg-code">FIL</div><div class="sg-sec">Sec A</div><div class="sg-room">Rm 103</div></div>
-        <div class="sg-cell has-cls" onclick="viewClassDetails('FIL-C','Thursday','10:00 AM')"><div class="sg-code">FIL</div><div class="sg-sec">Sec C</div><div class="sg-room">Rm 103</div></div>
-        <div class="sg-cell"></div>
-        <div class="sg-cell"></div>
-        <!-- 13:00 -->
-        <div class="sg-time">13:00</div>
-        <div class="sg-cell has-cls" onclick="viewClassDetails('FIL-A','Monday','01:00 PM')"><div class="sg-code">FIL</div><div class="sg-sec">Sec A</div><div class="sg-room">Rm 103</div></div>
-        <div class="sg-cell has-cls" onclick="viewClassDetails('MATH-C','Tuesday','01:00 PM')"><div class="sg-code">MATH</div><div class="sg-sec">Sec C</div><div class="sg-room">Rm 101</div></div>
-        <div class="sg-cell has-cls" onclick="viewClassDetails('SCI-B','Wednesday','01:00 PM')"><div class="sg-code">SCI</div><div class="sg-sec">Sec B</div><div class="sg-room">Lab 201</div></div>
-        <div class="sg-cell has-cls" onclick="viewClassDetails('MATH-B','Thursday','01:00 PM')"><div class="sg-code">MATH</div><div class="sg-sec">Sec B</div><div class="sg-room">Rm 101</div></div>
-        <div class="sg-cell has-cls" onclick="viewClassDetails('MATH-A','Friday','01:00 PM')"><div class="sg-code">MATH</div><div class="sg-sec">Sec A</div><div class="sg-room">Rm 101</div></div>
-        <div class="sg-cell"></div>
-        <!-- 14:30 -->
-        <div class="sg-time">14:30</div>
-        <div class="sg-cell"></div>
-        <div class="sg-cell has-cls" onclick="viewClassDetails('ENG-A','Tuesday','02:30 PM')"><div class="sg-code">ENG</div><div class="sg-sec">Sec A</div><div class="sg-room">Rm 102</div></div>
-        <div class="sg-cell has-cls" onclick="viewClassDetails('SCI-C','Wednesday','02:30 PM')"><div class="sg-code">SCI</div><div class="sg-sec">Sec C</div><div class="sg-room">Lab 201</div></div>
-        <div class="sg-cell has-cls" onclick="viewClassDetails('ENG-C','Thursday','02:30 PM')"><div class="sg-code">ENG</div><div class="sg-sec">Sec C</div><div class="sg-room">Rm 102</div></div>
-        <div class="sg-cell has-cls" onclick="viewClassDetails('FIL-C','Friday','02:30 PM')"><div class="sg-code">FIL</div><div class="sg-sec">Sec C</div><div class="sg-room">Rm 103</div></div>
-        <div class="sg-cell"></div>
-        <!-- 16:00 -->
-        <div class="sg-time">16:00</div>
-        <div class="sg-cell has-cls" onclick="viewClassDetails('ENG-C','Monday','04:00 PM')"><div class="sg-code">ENG</div><div class="sg-sec">Sec C</div><div class="sg-room">Rm 102</div></div>
-        <div class="sg-cell has-cls" onclick="viewClassDetails('SCI-C','Tuesday','04:00 PM')"><div class="sg-code">SCI</div><div class="sg-sec">Sec C</div><div class="sg-room">Lab 201</div></div>
-        <div class="sg-cell"></div>
-        <div class="sg-cell has-cls" onclick="viewClassDetails('SCI-A','Thursday','04:00 PM')"><div class="sg-code">SCI</div><div class="sg-sec">Sec A</div><div class="sg-room">Lab 201</div></div>
-        <div class="sg-cell has-cls" onclick="viewClassDetails('FIL-B','Friday','04:00 PM')"><div class="sg-code">FIL</div><div class="sg-sec">Sec B</div><div class="sg-room">Rm 103</div></div>
-        <div class="sg-cell"></div>
-      </div>
-    </div>
-  </div>
-  <div class="spacer"></div>
-</div>
+function renderNotifications() {
+    const list   = document.getElementById('notifList');
+    const unread = _notifications.filter(n => n.unread).length;
+    const badge  = document.getElementById('notificationCount');
+    badge.textContent    = unread;
+    badge.style.display  = unread > 0 ? 'flex' : 'none';
+    list.innerHTML = _notifications.map(n => {
+        return `<div class="nd-item ${n.unread ? 'unread' : ''}" onclick="markRead(${n.id})">
+            <div class="nd-avatar ${n.type || ''}">${n.avatar || '?'}</div>
+            <div class="nd-body">
+                <div class="nd-text">${n.text}</div>
+                <div class="nd-time">${n.time}</div>
+            </div>
+            <div class="nd-dot"></div>
+        </div>`;
+    }).join('');
+}
 
-<!-- PAGE: STUDENT LIST (renamed from Roster) -->
-<div class="page" id="page-roster">
-  <div class="section">
-    <div class="roster-hdr-row">
-      <div class="section-title">Student List</div>
-      <div class="roster-hdr-right">
-        <span class="roster-count-lbl">
-          <strong id="rosterShownCount">0</strong> / <strong id="rosterTotalCount">0</strong>
-        </span>
-        <button class="btn-add-stu" onclick="openAddStudentModal()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add Student
-        </button>
-      </div>
-    </div>
-    <div class="roster-search-row">
-      <input type="text" id="rosterSearch" placeholder="Search by name or ID…" oninput="filterRoster()">
-      <select id="rosterSectionFilter" onchange="filterRoster()">
-        <option value="">All Sections</option>
-        <option value="Sec A">Sec A</option>
-        <option value="Sec B">Sec B</option>
-        <option value="Sec C">Sec C</option>
-      </select>
-    </div>
-    <div class="stu-table-wrap">
-      <table class="stu-table">
-        <thead><tr><th class="stu-col-num">#</th><th class="stu-col-id">ID</th><th class="stu-col-name">Full Name</th><th class="stu-col-view">Details</th></tr></thead>
-        <tbody id="rosterTableBody"></tbody>
-      </table>
-    </div>
-    <!-- Roster Pagination -->
-    <div class="pagination-wrap" id="rosterPagination"></div>
-  </div>
-  <div class="spacer"></div>
-</div>
+function toggleNotifications(e) {
+    e.stopPropagation();
+    const dd  = document.getElementById('notifDropdown');
+    const btn = document.getElementById('notifBtn');
+    const rect = btn.getBoundingClientRect();
+    // Position dropdown below the bell button, flush to right edge
+    dd.style.top   = (rect.bottom + 8) + 'px';
+    dd.style.right = (window.innerWidth - rect.right) + 'px';
+    dd.style.left  = 'auto';
+    dd.classList.toggle('open');
+    if (dd.classList.contains('open')) renderNotifications();
+}
+function closeNotifications() { document.getElementById('notifDropdown').classList.remove('open'); }
+function markRead(id) { const n = _notifications.find(n => n.id === id); if (n) n.unread = false; renderNotifications(); }
+function markAllRead() { _notifications.forEach(n => n.unread = false); renderNotifications(); }
 
-<!-- PAGE: SETTINGS -->
-<div class="page" id="page-settings">
-  <div class="section">
-    <div class="section-hdr"><div class="section-title">Settings</div></div>
-    <div class="settings-section">
-      <div class="settings-section-title">Faculty Profile</div>
-      <div class="settings-form-row"><label>Full Name</label><input class="settings-input" value="Agnes Bernal"></div>
-      <div class="settings-form-row"><label>Subject</label><input class="settings-input" value="Software Engineering" readonly style="background:#f5f5f5"></div>
-      <div class="settings-form-row"><label>Email</label><input class="settings-input" value="agnes.bernal@sscr.edu.ph" type="email"></div>
-      <button class="btn btn-primary btn-full" style="margin-top:.5rem" onclick="saveProfile()">Save Changes</button>
-    </div>
-    <div class="settings-section">
-      <div class="settings-section-title">Security</div>
-      <div class="settings-form-row"><label>Current Password</label><input class="settings-input" type="password" placeholder="••••••••"></div>
-      <div class="settings-form-row"><label>New Password</label><input class="settings-input" type="password" placeholder="••••••••"></div>
-      <button class="btn btn-primary btn-full" style="margin-top:.5rem" onclick="showToast('Password updated successfully!','success')">Update Password</button>
-    </div>
-    <button class="btn btn-danger btn-full" style="margin-top:.5rem" onclick="logout()">Logout</button>
-  </div>
-  <div class="spacer"></div>
-</div>
+document.addEventListener('click', e => {
+    const wrapper = document.getElementById('notifWrapper');
+    const dd      = document.getElementById('notifDropdown');
+    if (wrapper && !wrapper.contains(e.target) && dd && !dd.contains(e.target)) {
+        closeNotifications();
+    }
+});
 
-<!-- BOTTOM NAV -->
-<nav class="bottom-nav">
-  <button class="nav-btn active" id="nav-home" onclick="goPage('home')">
-    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-    <span class="nav-label">Home</span>
-  </button>
-  <button class="nav-btn" id="nav-schedule" onclick="goPage('schedule')">
-    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-    <span class="nav-label">Schedule</span>
-  </button>
-  <!-- nav label changed from Roster to Student List -->
-  <button class="nav-btn" id="nav-roster" onclick="goPage('roster');loadRoster()">
-    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-    <span class="nav-label">Student List</span>
-  </button>
-  <button class="nav-btn" id="nav-settings" onclick="goPage('settings')">
-    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    <span class="nav-label">Settings</span>
-  </button>
-</nav>
 
-<!-- MODAL: Class (QR + Students) -->
-<div id="classModal" class="modal">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-hdr">
-      <div class="modal-ttl" id="classModalTitle">Class Details</div>
-      <button class="modal-close" onclick="closeModal('classModal')">×</button>
-    </div>
-    <div class="modal-scroll">
-      <div style="text-align:center;margin-bottom:1rem;">
-        <img id="classQRCode" src="" alt="QR Code" class="qr-img" onclick="enlargeQR()">
-        <div style="font-size:.72rem;color:#888;margin-top:.3rem;">Tap to enlarge</div>
-      </div>
-      <div class="session-info">
-        <p><strong>Class:</strong> <span id="sessionClass"></span></p>
-        <p><strong>Section:</strong> <span id="sessionSection"></span></p>
-        <p><strong>Date:</strong> <span id="sessionDate"></span></p>
-        <p><strong>Time:</strong> <span id="sessionTime"></span></p>
-      </div>
-      <div class="sec-tabs" style="margin-top:.85rem;">
-        <button class="sec-tab active" id="tab-SecA" onclick="switchSection('Sec A')">Sec A <span id="count-SecA"></span></button>
-        <button class="sec-tab" id="tab-SecB" onclick="switchSection('Sec B')">Sec B <span id="count-SecB"></span></button>
-        <button class="sec-tab" id="tab-SecC" onclick="switchSection('Sec C')">Sec C <span id="count-SecC"></span></button>
-      </div>
-      <div class="att-summary">
-        <div class="sum-item total">Total: <strong id="totalStudents">0</strong></div>
-        <div class="sum-item present">Present: <strong id="presentCount">0</strong></div>
-        <div class="sum-item absent">Absent: <strong id="absentCount">0</strong></div>
-        <div class="sum-item late">Late: <strong id="lateCount">0</strong></div>
-      </div>
-      <div class="stu-table-wrap">
-        <table class="stu-table">
-          <thead><tr><th>#</th><th>ID</th><th>Name</th><th>Time In</th><th>Status</th></tr></thead>
-          <tbody id="studentListBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
+// ═══════════════════════════════════════════════════════════
+//  PAGINATION HELPER
+// ═══════════════════════════════════════════════════════════
+function buildPagination(containerId, total, perPage, currentPage, onPageChange) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const totalPages = Math.ceil(total / perPage);
+    if (totalPages <= 1) { container.innerHTML = ''; return; }
 
-<!-- MODAL: QR Enlarged -->
-<div id="qrEnlargedModal" class="modal">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-hdr">
-      <div class="modal-ttl">QR Code</div>
-      <button class="modal-close" onclick="closeModal('qrEnlargedModal')">×</button>
-    </div>
-    <div class="modal-body" style="text-align:center;padding:1.5rem;">
-      <img id="enlargedQRImage" src="" alt="QR Code" style="max-width:100%;border:3px solid var(--gold);border-radius:12px;">
-    </div>
-  </div>
-</div>
+    let html = '';
+    // Prev arrow
+    html += `<button class="pg-btn" ${currentPage === 1 ? 'disabled' : ''}
+        onclick="(${onPageChange.toString()})(${currentPage - 1})">&#8249;</button>`;
 
-<!-- MODAL: Schedule Click Details -->
-<div id="detailsModal" class="modal">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-hdr">
-      <div class="modal-ttl">Class Details</div>
-      <button class="modal-close" onclick="closeModal('detailsModal')">×</button>
-    </div>
-    <div class="modal-body" id="modalBody"></div>
-  </div>
-</div>
+    // Page numbers — show at most 5 around current
+    const range = [];
+    for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+            range.push(i);
+        }
+    }
+    let prev = null;
+    range.forEach(i => {
+        if (prev !== null && i - prev > 1) html += `<span class="pg-info">…</span>`;
+        html += `<button class="pg-btn ${i === currentPage ? 'active' : ''}"
+            onclick="(${onPageChange.toString()})(${i})">${i}</button>`;
+        prev = i;
+    });
 
-<!-- MODAL: Add Student -->
-<div id="addStudentModal" class="modal">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-hdr">
-      <div class="modal-ttl">Add New Student</div>
-      <button class="modal-close" onclick="closeModal('addStudentModal')">×</button>
-    </div>
-    <div class="modal-scroll">
-      <div class="add-stu-form">
-        <div class="afs-row">
-          <label>Student ID</label>
-          <input type="text" id="newStuId" placeholder="e.g. 2024-00099" autocomplete="off">
-        </div>
-        <div class="afs-row">
-          <label>Full Name <span class="afs-hint">(Last, First Middle)</span></label>
-          <input type="text" id="newStuName" placeholder="e.g. DELA CRUZ, Juan Santos" autocomplete="off">
-        </div>
-        <div class="afs-row">
-          <label>Section</label>
-          <select id="newStuSection">
-            <option value="">Select section…</option>
-            <option value="Sec A">Sec A</option>
-            <option value="Sec B">Sec B</option>
-            <option value="Sec C">Sec C</option>
-          </select>
-        </div>
-        <div class="afs-row">
-          <label>Subjects Enrolled</label>
-          <div class="subj-checks" id="newStuSubjects">
-            <label class="subj-check-label" onclick="toggleSubjCheck(this)">
-              <input type="checkbox" value="Math"> Math
-            </label>
-            <label class="subj-check-label" onclick="toggleSubjCheck(this)">
-              <input type="checkbox" value="English"> English
-            </label>
-            <label class="subj-check-label" onclick="toggleSubjCheck(this)">
-              <input type="checkbox" value="Science"> Science
-            </label>
-            <label class="subj-check-label" onclick="toggleSubjCheck(this)">
-              <input type="checkbox" value="Filipino"> Filipino
-            </label>
-          </div>
-        </div>
-        <div style="display:flex;gap:0.6rem;margin-top:1rem;">
-          <button class="btn btn-primary btn-full" onclick="submitAddStudent()">
-            ✓ &nbsp;Add Student
-          </button>
-          <button class="btn btn-secondary" style="min-width:90px;justify-content:center;" onclick="closeModal('addStudentModal')">
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+    // Next arrow
+    html += `<button class="pg-btn" ${currentPage === totalPages ? 'disabled' : ''}
+        onclick="(${onPageChange.toString()})(${currentPage + 1})">&#8250;</button>`;
 
-<!-- MODAL: Student Details (view from Student List) -->
-<div id="studentDetailModal" class="modal">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-hdr">
-      <div class="modal-ttl">Student Details</div>
-      <button class="modal-close" onclick="closeModal('studentDetailModal')">×</button>
-    </div>
-    <div class="modal-body" id="studentDetailBody"></div>
-  </div>
-</div>
+    container.innerHTML = html;
+}
 
-<script src="auth.js"></script>
-<script src="students-data.js"></script>
-<script src="faculty-mobile.js"></script>
-<div id="toast-container"></div>
-</body>
-</html>
+
+// ═══════════════════════════════════════════════════════════
+//  SCAN / REPORTS  (with pagination)
+// ═══════════════════════════════════════════════════════════
+const REPORT_PER_PAGE = 5;
+let _reportPage    = 1;
+let _filteredScans = [];
+
+function refreshScanPreview() {
+    _reportPage = 1;
+    _rebuildScanTable();
+}
+
+function _rebuildScanTable() {
+    if (typeof RECENT_SCANS === 'undefined') return;
+
+    const typeVal = document.getElementById('rptType').value;
+    const subjVal = document.getElementById('rptSubject').value;
+    const secVal  = document.getElementById('rptSection').value;
+
+    _filteredScans = RECENT_SCANS.filter(r => {
+        const okType = !typeVal || r.status  === typeVal;
+        const okSubj = !subjVal || r.subject === subjVal;
+        const okSec  = !secVal  || r.section === secVal;
+        return okType && okSubj && okSec;
+    });
+
+    const parts = [];
+    if (typeVal) parts.push(typeVal);
+    if (subjVal) parts.push(subjVal);
+    if (secVal)  parts.push(secVal);
+    document.getElementById('scanPreviewLabel').textContent =
+        (parts.length ? parts.join(' · ') : 'All records') + ' · Feb 2026';
+
+    const start     = (_reportPage - 1) * REPORT_PER_PAGE;
+    const paginated = _filteredScans.slice(start, start + REPORT_PER_PAGE);
+    const tbody     = document.getElementById('scanPreviewBody');
+    tbody.innerHTML = '';
+
+    if (!_filteredScans.length) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#bbb;font-style:italic;padding:1.2rem;">No records match the selected filters.</td></tr>';
+    } else {
+        paginated.forEach(r => {
+            const statusCls = r.status === 'Present' ? 'Present' : r.status === 'Late' ? 'Late' : 'Absent';
+            const tr = document.createElement('tr');
+            tr.innerHTML =
+                // Col 1: ID + Last name + Section stacked
+                '<td>' +
+                  '<div class="rpt-student-id">' + r.id + '</div>' +
+                  '<div class="rpt-student-name">' + r.name.split(',')[0] + (r.name.includes(',') ? ',' + r.name.split(',').slice(1).join(',') : '') + '</div>' +
+                  '<div class="rpt-student-sec">' + r.section + '</div>' +
+                '</td>' +
+                // Col 2: Subject
+                '<td style="font-size:.74rem;font-weight:600;">' + r.subject + '</td>' +
+                // Col 3: Time + Status badge
+                '<td>' +
+                  '<div style="font-size:.74rem;font-weight:700;">' + (r.timeIn || '—') + '</div>' +
+                  '<span class="rpt-status ' + statusCls + '">' + r.status + '</span>' +
+                '</td>';
+            tbody.appendChild(tr);
+        });
+    }
+
+    const shown = Math.min(start + REPORT_PER_PAGE, _filteredScans.length);
+    document.getElementById('scanShownCount').textContent = _filteredScans.length ? shown : 0;
+    document.getElementById('scanTotalCount').textContent = RECENT_SCANS.length;
+
+    buildPagination('reportPagination', _filteredScans.length, REPORT_PER_PAGE, _reportPage, function(p) {
+        _reportPage = p;
+        _rebuildScanTable();
+    });
+}
+
+function filterScanSearch() {
+    const q    = document.getElementById('scanSearch').value.toUpperCase();
+    const rows = document.querySelectorAll('#scanPreviewBody tr');
+    let shown  = 0;
+    rows.forEach(row => {
+        const match = !q || row.textContent.toUpperCase().includes(q);
+        row.style.display = match ? '' : 'none';
+        if (match) shown++;
+    });
+    document.getElementById('scanShownCount').textContent = shown;
+}
+
+function downloadReport() {
+    const subject = document.getElementById('rptSubject').value;
+    const section = document.getElementById('rptSection').value;
+    if (!subject || !section) { showToast('Please select a Subject and Section first.', 'warn'); return; }
+    showToast('Downloading report for ' + subject + ' — ' + section + '…', 'success');
+}
+
+
+// ═══════════════════════════════════════════════════════════
+//  CLASS MODAL
+// ═══════════════════════════════════════════════════════════
+let _currentSubject = '';
+let _currentSection = 'Sec A';
+
+function openClassModal(subjectName) {
+    _currentSubject = subjectName;
+    _currentSection = 'Sec A';
+
+    document.getElementById('classModalTitle').textContent = subjectName;
+
+    const qrData = 'SSC-R-' + subjectName + '-' + Date.now();
+    document.getElementById('classQRCode').src =
+        'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(qrData);
+
+    document.getElementById('sessionClass').textContent   = subjectName;
+    document.getElementById('sessionSection').textContent = _currentSection;
+    document.getElementById('sessionDate').textContent    = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    document.getElementById('sessionTime').textContent    = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+    SSCR_SECTIONS.forEach(sec => {
+        const key = sec.replace(' ', '');
+        document.getElementById('count-' + key).textContent = SSCR_STUDENTS[sec].length;
+        document.getElementById('tab-' + key).classList.remove('active');
+    });
+    document.getElementById('tab-SecA').classList.add('active');
+
+    renderStudentTable(_currentSubject, _currentSection);
+    document.getElementById('classModal').classList.add('show');
+}
+
+function switchSection(sectionLabel) {
+    _currentSection = sectionLabel;
+    document.getElementById('sessionSection').textContent = sectionLabel;
+    SSCR_SECTIONS.forEach(sec => {
+        document.getElementById('tab-' + sec.replace(' ', '')).classList.remove('active');
+    });
+    document.getElementById('tab-' + sectionLabel.replace(' ', '')).classList.add('active');
+    renderStudentTable(_currentSubject, _currentSection);
+}
+
+function renderStudentTable(subject, section) {
+    const students = SSCR_STUDENTS[section];
+    const tbody    = document.getElementById('studentListBody');
+    tbody.innerHTML = '';
+
+    let present = 0, absent = 0, late = 0;
+
+    students.forEach((s, idx) => {
+        const rec    = attendanceDB[subject][section][s.id];
+        const status = rec.status || '';
+        let timeDisplay = '';
+        if (status === 'Absent') timeDisplay = '—';
+        else if (status === 'Present' || status === 'Late') timeDisplay = rec.timeIn || '—';
+        if (status === 'Present') present++;
+        else if (status === 'Absent') absent++;
+        else if (status === 'Late') late++;
+
+        const statusClass = 'status-' + (status || 'unmarked');
+        const tr = document.createElement('tr');
+        tr.innerHTML =
+            '<td style="color:#999;font-size:.78rem;">' + (idx + 1) + '</td>' +
+            '<td style="font-weight:700;font-size:.75rem;color:#555;">' + s.id + '</td>' +
+            '<td style="font-size:.8rem;">' + s.name + '</td>' +
+            '<td style="font-size:.8rem;color:#555;">' + timeDisplay + '</td>' +
+            '<td><select class="status-sel ' + statusClass + '" ' +
+                'onchange="updateStatus(\'' + subject + '\',\'' + section + '\',\'' + s.id + '\', this)">' +
+                '<option value=""'         + (!status             ? ' selected' : '') + '>— Mark —</option>' +
+                '<option value="Present"'  + (status === 'Present' ? ' selected' : '') + '>Present</option>' +
+                '<option value="Late"'     + (status === 'Late'    ? ' selected' : '') + '>Late</option>' +
+                '<option value="Absent"'   + (status === 'Absent'  ? ' selected' : '') + '>Absent</option>' +
+            '</select></td>';
+        tbody.appendChild(tr);
+    });
+
+    document.getElementById('totalStudents').textContent = students.length;
+    document.getElementById('presentCount').textContent  = present;
+    document.getElementById('absentCount').textContent   = absent;
+    document.getElementById('lateCount').textContent     = late;
+}
+
+function updateStatus(subject, section, studentId, selectEl) {
+    const newStatus = selectEl.value;
+    const rec = attendanceDB[subject][section][studentId];
+    rec.status = newStatus;
+    if (newStatus === 'Present' || newStatus === 'Late') {
+        if (!rec.timeIn) rec.timeIn = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    } else if (newStatus === 'Absent') {
+        rec.timeIn = '';
+    }
+    selectEl.className = 'status-sel status-' + (newStatus || 'unmarked');
+    renderStudentTable(subject, section);
+    if (newStatus) showToast(studentId + ' marked as ' + newStatus + '.', newStatus === 'Present' ? 'success' : newStatus === 'Late' ? 'warn' : 'error', 2000);
+}
+
+function enlargeQR() {
+    document.getElementById('enlargedQRImage').src = document.getElementById('classQRCode').src;
+    document.getElementById('qrEnlargedModal').classList.add('show');
+}
+
+
+// ═══════════════════════════════════════════════════════════
+//  STUDENT LIST  (with pagination + add student)
+// ═══════════════════════════════════════════════════════════
+const ROSTER_PER_PAGE = 15;
+let _rosterPage     = 1;
+let _customStudents = [];   // students added via the Add Student form
+
+function _getAllRosterStudents() {
+    const base = (typeof getAllStudents === 'function') ? getAllStudents() : [];
+    return [...base, ..._customStudents];
+}
+
+function loadRoster() {
+    _rosterPage = 1;
+    _rebuildRosterTable();
+}
+
+function _rebuildRosterTable() {
+    const search    = (document.getElementById('rosterSearch').value || '').toUpperCase();
+    const secFilter = document.getElementById('rosterSectionFilter').value;
+
+    const all = _getAllRosterStudents().filter(s => {
+        const text  = (s.id + ' ' + s.name + ' ' + s.section).toUpperCase();
+        const okSrc = !search    || text.includes(search);
+        const okSec = !secFilter || s.section === secFilter;
+        return okSrc && okSec;
+    });
+
+    const total     = all.length;
+    const start     = (_rosterPage - 1) * ROSTER_PER_PAGE;
+    const paginated = all.slice(start, start + ROSTER_PER_PAGE);
+
+    document.getElementById('rosterTotalCount').textContent = total;
+    document.getElementById('rosterShownCount').textContent = total;
+
+    const tbody = document.getElementById('rosterTableBody');
+    tbody.innerHTML = '';
+
+    if (!paginated.length) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#bbb;font-style:italic;padding:1.2rem;">No students found.</td></tr>';
+    } else {
+        paginated.forEach((s, idx) => {
+            const tr = document.createElement('tr');
+            // Store student data as JSON on the row for the detail modal
+            const safeId = s.id.replace(/'/g, "\\'");
+            tr.innerHTML =
+                '<td style="color:#999;font-size:.72rem;text-align:center;">' + (start + idx + 1) + '</td>' +
+                '<td style="font-weight:700;font-size:.68rem;color:#555;font-family:monospace;">' + s.id + '</td>' +
+                '<td style="font-size:.78rem;font-weight:600;">' + s.name + '</td>' +
+                '<td style="text-align:center;"><button class="btn-view-stu" onclick="openStudentDetail(\'' + safeId + '\')">View</button></td>';
+            tbody.appendChild(tr);
+        });
+    }
+
+    buildPagination('rosterPagination', total, ROSTER_PER_PAGE, _rosterPage, function(p) {
+        _rosterPage = p;
+        _rebuildRosterTable();
+    });
+}
+
+function openStudentDetail(id) {
+    const all = _getAllRosterStudents();
+    const s = all.find(s => s.id === id);
+    if (!s) return;
+    const subjs = Array.isArray(s.subjects) ? s.subjects.join(', ') : (s.subjects || '—');
+    const secBg = s.section === 'Sec A' ? '#e8f5e9;color:#2e7d32'
+                : s.section === 'Sec B' ? '#e3f2fd;color:#1565c0'
+                : '#fff3e0;color:#e65100';
+    document.getElementById('studentDetailBody').innerHTML =
+        '<div style="padding:0.5rem 1rem 1rem;">' +
+        '<div class="sdet-row"><span class="sdet-lbl">Student ID</span><span class="sdet-val" style="font-family:monospace;">' + s.id + '</span></div>' +
+        '<div class="sdet-row"><span class="sdet-lbl">Full Name</span><span class="sdet-val">' + s.name + '</span></div>' +
+        '<div class="sdet-row"><span class="sdet-lbl">Section</span><span class="sdet-val"><span style="background:' + secBg + ';border-radius:20px;padding:3px 14px;font-size:.85rem;font-weight:700;display:inline-block;">' + s.section + '</span></span></div>' +
+        '<div class="sdet-row"><span class="sdet-lbl">Subjects</span><span class="sdet-val">' + subjs + '</span></div>' +
+        '</div>';
+    document.getElementById('studentDetailModal').classList.add('show');
+}
+
+function filterRoster() {
+    _rosterPage = 1;
+    _rebuildRosterTable();
+}
+
+// ── Add Student Modal ─────────────────────────────────────
+function openAddStudentModal() {
+    document.getElementById('newStuId').value      = '';
+    document.getElementById('newStuName').value    = '';
+    document.getElementById('newStuSection').value = '';
+    document.querySelectorAll('#newStuSubjects .subj-check-label').forEach(lbl => {
+        lbl.classList.remove('checked');
+        lbl.querySelector('input').checked = false;
+    });
+    document.getElementById('addStudentModal').classList.add('show');
+}
+
+function toggleSubjCheck(label) {
+    // Let the browser toggle the checkbox first, then sync the visual class
+    setTimeout(function() {
+        const cb = label.querySelector('input[type=checkbox]');
+        if (cb.checked) label.classList.add('checked');
+        else            label.classList.remove('checked');
+    }, 0);
+}
+
+function submitAddStudent() {
+    const id      = document.getElementById('newStuId').value.trim();
+    const name    = document.getElementById('newStuName').value.trim();
+    const section = document.getElementById('newStuSection').value;
+    const subjs   = [];
+    document.querySelectorAll('#newStuSubjects input[type=checkbox]:checked').forEach(cb => subjs.push(cb.value));
+
+    if (!id)           { showToast('Please enter a Student ID.',   'error'); return; }
+    if (!name)         { showToast('Please enter the student name.', 'error'); return; }
+    if (!section)      { showToast('Please select a section.',     'error'); return; }
+    if (!subjs.length) { showToast('Select at least one subject.', 'warn');  return; }
+
+    // Duplicate ID check
+    if (_getAllRosterStudents().find(s => s.id === id)) {
+        showToast('Student ID "' + id + '" already exists.', 'error');
+        return;
+    }
+
+    _customStudents.push({ id, name, section, subjects: subjs });
+    closeModal('addStudentModal');
+    _rosterPage = 1;
+    _rebuildRosterTable();
+    showToast(name + ' added successfully!', 'success');
+}
+
+
+// ═══════════════════════════════════════════════════════════
+//  SCHEDULE CLICK
+// ═══════════════════════════════════════════════════════════
+function viewClassDetails(classCode, day, time) {
+    const info = CLASS_INFO[classCode] || { name: 'Unknown', room: '—', section: '—' };
+    document.getElementById('modalBody').innerHTML =
+        '<div class="detail-row"><span class="dr-lbl">Subject</span><span class="dr-val">' + info.name + '</span></div>' +
+        '<div class="detail-row"><span class="dr-lbl">Section</span><span class="dr-val">' + info.section + '</span></div>' +
+        '<div class="detail-row"><span class="dr-lbl">Day</span><span class="dr-val">' + day + '</span></div>' +
+        '<div class="detail-row"><span class="dr-lbl">Time</span><span class="dr-val">' + time + '</span></div>' +
+        '<div class="detail-row"><span class="dr-lbl">Location</span><span class="dr-val">' + info.room + '</span></div>' +
+        '<div style="margin-top:1rem;">' +
+            '<button class="btn btn-primary btn-full" onclick="openClassModal(\'' + info.name.split(' ')[0] + '\');closeModal(\'detailsModal\')">Start Attendance Session</button>' +
+        '</div>';
+    document.getElementById('detailsModal').classList.add('show');
+}
+
+
+// ═══════════════════════════════════════════════════════════
+//  PAGE NAVIGATION
+// ═══════════════════════════════════════════════════════════
+function goPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    const navBtn = document.getElementById('nav-' + id);
+    if (navBtn) navBtn.classList.add('active');
+}
+
+
+// ═══════════════════════════════════════════════════════════
+//  UTILITIES
+// ═══════════════════════════════════════════════════════════
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+function logout() {
+    showToast('Logging out…', 'info', 1200);
+    setTimeout(function(){ window.location.href = 'login.html'; }, 1300);
+}
+
+window.addEventListener('click', e => {
+    document.querySelectorAll('.modal').forEach(m => { if (e.target === m) m.classList.remove('show'); });
+});
+
+function saveProfile() {
+    var nameEl = document.querySelector('.settings-section .settings-input');
+    var name   = nameEl ? nameEl.value.trim() : '';
+    if (!name) { showToast('Name cannot be empty.', 'error'); return; }
+    var initials  = name.split(' ').map(function(w){ return w[0]; }).filter(Boolean).slice(0,2).join('').toUpperCase();
+    var homeAvatar = document.getElementById('homeAvatar');
+    var homeName   = document.getElementById('homeName');
+    var topAvatar  = document.querySelector('.avatar-sm');
+    if (homeAvatar) homeAvatar.textContent = initials;
+    if (homeName)   homeName.textContent   = name;
+    if (topAvatar)  topAvatar.textContent  = initials;
+    showToast('Profile saved successfully!', 'success');
+}
+
+
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', function() {
+    renderNotifications();
+    refreshScanPreview();
+});
