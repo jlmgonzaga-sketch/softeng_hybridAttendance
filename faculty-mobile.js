@@ -366,14 +366,14 @@ function _rebuildRosterTable() {
     } else {
         paginated.forEach((s, idx) => {
             const subjs = s.subjects || (typeof SSCR_SUBJECTS !== 'undefined' ? SSCR_SUBJECTS : []);
-            const subjectTags = subjs.map(sub => '<span class="subj-tag">' + sub + '</span>').join('');
+            const subjText = Array.isArray(subjs) ? subjs.join(', ') : subjs;
             const tr = document.createElement('tr');
             tr.innerHTML =
                 '<td style="color:#999;font-size:.75rem;">' + (start + idx + 1) + '</td>' +
                 '<td style="font-weight:700;font-size:.72rem;color:#555;">' + s.id + '</td>' +
                 '<td style="font-size:.8rem;">' + s.name + '</td>' +
                 '<td><span style="display:inline-block;background:#eee;border-radius:20px;padding:2px 8px;font-size:.72rem;font-weight:700;">' + s.section + '</span></td>' +
-                '<td>' + subjectTags + '</td>';
+                '<td class="subj-cell">' + subjText + '</td>';
             tbody.appendChild(tr);
         });
     }
