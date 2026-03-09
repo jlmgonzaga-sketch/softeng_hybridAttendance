@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>SSC-R Student — Mobile</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
-<script src="students-data.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <link rel="stylesheet" href="student-mobile.css">
 <style>
@@ -81,6 +80,7 @@
     <div class="stat-card sc-hist" onclick="openModal('attendanceHistoryModal')" title="View Full History">
       <div class="stat-label-top">Att. History</div>
       <div class="stat-value">View<br>All</div>
+      <div class="stat-hist-sub">Feb 2026 →</div>
     </div>
 
     <!-- 2. Attendance Rate -->
@@ -337,4 +337,37 @@
         <div class="qr-corners">
           <div class="qr-corner tl"></div><div class="qr-corner tr"></div>
           <div class="qr-corner bl"></div><div class="qr-corner br"></div>
-          <div id="
+          <div id="scanLine" class="qr-scan-line"></div>
+        </div>
+      </div>
+      <div id="qrStatusMsg" class="qr-status">Starting camera...</div>
+      <div id="qrResultBox" class="qr-result" style="display:none;">
+        <div class="qr-result-title">✅ QR Code Scanned!</div>
+        <div id="qrResultText" class="qr-result-text"></div>
+      </div>
+      <button class="btn btn-danger btn-full" style="margin-top:.5rem" onclick="closeQRModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Attendance Detail -->
+<div id="detailsModal" class="modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-hdr"><div class="modal-ttl">Attendance Details</div><button class="modal-close" onclick="closeModal('detailsModal')">×</button></div>
+    <div class="modal-body" id="detailsModalBody"></div>
+  </div>
+</div>
+
+<!-- MODAL: Class Details -->
+<div id="classModal" class="modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-hdr"><div class="modal-ttl">Class Details</div><button class="modal-close" onclick="closeModal('classModal')">×</button></div>
+    <div class="modal-body" id="classModalBody"></div>
+  </div>
+</div>
+
+<script src="student-mobile.js"></script>
+</body>
+</html>
