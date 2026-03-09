@@ -170,12 +170,12 @@ body::before {
 
 .section-hdr {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 0.6rem 0.85rem;
-  background: rgba(255,255,255,0.97);
+  padding: 0.65rem 0.85rem;
+  background: #ffffff;
   border: 2px solid var(--gold);
-  border-bottom: none;
+  border-bottom: 1px solid rgba(255,215,0,0.35);
   border-radius: 10px 10px 0 0;
-  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   margin-bottom: 0;
 }
 .section-title  { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--primary); }
@@ -204,8 +204,8 @@ body::before {
   border-top: none;
   border-radius: 0 0 10px 10px;
   overflow: hidden;
-  background: rgba(255,255,255,0.97);
-  backdrop-filter: blur(8px);
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
 .att-card {
