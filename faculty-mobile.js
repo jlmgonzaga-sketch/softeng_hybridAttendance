@@ -4,7 +4,7 @@
 //  Depends on: students-data.js, faculty-scans.js
 // ═══════════════════════════════════════════════════════════
 
-// ── Notifications ─────────────────────────────────────────
+// ── Auth ──────────────────────────────────────────────────
 requireAuth('faculty');
 
 // ── Toast / Snackbar System ──────────────────────────────
@@ -50,6 +50,7 @@ const CLASS_INFO = {
 };
 
 
+// ── Notifications ─────────────────────────────────────────
 const NOTIFICATIONS = [
     { id:1, unread:true,  type:'alert',   avatar:'SB', avatarColor:'#c62828,#ffcdd2', text:'<strong>3 students</strong> from Sec B exceeded absences in <strong>Math</strong>.', time:'2 mins ago' },
     { id:2, unread:true,  type:'info',    avatar:'SY', avatarColor:'#1565c0,#bbdefb', text:'<strong>Attendance report</strong> for English — Sec A generated successfully.', time:'15 mins ago' },
@@ -67,10 +68,8 @@ function renderNotifications() {
     badge.textContent    = unread;
     badge.style.display  = unread > 0 ? 'flex' : 'none';
     list.innerHTML = _notifications.map(n => {
-        var cols = (n.avatarColor || '#555,#eee').split(',');
-        var avatarStyle = 'background:' + cols[1] + ';color:' + cols[0] + ';border:2px solid ' + cols[0] + ';';
         return `<div class="nd-item ${n.unread ? 'unread' : ''}" onclick="markRead(${n.id})">
-            <div class="nd-avatar" style="${avatarStyle}">${n.avatar || '?'}</div>
+            <div class="nd-avatar ${n.type || ''}">${n.avatar || '?'}</div>
             <div class="nd-body">
                 <div class="nd-text">${n.text}</div>
                 <div class="nd-time">${n.time}</div>
@@ -95,13 +94,64 @@ document.addEventListener('click', e => {
     if (wrapper && !wrapper.contains(e.target)) closeNotifications();
 });
 
-// ── Scan Preview ──────────────────────────────────────────
+
+// ═══════════════════════════════════════════════════════════
+//  PAGINATION HELPER
+// ═══════════════════════════════════════════════════════════
+function buildPagination(containerId, total, perPage, currentPage, onPageChange) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const totalPages = Math.ceil(total / perPage);
+    if (totalPages <= 1) { container.innerHTML = ''; return; }
+
+    let html = '';
+    // Prev arrow
+    html += `<button class="pg-btn" ${currentPage === 1 ? 'disabled' : ''}
+        onclick="(${onPageChange.toString()})(${currentPage - 1})">&#8249;</button>`;
+
+    // Page numbers — show at most 5 around current
+    const range = [];
+    for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+            range.push(i);
+        }
+    }
+    let prev = null;
+    range.forEach(i => {
+        if (prev !== null && i - prev > 1) html += `<span class="pg-info">…</span>`;
+        html += `<button class="pg-btn ${i === currentPage ? 'active' : ''}"
+            onclick="(${onPageChange.toString()})(${i})">${i}</button>`;
+        prev = i;
+    });
+
+    // Next arrow
+    html += `<button class="pg-btn" ${currentPage === totalPages ? 'disabled' : ''}
+        onclick="(${onPageChange.toString()})(${currentPage + 1})">&#8250;</button>`;
+
+    container.innerHTML = html;
+}
+
+
+// ═══════════════════════════════════════════════════════════
+//  SCAN / REPORTS  (with pagination)
+// ═══════════════════════════════════════════════════════════
+const REPORT_PER_PAGE = 10;
+let _reportPage    = 1;
+let _filteredScans = [];
+
 function refreshScanPreview() {
+    _reportPage = 1;
+    _rebuildScanTable();
+}
+
+function _rebuildScanTable() {
+    if (typeof RECENT_SCANS === 'undefined') return;
+
     const typeVal = document.getElementById('rptType').value;
     const subjVal = document.getElementById('rptSubject').value;
     const secVal  = document.getElementById('rptSection').value;
 
-    const filtered = RECENT_SCANS.filter(r => {
+    _filteredScans = RECENT_SCANS.filter(r => {
         const okType = !typeVal || r.status  === typeVal;
         const okSubj = !subjVal || r.subject === subjVal;
         const okSec  = !secVal  || r.section === secVal;
@@ -115,13 +165,15 @@ function refreshScanPreview() {
     document.getElementById('scanPreviewLabel').textContent =
         (parts.length ? parts.join(' · ') : 'All records') + ' · Feb 2026';
 
-    const tbody = document.getElementById('scanPreviewBody');
+    const start     = (_reportPage - 1) * REPORT_PER_PAGE;
+    const paginated = _filteredScans.slice(start, start + REPORT_PER_PAGE);
+    const tbody     = document.getElementById('scanPreviewBody');
     tbody.innerHTML = '';
 
-    if (!filtered.length) {
+    if (!_filteredScans.length) {
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#bbb;font-style:italic;padding:1.2rem;">No records match the selected filters.</td></tr>';
     } else {
-        filtered.forEach(r => {
+        paginated.forEach(r => {
             const bs = r.status === 'Present'
                 ? 'background:rgba(255,215,0,.15);color:#DAA520;border:1.5px solid #FFD700;'
                 : r.status === 'Late'
@@ -139,14 +191,20 @@ function refreshScanPreview() {
         });
     }
 
-    document.getElementById('scanShownCount').textContent = filtered.length;
-    document.getElementById('scanTotalCount').textContent  = RECENT_SCANS.length;
+    const shown = Math.min(start + REPORT_PER_PAGE, _filteredScans.length);
+    document.getElementById('scanShownCount').textContent = _filteredScans.length ? shown : 0;
+    document.getElementById('scanTotalCount').textContent = RECENT_SCANS.length;
+
+    buildPagination('reportPagination', _filteredScans.length, REPORT_PER_PAGE, _reportPage, function(p) {
+        _reportPage = p;
+        _rebuildScanTable();
+    });
 }
 
 function filterScanSearch() {
-    const q = document.getElementById('scanSearch').value.toUpperCase();
+    const q    = document.getElementById('scanSearch').value.toUpperCase();
     const rows = document.querySelectorAll('#scanPreviewBody tr');
-    let shown = 0;
+    let shown  = 0;
     rows.forEach(row => {
         const match = !q || row.textContent.toUpperCase().includes(q);
         row.style.display = match ? '' : 'none';
@@ -155,7 +213,6 @@ function filterScanSearch() {
     document.getElementById('scanShownCount').textContent = shown;
 }
 
-// ── Download Report ───────────────────────────────────────
 function downloadReport() {
     const subject = document.getElementById('rptSubject').value;
     const section = document.getElementById('rptSection').value;
@@ -163,7 +220,10 @@ function downloadReport() {
     showToast('Downloading report for ' + subject + ' — ' + section + '…', 'success');
 }
 
-// ── Class Modal ───────────────────────────────────────────
+
+// ═══════════════════════════════════════════════════════════
+//  CLASS MODAL
+// ═══════════════════════════════════════════════════════════
 let _currentSubject = '';
 let _currentSection = 'Sec A';
 
@@ -262,44 +322,123 @@ function enlargeQR() {
     document.getElementById('qrEnlargedModal').classList.add('show');
 }
 
-// ── Student Roster ────────────────────────────────────────
+
+// ═══════════════════════════════════════════════════════════
+//  STUDENT LIST  (with pagination + add student)
+// ═══════════════════════════════════════════════════════════
+const ROSTER_PER_PAGE = 15;
+let _rosterPage     = 1;
+let _customStudents = [];   // students added via the Add Student form
+
+function _getAllRosterStudents() {
+    const base = (typeof getAllStudents === 'function') ? getAllStudents() : [];
+    return [...base, ..._customStudents];
+}
+
 function loadRoster() {
+    _rosterPage = 1;
+    _rebuildRosterTable();
+}
+
+function _rebuildRosterTable() {
+    const search    = (document.getElementById('rosterSearch').value || '').toUpperCase();
+    const secFilter = document.getElementById('rosterSectionFilter').value;
+
+    const all = _getAllRosterStudents().filter(s => {
+        const text  = (s.id + ' ' + s.name + ' ' + s.section).toUpperCase();
+        const okSrc = !search    || text.includes(search);
+        const okSec = !secFilter || s.section === secFilter;
+        return okSrc && okSec;
+    });
+
+    const total     = all.length;
+    const start     = (_rosterPage - 1) * ROSTER_PER_PAGE;
+    const paginated = all.slice(start, start + ROSTER_PER_PAGE);
+
+    document.getElementById('rosterTotalCount').textContent = total;
+    document.getElementById('rosterShownCount').textContent = total;
+
     const tbody = document.getElementById('rosterTableBody');
     tbody.innerHTML = '';
-    const allStudents = getAllStudents();
-    document.getElementById('rosterTotalCount').textContent = allStudents.length;
-    document.getElementById('rosterShownCount').textContent = allStudents.length;
-    allStudents.forEach((s, idx) => {
-        const tr = document.createElement('tr');
-        const subjectTags = SSCR_SUBJECTS.map(sub => '<span class="subj-tag">' + sub + '</span>').join('');
-        tr.innerHTML =
-            '<td style="color:#999;font-size:.75rem;">' + (idx + 1) + '</td>' +
-            '<td style="font-weight:700;font-size:.72rem;color:#555;">' + s.id + '</td>' +
-            '<td style="font-size:.8rem;">' + s.name + '</td>' +
-            '<td><span style="display:inline-block;background:#eee;border-radius:20px;padding:2px 8px;font-size:.72rem;font-weight:700;">' + s.section + '</span></td>' +
-            '<td>' + subjectTags + '</td>';
-        tbody.appendChild(tr);
+
+    if (!paginated.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#bbb;font-style:italic;padding:1.2rem;">No students found.</td></tr>';
+    } else {
+        paginated.forEach((s, idx) => {
+            const subjs = s.subjects || (typeof SSCR_SUBJECTS !== 'undefined' ? SSCR_SUBJECTS : []);
+            const subjectTags = subjs.map(sub => '<span class="subj-tag">' + sub + '</span>').join('');
+            const tr = document.createElement('tr');
+            tr.innerHTML =
+                '<td style="color:#999;font-size:.75rem;">' + (start + idx + 1) + '</td>' +
+                '<td style="font-weight:700;font-size:.72rem;color:#555;">' + s.id + '</td>' +
+                '<td style="font-size:.8rem;">' + s.name + '</td>' +
+                '<td><span style="display:inline-block;background:#eee;border-radius:20px;padding:2px 8px;font-size:.72rem;font-weight:700;">' + s.section + '</span></td>' +
+                '<td>' + subjectTags + '</td>';
+            tbody.appendChild(tr);
+        });
+    }
+
+    buildPagination('rosterPagination', total, ROSTER_PER_PAGE, _rosterPage, function(p) {
+        _rosterPage = p;
+        _rebuildRosterTable();
     });
 }
 
 function filterRoster() {
-    const search    = document.getElementById('rosterSearch').value.toUpperCase();
-    const secFilter = document.getElementById('rosterSectionFilter').value;
-    const rows      = document.querySelectorAll('#rosterTableBody tr');
-    let shown = 0;
-    rows.forEach(row => {
-        const text    = row.textContent.toUpperCase();
-        const secCell = row.cells[3] ? row.cells[3].textContent.trim() : '';
-        if ((!search || text.includes(search)) && (!secFilter || secCell.includes(secFilter))) {
-            row.style.display = ''; shown++;
-        } else {
-            row.style.display = 'none';
-        }
-    });
-    document.getElementById('rosterShownCount').textContent = shown;
+    _rosterPage = 1;
+    _rebuildRosterTable();
 }
 
-// ── Schedule Click ────────────────────────────────────────
+// ── Add Student Modal ─────────────────────────────────────
+function openAddStudentModal() {
+    document.getElementById('newStuId').value      = '';
+    document.getElementById('newStuName').value    = '';
+    document.getElementById('newStuSection').value = '';
+    document.querySelectorAll('#newStuSubjects .subj-check-label').forEach(lbl => {
+        lbl.classList.remove('checked');
+        lbl.querySelector('input').checked = false;
+    });
+    document.getElementById('addStudentModal').classList.add('show');
+}
+
+function toggleSubjCheck(label) {
+    // Let the browser toggle the checkbox first, then sync the visual class
+    setTimeout(function() {
+        const cb = label.querySelector('input[type=checkbox]');
+        if (cb.checked) label.classList.add('checked');
+        else            label.classList.remove('checked');
+    }, 0);
+}
+
+function submitAddStudent() {
+    const id      = document.getElementById('newStuId').value.trim();
+    const name    = document.getElementById('newStuName').value.trim();
+    const section = document.getElementById('newStuSection').value;
+    const subjs   = [];
+    document.querySelectorAll('#newStuSubjects input[type=checkbox]:checked').forEach(cb => subjs.push(cb.value));
+
+    if (!id)           { showToast('Please enter a Student ID.',   'error'); return; }
+    if (!name)         { showToast('Please enter the student name.', 'error'); return; }
+    if (!section)      { showToast('Please select a section.',     'error'); return; }
+    if (!subjs.length) { showToast('Select at least one subject.', 'warn');  return; }
+
+    // Duplicate ID check
+    if (_getAllRosterStudents().find(s => s.id === id)) {
+        showToast('Student ID "' + id + '" already exists.', 'error');
+        return;
+    }
+
+    _customStudents.push({ id, name, section, subjects: subjs });
+    closeModal('addStudentModal');
+    _rosterPage = 1;
+    _rebuildRosterTable();
+    showToast(name + ' added successfully!', 'success');
+}
+
+
+// ═══════════════════════════════════════════════════════════
+//  SCHEDULE CLICK
+// ═══════════════════════════════════════════════════════════
 function viewClassDetails(classCode, day, time) {
     const info = CLASS_INFO[classCode] || { name: 'Unknown', room: '—', section: '—' };
     document.getElementById('modalBody').innerHTML =
@@ -314,7 +453,10 @@ function viewClassDetails(classCode, day, time) {
     document.getElementById('detailsModal').classList.add('show');
 }
 
-// ── Page Navigation ───────────────────────────────────────
+
+// ═══════════════════════════════════════════════════════════
+//  PAGE NAVIGATION
+// ═══════════════════════════════════════════════════════════
 function goPage(id) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -323,8 +465,12 @@ function goPage(id) {
     if (navBtn) navBtn.classList.add('active');
 }
 
-// ── Utilities ─────────────────────────────────────────────
+
+// ═══════════════════════════════════════════════════════════
+//  UTILITIES
+// ═══════════════════════════════════════════════════════════
 function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
 function logout() {
     showToast('Logging out…', 'info', 1200);
     setTimeout(function(){ window.location.href = 'login.html'; }, 1300);
@@ -334,23 +480,25 @@ window.addEventListener('click', e => {
     document.querySelectorAll('.modal').forEach(m => { if (e.target === m) m.classList.remove('show'); });
 });
 
-// ── Init ──────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-    renderNotifications();
-    refreshScanPreview();
-});
-// ── Profile Save (updates home strip) ────────────────────
 function saveProfile() {
     var nameEl = document.querySelector('.settings-section .settings-input');
-    var name = nameEl ? nameEl.value.trim() : '';
+    var name   = nameEl ? nameEl.value.trim() : '';
     if (!name) { showToast('Name cannot be empty.', 'error'); return; }
-    var initials = name.split(' ').map(function(w){ return w[0]; }).filter(Boolean).slice(0,2).join('').toUpperCase();
+    var initials  = name.split(' ').map(function(w){ return w[0]; }).filter(Boolean).slice(0,2).join('').toUpperCase();
     var homeAvatar = document.getElementById('homeAvatar');
     var homeName   = document.getElementById('homeName');
-    var homeRole   = document.getElementById('homeRole');
     var topAvatar  = document.querySelector('.avatar-sm');
     if (homeAvatar) homeAvatar.textContent = initials;
     if (homeName)   homeName.textContent   = name;
     if (topAvatar)  topAvatar.textContent  = initials;
     showToast('Profile saved successfully!', 'success');
 }
+
+
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', function() {
+    renderNotifications();
+    refreshScanPreview();
+});
