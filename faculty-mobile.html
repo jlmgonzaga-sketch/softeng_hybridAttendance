@@ -108,10 +108,14 @@
       <div class="scan-table-wrap">
         <table class="scan-table">
           <thead>
-            <tr><th>ID</th><th>Name</th><th>Subject</th><th>Sec</th><th>Time In</th><th>Status</th></tr>
+            <tr>
+              <th class="rpt-col-info">Student</th>
+              <th class="rpt-col-subj">Subject</th>
+              <th class="rpt-col-time">Time · Status</th>
+            </tr>
           </thead>
           <tbody id="scanPreviewBody">
-            <tr><td colspan="6" style="text-align:center;color:#bbb;font-style:italic;padding:1.2rem;">Loading...</td></tr>
+            <tr><td colspan="3" style="text-align:center;color:#bbb;font-style:italic;padding:1.2rem;">Loading...</td></tr>
           </tbody>
         </table>
       </div>
@@ -126,7 +130,6 @@
 <!-- PAGE: SCHEDULE -->
 <div class="page" id="page-schedule">
   <div class="section">
-    <div class="section-hdr"><div class="section-title">Schedule</div></div>
     <div class="sched-outer">
       <div class="sched-grid">
         <div class="sg-hdr">Time</div>
@@ -216,7 +219,7 @@
     </div>
     <div class="stu-table-wrap">
       <table class="stu-table">
-        <thead><tr><th>#</th><th>ID</th><th>Name</th><th>Section</th><th>Subjects</th></tr></thead>
+        <thead><tr><th class="stu-col-num">#</th><th class="stu-col-id">ID</th><th class="stu-col-name">Full Name</th><th class="stu-col-view">Details</th></tr></thead>
         <tbody id="rosterTableBody"></tbody>
       </table>
     </div>
@@ -389,6 +392,18 @@
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- MODAL: Student Details (view from Student List) -->
+<div id="studentDetailModal" class="modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-hdr">
+      <div class="modal-ttl">Student Details</div>
+      <button class="modal-close" onclick="closeModal('studentDetailModal')">×</button>
+    </div>
+    <div class="modal-body" id="studentDetailBody"></div>
   </div>
 </div>
 
