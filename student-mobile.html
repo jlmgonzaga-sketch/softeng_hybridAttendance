@@ -9,6 +9,7 @@
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <link rel="stylesheet" href="student-mobile.css">
 <style>
+/* ── Subject faculty cards ── */
 .sfc-wrap{margin:.35rem 0 0;border:2px solid #FFD700;border-radius:12px;overflow:hidden;background:#fff}
 .sfc-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.7rem;color:#1a1a1a;padding:.3rem .55rem;border-bottom:1.5px solid #FFD700;background:#fffde7}
 .sfc-row{display:flex;align-items:center;justify-content:space-between;gap:.3rem;padding:.28rem .55rem;border-bottom:1px solid rgba(255,215,0,.2)}
@@ -17,11 +18,79 @@
 .sfc-name{font-size:.68rem;font-weight:700;color:#1a1a1a;font-family:'Syne',sans-serif}
 .sfc-info{font-size:.58rem;color:#aaa}
 .sfc-mail{font-size:.58rem;font-weight:600;color:#8B0000!important;text-decoration:none;white-space:nowrap;flex-shrink:0}
+
+/* ── Stats grid — 2×2 matching desktop layout ── */
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .65rem;
+    margin: .75rem 0;
+}
+.stat-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: .9rem 1rem;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid rgba(255,215,0,0.5);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    transition: all 0.2s;
+}
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 4px;
+}
+/* History card — red top bar, clickable */
+.stat-card.sc-hist::before { background: linear-gradient(135deg,#DC143C,#8B0000); }
+.stat-card.sc-hist {
+    cursor: pointer;
+    grid-column: 1 / -1; /* full width — mirrors desktop "first" card */
+}
+.stat-card.sc-hist:active { transform: scale(0.98); }
+
+/* Other cards */
+.stat-card.sc-p::before { background: linear-gradient(135deg,#1a1a1a,#FFD700); }
+.stat-card.sc-s::before { background: linear-gradient(135deg,#FFD700,#FFA500); }
+.stat-card.sc-w::before { background: linear-gradient(135deg,#DC143C,#FFD700); }
+
+.stat-label-top {
+    font-size: .62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: #888;
+    margin-bottom: .25rem;
+}
+.stat-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg,#DC143C,#FFD700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+}
+/* History card value — solid red, smaller to fit "Attendance History" */
+.stat-card.sc-hist .stat-value {
+    font-size: 1.2rem !important;
+    -webkit-text-fill-color: #8B0000 !important;
+    background: none !important;
+    line-height: 1.25;
+}
+.stat-hist-sub {
+    font-size: .7rem;
+    font-weight: 700;
+    color: #DC143C;
+    margin-top: .3rem;
+}
 </style>
 </head>
 <body>
 
-<!-- TOP BAR — notification dropdown is rendered OUTSIDE header below to avoid stacking context -->
+<!-- TOP BAR -->
 <header class="top-bar">
   <img src="sscrmnlofficiallogo.png" alt="SSC-R" class="top-logo">
   <div class="top-right">
@@ -33,7 +102,7 @@
   </div>
 </header>
 
-<!-- NOTIFICATION DROPDOWN — outside header, pure position:fixed, nothing can clip it -->
+<!-- NOTIFICATION DROPDOWN -->
 <div class="notif-dropdown" id="notifDropdown">
   <div class="nd-hdr">
     <span class="nd-title">Notifications</span>
@@ -54,23 +123,34 @@
     <button class="btn-logout" onclick="logout()">Logout</button>
   </div>
 
+  <!-- ── STATS — matches desktop: History · Rate · Attended · Absences ── -->
   <div class="stats-grid">
+
+    <!-- 1. Attendance History — full width, clickable -->
+    <div class="stat-card sc-hist" onclick="openModal('attendanceHistoryModal')" title="View Full History">
+      <div class="stat-label-top">View All Records</div>
+      <div class="stat-value">Attendance<br>History</div>
+      <div class="stat-hist-sub">View All Records →</div>
+    </div>
+
+    <!-- 2. Attendance Rate -->
     <div class="stat-card sc-p">
       <div class="stat-label-top">Att. Rate</div>
-      <div class="stat-value">94.6%</div>
+      <div class="stat-value" id="m-statRate">—</div>
     </div>
+
+    <!-- 3. Classes Attended -->
     <div class="stat-card sc-s">
       <div class="stat-label-top">Attended</div>
-      <div class="stat-value">106</div>
+      <div class="stat-value" id="m-statAttended">—</div>
     </div>
+
+    <!-- 4. Absences -->
     <div class="stat-card sc-w">
       <div class="stat-label-top">Absences</div>
-      <div class="stat-value">6</div>
+      <div class="stat-value" id="m-statAbsent">—</div>
     </div>
-    <div class="stat-card sc-i">
-      <div class="stat-label-top">Late</div>
-      <div class="stat-value">15</div>
-    </div>
+
   </div>
 
   <div class="section" style="margin-top:.75rem;">
@@ -83,6 +163,62 @@
   <div class="spacer"></div>
 </div>
 
+<!-- ══ MODAL: Attendance History ══ -->
+<div id="attendanceHistoryModal" class="modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-hdr">
+      <div class="modal-ttl">Attendance History — Feb 2026</div>
+      <button class="modal-close" onclick="closeModal('attendanceHistoryModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <!-- Summary chips -->
+      <div style="display:flex;gap:.5rem;margin-bottom:.85rem;flex-wrap:wrap;">
+        <div style="flex:1;min-width:80px;padding:.55rem .75rem;border-radius:10px;background:#FFF9E6;border:2px solid #FFD700;text-align:center;">
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:#7A4F00;" id="m-chipPresent">—</div>
+          <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;color:#7A4F00;">Present</div>
+        </div>
+        <div style="flex:1;min-width:80px;padding:.55rem .75rem;border-radius:10px;background:#FFF0F3;border:2px solid #DC143C;text-align:center;">
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:#8B0000;" id="m-chipAbsent">—</div>
+          <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;color:#8B0000;">Absent</div>
+        </div>
+        <div style="flex:1;min-width:80px;padding:.55rem .75rem;border-radius:10px;background:#FFF5E6;border:2px solid #FFA500;text-align:center;">
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:#7A4500;" id="m-chipLate">—</div>
+          <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;color:#7A4500;">Late</div>
+        </div>
+      </div>
+
+      <!-- Tabs: All Records | By Subject -->
+      <div style="display:flex;gap:.4rem;margin-bottom:.75rem;border-bottom:2px solid #FFD700;padding-bottom:.4rem;">
+        <button class="ah-tab active" id="m-tab-records" onclick="mSwitchTab('records',this)">All Records</button>
+        <button class="ah-tab" id="m-tab-breakdown" onclick="mSwitchTab('breakdown',this)">By Subject</button>
+      </div>
+
+      <!-- All Records panel -->
+      <div id="m-panel-records">
+        <div style="max-height:52vh;overflow-y:auto;border:2px solid #FFD700;border-radius:10px;">
+          <table style="width:100%;border-collapse:collapse;background:#fff;">
+            <thead>
+              <tr style="background:#000;">
+                <th style="padding:.5rem .6rem;text-align:left;font-family:'Syne',sans-serif;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#FFD700;border-bottom:2px solid #FFD700;white-space:nowrap;">Subject</th>
+                <th style="padding:.5rem .6rem;text-align:left;font-family:'Syne',sans-serif;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#FFD700;border-bottom:2px solid #FFD700;white-space:nowrap;">Date</th>
+                <th style="padding:.5rem .6rem;text-align:left;font-family:'Syne',sans-serif;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#FFD700;border-bottom:2px solid #FFD700;white-space:nowrap;">Day</th>
+                <th style="padding:.5rem .6rem;text-align:left;font-family:'Syne',sans-serif;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#FFD700;border-bottom:2px solid #FFD700;white-space:nowrap;">Status</th>
+              </tr>
+            </thead>
+            <tbody id="m-ahTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- By Subject panel -->
+      <div id="m-panel-breakdown" style="display:none;">
+        <div id="m-breakdownGrid" style="display:flex;flex-direction:column;gap:.6rem;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ══ PAGE: ATTENDANCE ══ -->
 <div class="page" id="page-attendance">
   <div class="section">
@@ -90,7 +226,6 @@
       <div class="section-title">My Attendance</div>
       <span class="att-count-label" id="attCountLabel"></span>
     </div>
-    <!-- All 3 filters on ONE row -->
     <div class="filter-bar">
       <input type="text" class="search-input" id="attSearch" placeholder="Search…" oninput="renderAttTable()">
       <select class="fsel" id="attStatus" onchange="renderAttTable()">
@@ -119,12 +254,8 @@
     <div class="sched-outer">
       <div class="sched-grid">
         <div class="sg-hdr">Time</div>
-        <div class="sg-hdr">Mon</div>
-        <div class="sg-hdr">Tue</div>
-        <div class="sg-hdr">Wed</div>
-        <div class="sg-hdr">Thu</div>
-        <div class="sg-hdr">Fri</div>
-        <div class="sg-hdr">Sat</div>
+        <div class="sg-hdr">Mon</div><div class="sg-hdr">Tue</div><div class="sg-hdr">Wed</div>
+        <div class="sg-hdr">Thu</div><div class="sg-hdr">Fri</div><div class="sg-hdr">Sat</div>
         <div class="sg-time">07:00</div>
         <div class="sg-cell has-cls" onclick="viewClassDetail('Math','Monday','07:00 AM')"><div class="sg-code">MATH</div><div class="sg-sec">Sec B</div><div class="sg-room">Rm 101</div></div>
         <div class="sg-cell"></div>
@@ -142,35 +273,26 @@
         <div class="sg-time">10:00</div>
         <div class="sg-cell"></div>
         <div class="sg-cell has-cls" onclick="viewClassDetail('Filipino','Tuesday','10:00 AM')"><div class="sg-code">FIL</div><div class="sg-sec">Sec B</div><div class="sg-room">Rm 103</div></div>
-        <div class="sg-cell"></div>
-        <div class="sg-cell"></div>
-        <div class="sg-cell"></div>
-        <div class="sg-cell"></div>
+        <div class="sg-cell"></div><div class="sg-cell"></div><div class="sg-cell"></div><div class="sg-cell"></div>
         <div class="sg-time">13:00</div>
         <div class="sg-cell"></div>
         <div class="sg-cell has-cls" onclick="viewClassDetail('Math','Tuesday','01:00 PM')"><div class="sg-code">MATH</div><div class="sg-sec">Sec B</div><div class="sg-room">Rm 101</div></div>
         <div class="sg-cell"></div>
         <div class="sg-cell has-cls" onclick="viewClassDetail('Math','Thursday','01:00 PM')"><div class="sg-code">MATH</div><div class="sg-sec">Sec B</div><div class="sg-room">Rm 101</div></div>
-        <div class="sg-cell"></div>
-        <div class="sg-cell"></div>
+        <div class="sg-cell"></div><div class="sg-cell"></div>
         <div class="sg-time">14:30</div>
         <div class="sg-cell"></div>
         <div class="sg-cell has-cls" onclick="viewClassDetail('English','Tuesday','02:30 PM')"><div class="sg-code">ENG</div><div class="sg-sec">Sec B</div><div class="sg-room">Rm 102</div></div>
         <div class="sg-cell"></div>
         <div class="sg-cell has-cls" onclick="viewClassDetail('English','Thursday','02:30 PM')"><div class="sg-code">ENG</div><div class="sg-sec">Sec B</div><div class="sg-room">Rm 102</div></div>
-        <div class="sg-cell"></div>
-        <div class="sg-cell"></div>
+        <div class="sg-cell"></div><div class="sg-cell"></div>
         <div class="sg-time">16:00</div>
         <div class="sg-cell has-cls" onclick="viewClassDetail('English','Monday','04:00 PM')"><div class="sg-code">ENG</div><div class="sg-sec">Sec B</div><div class="sg-room">Rm 102</div></div>
-        <div class="sg-cell"></div>
-        <div class="sg-cell"></div>
-        <div class="sg-cell"></div>
+        <div class="sg-cell"></div><div class="sg-cell"></div><div class="sg-cell"></div>
         <div class="sg-cell has-cls" onclick="viewClassDetail('Filipino','Friday','04:00 PM')"><div class="sg-code">FIL</div><div class="sg-sec">Sec B</div><div class="sg-room">Rm 103</div></div>
         <div class="sg-cell"></div>
       </div>
     </div>
-
-    <!-- Subject faculty cards below schedule -->
     <div class="sfc-wrap">
       <div class="sfc-title">Enrolled Subjects</div>
       <div class="sfc-row"><div class="sfc-left"><div class="sfc-name">Mathematics</div><div class="sfc-info">R. Doneza · Rm 101 · 07:00 AM</div></div><a href="mailto:rdoneza@sscr.edu.ph" class="sfc-mail">rdoneza@sscr.edu.ph</a></div>
@@ -274,22 +396,6 @@
         <div id="qrResultText" class="qr-result-text"></div>
       </div>
       <button class="btn btn-danger btn-full" style="margin-top:.5rem" onclick="closeQRModal()">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: Subjects -->
-<div id="subjectsModal" class="modal">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-hdr"><div class="modal-ttl">Enrolled Subjects</div><button class="modal-close" onclick="closeModal('subjectsModal')">×</button></div>
-    <div class="modal-body">
-      <div class="subject-list">
-        <div class="subject-item"><div class="subj-dot" style="background:#6366f1"></div><div class="subj-info"><div class="subj-name">Mathematics</div><div class="subj-meta">Mr. Rheymard Doneza · Room 101</div></div></div>
-        <div class="subject-item"><div class="subj-dot" style="background:#0ea5e9"></div><div class="subj-info"><div class="subj-name">English</div><div class="subj-meta">Mr. Gary Soriano · Room 102</div></div></div>
-        <div class="subject-item"><div class="subj-dot" style="background:#10b981"></div><div class="subj-info"><div class="subj-name">Science</div><div class="subj-meta">Ms. Agnes Bernal · Lab 201</div></div></div>
-        <div class="subject-item"><div class="subj-dot" style="background:#f59e0b"></div><div class="subj-info"><div class="subj-name">Filipino</div><div class="subj-meta">Mr. Gerome Carpio · Room 103</div></div></div>
-      </div>
     </div>
   </div>
 </div>
