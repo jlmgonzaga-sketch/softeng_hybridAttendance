@@ -196,26 +196,26 @@
 <!-- PAGE: STUDENT LIST (renamed from Roster) -->
 <div class="page" id="page-roster">
   <div class="section">
-    <div class="roster-hdr-row">
-      <div class="section-title">Student List</div>
-      <div class="roster-hdr-right">
-        <span class="roster-count-lbl">
-          <strong id="rosterShownCount">0</strong> / <strong id="rosterTotalCount">0</strong>
-        </span>
-        <button class="btn-add-stu" onclick="openAddStudentModal()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add Student
-        </button>
-      </div>
+    <div class="roster-hdr-card">
+      <span class="section-title" style="color:var(--black);font-size:0.95rem;">Student List</span>
+      <button class="btn-add-stu" onclick="openAddStudentModal()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Student
+      </button>
     </div>
-    <div class="roster-search-row">
-      <input type="text" id="rosterSearch" placeholder="Search by name or ID…" oninput="filterRoster()">
-      <select id="rosterSectionFilter" onchange="filterRoster()">
-        <option value="">All Sections</option>
-        <option value="Sec A">Sec A</option>
-        <option value="Sec B">Sec B</option>
-        <option value="Sec C">Sec C</option>
-      </select>
+    <div class="roster-hdr-row">
+      <span class="roster-count-lbl">
+        <strong id="rosterShownCount">0</strong> / <strong id="rosterTotalCount">0</strong>
+      </span>
+      <div class="roster-hdr-right">
+        <input type="text" id="rosterSearch" placeholder="Search…" oninput="filterRoster()" style="padding:0.4rem 0.65rem;border:1.5px solid var(--gold);border-radius:8px;font-size:0.78rem;outline:none;width:130px;">
+        <select id="rosterSectionFilter" onchange="filterRoster()" style="padding:0.4rem 0.5rem;border:1.5px solid var(--gold);border-radius:8px;font-size:0.78rem;outline:none;background:#fff;">
+          <option value="">All Sections</option>
+          <option value="Sec A">Sec A</option>
+          <option value="Sec B">Sec B</option>
+          <option value="Sec C">Sec C</option>
+        </select>
+      </div>
     </div>
     <div class="stu-table-wrap">
       <table class="stu-table">
