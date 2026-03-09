@@ -7,13 +7,56 @@
 // ── Notifications ─────────────────────────────────────────
 requireAuth('faculty');
 
+// ── Toast / Snackbar System ──────────────────────────────
+(function() {
+    var container = document.createElement('div');
+    container.id = 'toast-container';
+    document.body.appendChild(container);
+    var ICONS = { success:'✓', error:'✕', info:'ℹ', warn:'⚠' };
+    window.showToast = function(msg, type, duration) {
+        type = type || 'info'; duration = duration || 3200;
+        var toast = document.createElement('div');
+        toast.className = 'toast toast-' + type;
+        toast.innerHTML =
+            '<span class="toast-icon">' + (ICONS[type]||'ℹ') + '</span>' +
+            '<span class="toast-msg">' + msg + '</span>' +
+            '<button class="toast-close" onclick="this.parentElement._dismiss()">×</button>';
+        toast._dismiss = function() {
+            toast.classList.add('toast-out');
+            setTimeout(function(){ toast.remove(); }, 280);
+        };
+        container.appendChild(toast);
+        var t = setTimeout(function(){ toast._dismiss(); }, duration);
+        toast.addEventListener('mouseenter', function(){ clearTimeout(t); });
+        toast.addEventListener('mouseleave', function(){ t = setTimeout(function(){ toast._dismiss(); }, 1500); });
+    };
+})();
+
+
+// ── Shared Class Info ────────────────────────────────────
+const CLASS_INFO = {
+    'MATH-A': { name:'Mathematics', room:'Room 101', section:'Sec A' },
+    'MATH-B': { name:'Mathematics', room:'Room 101', section:'Sec B' },
+    'MATH-C': { name:'Mathematics', room:'Room 101', section:'Sec C' },
+    'ENG-A':  { name:'English',     room:'Room 102', section:'Sec A' },
+    'ENG-B':  { name:'English',     room:'Room 102', section:'Sec B' },
+    'ENG-C':  { name:'English',     room:'Room 102', section:'Sec C' },
+    'SCI-A':  { name:'Science',     room:'Lab 201',  section:'Sec A' },
+    'SCI-B':  { name:'Science',     room:'Lab 201',  section:'Sec B' },
+    'SCI-C':  { name:'Science',     room:'Lab 201',  section:'Sec C' },
+    'FIL-A':  { name:'Filipino',    room:'Room 103', section:'Sec A' },
+    'FIL-B':  { name:'Filipino',    room:'Room 103', section:'Sec B' },
+    'FIL-C':  { name:'Filipino',    room:'Room 103', section:'Sec C' },
+};
+
+
 const NOTIFICATIONS = [
-    { id:1, unread:true,  text:'<strong>3 students</strong> from Sec B exceeded absences in <strong>Math</strong>.', time:'2 mins ago' },
-    { id:2, unread:true,  text:'<strong>Attendance report</strong> for English — Sec A generated successfully.', time:'15 mins ago' },
-    { id:3, unread:true,  text:'<strong>GONZAGA, Krystine</strong> was marked Late in Science today.', time:'42 mins ago' },
-    { id:4, unread:false, text:'QR session for <strong>Filipino — Sec C</strong> completed. 11/11 recorded.', time:'1 hr ago' },
-    { id:5, unread:false, text:'Reminder: Submit <strong>monthly attendance reports</strong> by Feb 28, 2026.', time:'3 hrs ago' },
-    { id:6, unread:false, text:'System maintenance on <strong>Feb 22, 2026 at 11:00 PM</strong>.', time:'Yesterday' },
+    { id:1, unread:true,  type:'alert',   avatar:'SB', avatarColor:'#c62828,#ffcdd2', text:'<strong>3 students</strong> from Sec B exceeded absences in <strong>Math</strong>.', time:'2 mins ago' },
+    { id:2, unread:true,  type:'info',    avatar:'SY', avatarColor:'#1565c0,#bbdefb', text:'<strong>Attendance report</strong> for English — Sec A generated successfully.', time:'15 mins ago' },
+    { id:3, unread:true,  type:'warn',    avatar:'KG', avatarColor:'#e65100,#ffe0b2', text:'<strong>GONZAGA, Krystine</strong> was marked Late in Science today.', time:'42 mins ago' },
+    { id:4, unread:false, type:'success', avatar:'QR', avatarColor:'#2e7d32,#c8e6c9', text:'QR session for <strong>Filipino — Sec C</strong> completed. 11/11 recorded.', time:'1 hr ago' },
+    { id:5, unread:false, type:'info',    avatar:'AD', avatarColor:'#1565c0,#bbdefb', text:'Reminder: Submit <strong>monthly attendance reports</strong> by Feb 28, 2026.', time:'3 hrs ago' },
+    { id:6, unread:false, type:'alert',   avatar:'SY', avatarColor:'#7b1fa2,#e1bee7', text:'System maintenance on <strong>Feb 22, 2026 at 11:00 PM</strong>.', time:'Yesterday' },
 ];
 let _notifications = [...NOTIFICATIONS];
 
@@ -23,14 +66,18 @@ function renderNotifications() {
     const badge  = document.getElementById('notificationCount');
     badge.textContent    = unread;
     badge.style.display  = unread > 0 ? 'flex' : 'none';
-    list.innerHTML = _notifications.map(n => `
-        <div class="nd-item ${n.unread ? 'unread' : ''}" onclick="markRead(${n.id})">
+    list.innerHTML = _notifications.map(n => {
+        var cols = (n.avatarColor || '#555,#eee').split(',');
+        var avatarStyle = 'background:' + cols[1] + ';color:' + cols[0] + ';border:2px solid ' + cols[0] + ';';
+        return `<div class="nd-item ${n.unread ? 'unread' : ''}" onclick="markRead(${n.id})">
+            <div class="nd-avatar" style="${avatarStyle}">${n.avatar || '?'}</div>
             <div class="nd-body">
                 <div class="nd-text">${n.text}</div>
                 <div class="nd-time">${n.time}</div>
             </div>
             <div class="nd-dot"></div>
-        </div>`).join('');
+        </div>`;
+    }).join('');
 }
 
 function toggleNotifications(e) {
@@ -112,8 +159,8 @@ function filterScanSearch() {
 function downloadReport() {
     const subject = document.getElementById('rptSubject').value;
     const section = document.getElementById('rptSection').value;
-    if (!subject || !section) { alert('Please select a Subject and Section first.'); return; }
-    alert('Downloading report for ' + subject + ' — ' + section + '...\n(PDF/Excel export in full system)');
+    if (!subject || !section) { showToast('Please select a Subject and Section first.', 'warn'); return; }
+    showToast('Downloading report for ' + subject + ' — ' + section + '…', 'success');
 }
 
 // ── Class Modal ───────────────────────────────────────────
@@ -207,6 +254,7 @@ function updateStatus(subject, section, studentId, selectEl) {
     }
     selectEl.className = 'status-sel status-' + (newStatus || 'unmarked');
     renderStudentTable(subject, section);
+    if (newStatus) showToast(studentId + ' marked as ' + newStatus + '.', newStatus === 'Present' ? 'success' : newStatus === 'Late' ? 'warn' : 'error', 2000);
 }
 
 function enlargeQR() {
@@ -253,21 +301,7 @@ function filterRoster() {
 
 // ── Schedule Click ────────────────────────────────────────
 function viewClassDetails(classCode, day, time) {
-    const classInfo = {
-        'MATH-A': { name: 'Mathematics', room: 'Room 101', section: 'Sec A' },
-        'MATH-B': { name: 'Mathematics', room: 'Room 101', section: 'Sec B' },
-        'MATH-C': { name: 'Mathematics', room: 'Room 101', section: 'Sec C' },
-        'ENG-A':  { name: 'English',     room: 'Room 102', section: 'Sec A' },
-        'ENG-B':  { name: 'English',     room: 'Room 102', section: 'Sec B' },
-        'ENG-C':  { name: 'English',     room: 'Room 102', section: 'Sec C' },
-        'SCI-A':  { name: 'Science',     room: 'Lab 201',  section: 'Sec A' },
-        'SCI-B':  { name: 'Science',     room: 'Lab 201',  section: 'Sec B' },
-        'SCI-C':  { name: 'Science',     room: 'Lab 201',  section: 'Sec C' },
-        'FIL-A':  { name: 'Filipino',    room: 'Room 103', section: 'Sec A' },
-        'FIL-B':  { name: 'Filipino',    room: 'Room 103', section: 'Sec B' },
-        'FIL-C':  { name: 'Filipino',    room: 'Room 103', section: 'Sec C' },
-    };
-    const info = classInfo[classCode] || { name: 'Unknown', room: '—', section: '—' };
+    const info = CLASS_INFO[classCode] || { name: 'Unknown', room: '—', section: '—' };
     document.getElementById('modalBody').innerHTML =
         '<div class="detail-row"><span class="dr-lbl">Subject</span><span class="dr-val">' + info.name + '</span></div>' +
         '<div class="detail-row"><span class="dr-lbl">Section</span><span class="dr-val">' + info.section + '</span></div>' +
@@ -291,7 +325,10 @@ function goPage(id) {
 
 // ── Utilities ─────────────────────────────────────────────
 function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-function logout() { if (confirm('Are you sure you want to logout?')) window.location.href = 'login.html'; }
+function logout() {
+    showToast('Logging out…', 'info', 1200);
+    setTimeout(function(){ window.location.href = 'login.html'; }, 1300);
+}
 
 window.addEventListener('click', e => {
     document.querySelectorAll('.modal').forEach(m => { if (e.target === m) m.classList.remove('show'); });
@@ -302,3 +339,18 @@ document.addEventListener('DOMContentLoaded', () => {
     renderNotifications();
     refreshScanPreview();
 });
+// ── Profile Save (updates home strip) ────────────────────
+function saveProfile() {
+    var nameEl = document.querySelector('.settings-section .settings-input');
+    var name = nameEl ? nameEl.value.trim() : '';
+    if (!name) { showToast('Name cannot be empty.', 'error'); return; }
+    var initials = name.split(' ').map(function(w){ return w[0]; }).filter(Boolean).slice(0,2).join('').toUpperCase();
+    var homeAvatar = document.getElementById('homeAvatar');
+    var homeName   = document.getElementById('homeName');
+    var homeRole   = document.getElementById('homeRole');
+    var topAvatar  = document.querySelector('.avatar-sm');
+    if (homeAvatar) homeAvatar.textContent = initials;
+    if (homeName)   homeName.textContent   = name;
+    if (topAvatar)  topAvatar.textContent  = initials;
+    showToast('Profile saved successfully!', 'success');
+}
