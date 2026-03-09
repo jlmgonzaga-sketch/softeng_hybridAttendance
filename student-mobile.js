@@ -23,17 +23,12 @@ const SUBJECT_INFO = {
     Filipino:{ full: 'Filipino',    faculty: 'Gerome Carpio',   room: 'Room 103', section: 'Sec B' },
 };
 
-// Pre-compute stats
-const SUBJECT_STATS = {};
 for (const [subj, days] of Object.entries(RAW_ATTENDANCE)) {
     const p = days.filter(s => s === 'P').length;
     const l = days.filter(s => s === 'L').length;
     const a = days.filter(s => s === 'A').length;
-    const total = p + l + a;
-    SUBJECT_STATS[subj] = { present: p, late: l, absent: a, total, rate: Math.round((p + l) / total * 1000) / 10 };
 }
 
-// Build flat attendance records (newest first)
 const WEEKDAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const ATTENDANCE_RECORDS = [];
 for (let day = 28; day >= 1; day--) {
@@ -88,23 +83,16 @@ document.addEventListener('click', e => {
     if (w && !w.contains(e.target)) closeNotifications();
 });
 
-// ── Card HTML builder (no icon dot) ──────────────────────
+// ── Card builder — NO abbreviation box, just subject name + date ──
 function buildCard(r) {
     const badgeClass = { P: 'status-present', L: 'status-late', A: 'status-absent' };
     const badgeLabel = { P: 'Present', L: 'Late', A: 'Absent' };
-    return `
-        <div class="att-card" onclick="showAttDetail('${r.subject}','${r.date}','${r.weekday}','${r.status}')">
-            <div class="att-info">
-                <div class="att-subj-name">${SUBJECT_INFO[r.subject].full}</div>
-                <div class="att-meta">${r.date} · ${r.weekday}</div>
-            </div>
-            <span class="status-badge ${badgeClass[r.status]}">${badgeLabel[r.status]}</span>
-        </div>`;
+    return `<div class="att-card" onclick="showAttDetail('${r.subject}','${r.date}','${r.weekday}','${r.status}')"><div class="att-info"><div class="att-subj-name">${SUBJECT_INFO[r.subject].full}</div><div class="att-meta">${r.date} · ${r.weekday}</div></div><span class="status-badge ${badgeClass[r.status]}">${badgeLabel[r.status]}</span></div>`;
 }
 
-// ── Recent Attendance (Home page) ─────────────────────────
+// ── Recent Attendance (Home) ───────────────────────────────
 function renderRecentAttendance() {
-    const wrap   = document.getElementById('recentAttendanceList');
+    const wrap = document.getElementById('recentAttendanceList');
     const recent = ATTENDANCE_RECORDS.slice(0, 8);
     wrap.innerHTML = recent.map(buildCard).join('');
 }
@@ -145,7 +133,6 @@ function renderAttPage() {
 
     wrap.innerHTML = slice.map(buildCard).join('');
 
-    // Pagination
     const pg = document.getElementById('attPagination');
     let html = `<button class="page-btn" onclick="goAttPage(${attPage-1})" ${attPage===1?'disabled':''}>‹</button>`;
     const maxV = 5;
@@ -167,7 +154,11 @@ function goAttPage(n) {
     renderAttPage();
 }
 
-// ── Attendance Detail Modal ───────────────────────────────
+// ── Detail helpers ────────────────────────────────────────
+function row(lbl, val) {
+    return `<div class="detail-row"><span class="dr-lbl">${lbl}</span><span class="dr-val">${val}</span></div>`;
+}
+
 function showAttDetail(subject, date, weekday, status) {
     const info = SUBJECT_INFO[subject];
     const sl   = status === 'P' ? 'Present' : status === 'L' ? 'Late' : 'Absent';
@@ -179,17 +170,12 @@ function showAttDetail(subject, date, weekday, status) {
     openModal('detailsModal');
 }
 
-// ── Schedule Detail Modal ─────────────────────────────────
 function viewClassDetail(subject, day, time) {
     const info = SUBJECT_INFO[subject];
     document.getElementById('classModalBody').innerHTML =
         row('Subject', info.full) + row('Faculty', info.faculty) + row('Room', info.room) +
         row('Section', info.section) + row('Day', day) + row('Time', time);
     openModal('classModal');
-}
-
-function row(lbl, val) {
-    return `<div class="detail-row"><span class="dr-lbl">${lbl}</span><span class="dr-val">${val}</span></div>`;
 }
 
 // ── Modal open / close ────────────────────────────────────
@@ -205,61 +191,96 @@ window.addEventListener('click', e => {
     });
 });
 
-// ── QR Scanner ────────────────────────────────────────────
+// ── QR Scanner — async-safe close ────────────────────────
 let _html5QrCode = null;
+let _qrClosing   = false;   // guard: prevent double-close race
 
 function openQRScanner() {
+    // Reset UI
     document.getElementById('qrResultBox').style.display = 'none';
     document.getElementById('qrStatusMsg').textContent   = 'Starting camera...';
     document.getElementById('qrStatusMsg').style.color   = '#888';
     document.getElementById('scanLine').style.display    = 'block';
-    openModal('qrModal');
 
-    setTimeout(() => {
-        _html5QrCode = new Html5Qrcode('qr-reader');
-        Html5Qrcode.getCameras().then(cameras => {
-            if (!cameras || cameras.length === 0) {
-                document.getElementById('qrStatusMsg').textContent = 'No camera found.';
-                return;
-            }
-            const cam = cameras.find(c => /back|rear|environment/i.test(c.label)) || cameras[cameras.length - 1];
-            _html5QrCode.start(
-                cam.id,
-                { fps: 10, qrbox: { width: 200, height: 200 } },
-                (decodedText) => {
+    // Destroy any leftover instance first, then open fresh
+    _destroyQR().then(() => {
+        openModal('qrModal');
+        setTimeout(_startQR, 300);
+    });
+}
+
+function _startQR() {
+    _html5QrCode = new Html5Qrcode('qr-reader');
+    Html5Qrcode.getCameras().then(cameras => {
+        if (!cameras || cameras.length === 0) {
+            document.getElementById('qrStatusMsg').textContent = 'No camera found.';
+            return;
+        }
+        const cam = cameras.find(c => /back|rear|environment/i.test(c.label)) || cameras[cameras.length - 1];
+        _html5QrCode.start(
+            cam.id,
+            { fps: 10, qrbox: { width: 200, height: 200 } },
+            (decodedText) => {
+                // QR scanned — stop camera, show result, keep modal open so user can read it
+                _html5QrCode.stop().catch(() => {}).finally(() => {
+                    _html5QrCode = null;
                     document.getElementById('qrResultText').textContent  = decodedText;
                     document.getElementById('qrResultBox').style.display = 'block';
                     document.getElementById('qrStatusMsg').textContent   = 'Attendance marked as Present!';
                     document.getElementById('qrStatusMsg').style.color   = '#2e7d32';
                     document.getElementById('scanLine').style.display    = 'none';
-                    _html5QrCode.stop().catch(() => {});
-                },
-                () => {}
-            ).then(() => {
-                document.getElementById('qrStatusMsg').textContent = 'Align QR code in the frame';
-            }).catch(() => {
-                document.getElementById('qrStatusMsg').textContent = 'Camera access denied.';
-                document.getElementById('qrStatusMsg').style.color = '#c62828';
-            });
+                    // Re-enable buttons — camera is fully stopped
+                    _qrClosing = false;
+                });
+            },
+            () => {} // per-frame errors ignored
+        ).then(() => {
+            document.getElementById('qrStatusMsg').textContent = 'Align QR code in the frame';
         }).catch(() => {
-            document.getElementById('qrStatusMsg').textContent = 'Could not access camera.';
+            document.getElementById('qrStatusMsg').textContent = 'Camera access denied.';
             document.getElementById('qrStatusMsg').style.color = '#c62828';
+            _html5QrCode = null;
         });
-    }, 300);
+    }).catch(() => {
+        document.getElementById('qrStatusMsg').textContent = 'Could not access camera.';
+        document.getElementById('qrStatusMsg').style.color = '#c62828';
+        _html5QrCode = null;
+    });
+}
+
+// Safely destroy the QR instance — always returns a Promise
+function _destroyQR() {
+    if (!_html5QrCode) return Promise.resolve();
+    const inst = _html5QrCode;
+    _html5QrCode = null;
+    return inst.stop().catch(() => {}).finally(() => {
+        try { inst.clear(); } catch(e) {}
+    });
 }
 
 function closeQRModal() {
-    if (_html5QrCode) {
-        _html5QrCode.stop().catch(() => {}).finally(() => {
-            _html5QrCode.clear();
-            _html5QrCode = null;
-        });
-    }
+    if (_qrClosing) return;   // already mid-close, ignore extra taps
+    _qrClosing = true;
+
+    // Close the modal immediately so the UI feels responsive
+    closeModal('qrModal');
+
+    // Reset display state right away
     document.getElementById('scanLine').style.display    = 'block';
     document.getElementById('qrResultBox').style.display = 'none';
     document.getElementById('qrStatusMsg').textContent   = 'Starting camera...';
     document.getElementById('qrStatusMsg').style.color   = '#888';
-    closeModal('qrModal');
+
+    // Destroy camera async in background — clears the div too
+    _destroyQR().finally(() => {
+        // Nuke and recreate the qr-reader div so html5-qrcode
+        // doesn't leave stale video elements that block next open
+        const container = document.getElementById('qr-reader');
+        if (container) {
+            container.innerHTML = '';
+        }
+        _qrClosing = false;
+    });
 }
 
 // ── Page Navigation ───────────────────────────────────────
