@@ -17,10 +17,10 @@ const RAW_ATTENDANCE = {
 };
 
 const SUBJECT_INFO = {
-    Math:    { full: 'Mathematics', faculty: 'Rheymard Doneza', room: 'Room 101', section: 'Sec B', time: '07:00 AM' },
-    English: { full: 'English',     faculty: 'Gary Soriano',    room: 'Room 102', section: 'Sec B', time: '08:30 AM' },
-    Science: { full: 'Science',     faculty: 'Agnes Bernal',    room: 'Lab 201',  section: 'Sec B', time: '10:00 AM' },
-    Filipino:{ full: 'Filipino',    faculty: 'Gerome Carpio',   room: 'Room 103', section: 'Sec B', time: '01:00 PM' },
+    Math:    { full: 'Mathematics', faculty: 'Rheymard Doneza', room: 'Room 101', section: 'Sec B', time: '07:00 AM', email: 'rdoneza@sscr.edu.ph' },
+    English: { full: 'English',     faculty: 'Gary Soriano',    room: 'Room 102', section: 'Sec B', time: '08:30 AM', email: 'gsoriano@sscr.edu.ph' },
+    Science: { full: 'Science',     faculty: 'Agnes Bernal',    room: 'Lab 201',  section: 'Sec B', time: '10:00 AM', email: 'abernal@sscr.edu.ph' },
+    Filipino:{ full: 'Filipino',    faculty: 'Gerome Carpio',   room: 'Room 103', section: 'Sec B', time: '01:00 PM', email: 'gcarpio@sscr.edu.ph' },
 };
 
 for (const [subj, days] of Object.entries(RAW_ATTENDANCE)) {
@@ -161,6 +161,9 @@ function goAttPage(n) {
 function row(lbl, val) {
     return `<div class="detail-row"><span class="dr-lbl">${lbl}</span><span class="dr-val">${val}</span></div>`;
 }
+function rowEmail(lbl, email) {
+    return `<div class="detail-row"><span class="dr-lbl">${lbl}</span><span class="dr-val"><a href="mailto:${email}" class="email-link">${email}</a></span></div>`;
+}
 
 function showAttDetail(subject, date, weekday, status) {
     const info = SUBJECT_INFO[subject];
@@ -168,7 +171,7 @@ function showAttDetail(subject, date, weekday, status) {
     const sc   = status === 'P' ? 'status-present' : status === 'L' ? 'status-late' : 'status-absent';
     document.getElementById('detailsModalBody').innerHTML =
         row('Subject', info.full) + row('Faculty', info.faculty) + row('Room', info.room) +
-        row('Section', info.section) + row('Date', date) + row('Day', weekday) + row('Time', info.time) +
+        row('Section', info.section) + row('Date', date) + row('Day', weekday) + row('Time', info.time) + rowEmail('Faculty Email', info.email) +
         `<div class="detail-row"><span class="dr-lbl">Status</span><span class="dr-val"><span class="status-badge ${sc}">${sl}</span></span></div>`;
     openModal('detailsModal');
 }
@@ -177,7 +180,7 @@ function viewClassDetail(subject, day, time) {
     const info = SUBJECT_INFO[subject];
     document.getElementById('classModalBody').innerHTML =
         row('Subject', info.full) + row('Faculty', info.faculty) + row('Room', info.room) +
-        row('Section', info.section) + row('Day', day) + row('Time', time);
+        row('Section', info.section) + row('Day', day) + row('Time', time) + rowEmail('Email', info.email);
     openModal('classModal');
 }
 
