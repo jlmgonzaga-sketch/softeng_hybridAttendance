@@ -9,7 +9,7 @@
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <link rel="stylesheet" href="student-mobile.css">
 <style>
-.sfc-wrap{margin:.35rem .75rem 0;border:1.5px solid #FFD700;border-radius:8px;overflow:hidden;background:#fff}
+.sfc-wrap{margin:.35rem 0 0;border:2px solid #FFD700;border-radius:12px;overflow:hidden;background:#fff}
 .sfc-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.7rem;color:#1a1a1a;padding:.3rem .55rem;border-bottom:1.5px solid #FFD700;background:#fffde7}
 .sfc-row{display:flex;align-items:center;justify-content:space-between;gap:.3rem;padding:.28rem .55rem;border-bottom:1px solid rgba(255,215,0,.2)}
 .sfc-row:last-child{border-bottom:none}
@@ -270,7 +270,7 @@
       </div>
       <div id="qrStatusMsg" class="qr-status">Starting camera...</div>
       <div id="qrResultBox" class="qr-result" style="display:none;">
-        <div class="qr-result-title">QR Code Scanned!</div>
+        <div class="qr-result-title">✅ QR Code Scanned!</div>
         <div id="qrResultText" class="qr-result-text"></div>
       </div>
       <button class="btn btn-danger btn-full" style="margin-top:.5rem" onclick="closeQRModal()">Cancel</button>
