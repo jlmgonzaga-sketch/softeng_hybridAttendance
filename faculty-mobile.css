@@ -80,14 +80,16 @@ body::before {
   color: var(--black); flex-shrink: 0;
 }
 
-/* ── NOTIFICATION DROPDOWN ── */
+/* ── NOTIFICATION DROPDOWN — fixed position, positioned by JS ── */
 .notif-wrapper { position: relative; }
 .notif-dropdown {
-  display: none; position: absolute; top: calc(100% + 8px); right: 0;
-  width: 300px; background: #fff;
+  display: none;
+  position: fixed;
+  top: 62px; right: 12px;        /* JS will override top dynamically */
+  width: 310px; background: #fff;
   border-radius: 16px; border: 2px solid var(--gold);
-  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-  z-index: 99999; overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.45);
+  z-index: 999999; overflow: hidden;
   animation: fadeDown 0.2s ease;
 }
 .notif-dropdown.open { display: block; }
@@ -165,18 +167,35 @@ body::before {
 }
 .section-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; color: var(--primary); }
 
-/* ── CLASS CARDS ── */
-.class-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
-.class-card {
-  background: rgba(255,255,255,0.96); border: 2.5px solid var(--gold); border-radius: var(--radius);
-  padding: 1.1rem 0.9rem; cursor: pointer; transition: all 0.2s;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.1); text-align: center;
-  backdrop-filter: blur(6px);
+/* ── CLASSES CARD (single card, one row) ── */
+.classes-card {
+  background: rgba(255,255,255,0.97); border: 2.5px solid var(--gold);
+  border-radius: var(--radius); box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  overflow: hidden;
 }
-.class-card:active { transform: scale(0.97); border-color: var(--red); background: #fffbf0; }
-.cc-name { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1rem; color: var(--primary); margin-bottom: 0.2rem; }
-.cc-sub  { font-size: 0.72rem; color: #888; font-weight: 600; }
-/* cc-dot removed — class cards are plain text like desktop */
+.classes-card-hdr {
+  background: linear-gradient(135deg, #8B0000, #1a1a1a);
+  padding: 0.6rem 1rem; border-bottom: 2px solid var(--gold);
+}
+.classes-card-title {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 0.95rem;
+  color: var(--gold); letter-spacing: 0.03em;
+}
+.class-pill-row {
+  display: flex; gap: 0.5rem; padding: 0.75rem;
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+}
+.class-pill-row::-webkit-scrollbar { display: none; }
+.class-pill {
+  flex: 1; min-width: 0;
+  padding: 0.65rem 0.5rem;
+  background: #fff; border: 2.5px solid var(--gold); border-radius: 10px;
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 0.82rem;
+  color: var(--primary); cursor: pointer; white-space: nowrap;
+  transition: all 0.18s; text-align: center;
+}
+.class-pill:active,
+.class-pill:hover { background: var(--gradient-red); color: #fff; border-color: var(--red-dark); transform: scale(0.97); }
 
 /* ── REPORTS CARD ── */
 .card {
