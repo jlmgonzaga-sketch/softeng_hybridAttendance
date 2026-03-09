@@ -1,11 +1,8 @@
 // ═══════════════════════════════════════════════════════════
 //  SSC-R Student — Mobile JS
-//  Same data and logic as student.js desktop
-//  Depends on: students-data.js (for SSCR_STUDENTS etc.)
-//  Student data sourced from students-data.js (MEL_ATTENDANCE, etc.)
 // ═══════════════════════════════════════════════════════════
 
-// ── Student Data (same as student.js desktop) ─────────────
+// ── Student Data ──────────────────────────────────────────
 const STUDENT = {
     id:      '2026-0031',
     name:    'Mel Reynald Malacas',
@@ -38,29 +35,18 @@ for (const [subj, days] of Object.entries(RAW_ATTENDANCE)) {
     SUBJECT_STATS[subj] = { present: p, late: l, absent: a, total, rate: Math.round((p + l) / total * 1000) / 10 };
     grandPresent += p; grandLate += l; grandAbsent += a;
 }
-const GRAND_TOTAL    = grandPresent + grandLate + grandAbsent;
-const GRAND_ATTENDED = grandPresent + grandLate;
-const OVERALL_RATE   = Math.round(GRAND_ATTENDED / GRAND_TOTAL * 1000) / 10;
 
-// Build flat records (newest first)
+// Build flat attendance records (newest first)
 const WEEKDAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const ATTENDANCE_RECORDS = [];
 for (let day = 28; day >= 1; day--) {
-    const d       = new Date(2026, 1, day);
-    const weekday = WEEKDAY_NAMES[d.getDay()];
+    const d         = new Date(2026, 1, day);
+    const weekday   = WEEKDAY_NAMES[d.getDay()];
     const dateLabel = `Feb ${String(day).padStart(2,'0')}, 2026`;
     const dateKey   = `2026-02-${String(day).padStart(2,'0')}`;
     for (const subj of ['Math','English','Science','Filipino']) {
         ATTENDANCE_RECORDS.push({ subject: subj, day, date: dateLabel, dateKey, weekday, status: RAW_ATTENDANCE[subj][day - 1] });
     }
-}
-
-// Calendar dominant status per day
-const ATTENDANCE_DATA = {};
-for (let day = 1; day <= 28; day++) {
-    const key = `2026-02-${String(day).padStart(2,'0')}`;
-    const statuses = Object.values(RAW_ATTENDANCE).map(arr => arr[day - 1]);
-    ATTENDANCE_DATA[key] = statuses.includes('A') ? 'absent' : statuses.includes('L') ? 'late' : 'present';
 }
 
 // ── Notifications ─────────────────────────────────────────
@@ -89,6 +75,7 @@ function renderNotifications() {
             <div class="nd-dot"></div>
         </div>`).join('');
 }
+
 function toggleNotifications(e) {
     e.stopPropagation();
     const dd = document.getElementById('notifDropdown');
@@ -98,6 +85,7 @@ function toggleNotifications(e) {
 function closeNotifications() { document.getElementById('notifDropdown').classList.remove('open'); }
 function markRead(id)  { const n = _notifications.find(n => n.id === id); if (n) n.unread = false; renderNotifications(); }
 function markAllRead() { _notifications.forEach(n => n.unread = false); renderNotifications(); }
+
 document.addEventListener('click', e => {
     const w = document.getElementById('notifWrapper');
     if (w && !w.contains(e.target)) closeNotifications();
@@ -105,8 +93,8 @@ document.addEventListener('click', e => {
 
 // ── Recent Attendance (Home page) ─────────────────────────
 function renderRecentAttendance() {
-    const list    = document.getElementById('recentAttendanceList');
-    const recent  = ATTENDANCE_RECORDS.slice(0, 8);
+    const list     = document.getElementById('recentAttendanceList');
+    const recent   = ATTENDANCE_RECORDS.slice(0, 8);
     const dotClass = { Math: 'dot-math', English: 'dot-english', Science: 'dot-science', Filipino: 'dot-filipino' };
     const badgeClass = { P: 'status-present', L: 'status-late', A: 'status-absent' };
     const badgeLabel = { P: 'Present', L: 'Late', A: 'Absent' };
@@ -122,7 +110,7 @@ function renderRecentAttendance() {
         </div>`).join('');
 }
 
-// ── Attendance Records Page ───────────────────────────────
+// ── Attendance Page ───────────────────────────────────────
 const ATT_PER_PAGE = 12;
 let attPage = 1;
 
@@ -130,7 +118,6 @@ function getFilteredRecords() {
     const q       = (document.getElementById('attSearch').value || '').toUpperCase();
     const status  = document.getElementById('attStatus').value;
     const subject = document.getElementById('attSubject').value;
-
     return ATTENDANCE_RECORDS.filter(r => {
         const matchQ    = !q || (r.subject + ' ' + r.date + ' ' + r.weekday).toUpperCase().includes(q);
         const matchStat = !status  || r.status  === status;
@@ -139,18 +126,14 @@ function getFilteredRecords() {
     });
 }
 
-function renderAttTable() {
-    attPage = 1;
-    renderAttPage();
-}
+function renderAttTable() { attPage = 1; renderAttPage(); }
 
 function renderAttPage() {
     const records    = getFilteredRecords();
     const totalPages = Math.max(1, Math.ceil(records.length / ATT_PER_PAGE));
     if (attPage > totalPages) attPage = totalPages;
-
-    const start  = (attPage - 1) * ATT_PER_PAGE;
-    const slice  = records.slice(start, start + ATT_PER_PAGE);
+    const start = (attPage - 1) * ATT_PER_PAGE;
+    const slice = records.slice(start, start + ATT_PER_PAGE);
 
     const dotClass   = { Math: 'dot-math', English: 'dot-english', Science: 'dot-science', Filipino: 'dot-filipino' };
     const badgeClass = { P: 'status-present', L: 'status-late', A: 'status-absent' };
@@ -199,9 +182,9 @@ function goAttPage(n) {
 
 // ── Attendance Detail Modal ───────────────────────────────
 function showAttDetail(subject, date, weekday, status) {
-    const info  = SUBJECT_INFO[subject];
-    const sl    = status === 'P' ? 'Present' : status === 'L' ? 'Late' : 'Absent';
-    const sc    = status === 'P' ? 'status-present' : status === 'L' ? 'status-late' : 'status-absent';
+    const info = SUBJECT_INFO[subject];
+    const sl   = status === 'P' ? 'Present' : status === 'L' ? 'Late' : 'Absent';
+    const sc   = status === 'P' ? 'status-present' : status === 'L' ? 'status-late' : 'status-absent';
     document.getElementById('detailsModalBody').innerHTML =
         `<div class="detail-row"><span class="dr-lbl">Subject</span><span class="dr-val">${info.full}</span></div>` +
         `<div class="detail-row"><span class="dr-lbl">Faculty</span><span class="dr-val">${info.faculty}</span></div>` +
@@ -210,10 +193,10 @@ function showAttDetail(subject, date, weekday, status) {
         `<div class="detail-row"><span class="dr-lbl">Date</span><span class="dr-val">${date}</span></div>` +
         `<div class="detail-row"><span class="dr-lbl">Day</span><span class="dr-val">${weekday}</span></div>` +
         `<div class="detail-row"><span class="dr-lbl">Status</span><span class="dr-val"><span class="status-badge ${sc}">${sl}</span></span></div>`;
-    document.getElementById('detailsModal').classList.add('show');
+    openModal('detailsModal');
 }
 
-// ── Schedule Click ────────────────────────────────────────
+// ── Schedule Detail Modal ─────────────────────────────────
 function viewClassDetail(subject, day, time) {
     const info = SUBJECT_INFO[subject];
     document.getElementById('classModalBody').innerHTML =
@@ -223,21 +206,39 @@ function viewClassDetail(subject, day, time) {
         `<div class="detail-row"><span class="dr-lbl">Section</span><span class="dr-val">${info.section}</span></div>` +
         `<div class="detail-row"><span class="dr-lbl">Day</span><span class="dr-val">${day}</span></div>` +
         `<div class="detail-row"><span class="dr-lbl">Time</span><span class="dr-val">${time}</span></div>`;
-    document.getElementById('classModal').classList.add('show');
+    openModal('classModal');
 }
 
-// ── QR Scanner (Real Camera) ────────────────────────────────────────────────
+// ── Subjects Sheet ────────────────────────────────────────
+function openSubjectsSheet() { openModal('subjectsModal'); }
+
+// ── Modal open / close ────────────────────────────────────
+function openModal(id)  { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+// Close modal when tapping the dark backdrop
+window.addEventListener('click', e => {
+    document.querySelectorAll('.modal').forEach(m => {
+        if (e.target === m) {
+            // If it's the QR modal, also stop the camera
+            if (m.id === 'qrModal') closeQRModal();
+            else m.classList.remove('show');
+        }
+    });
+});
+
+// ── QR Scanner ────────────────────────────────────────────
 let _html5QrCode = null;
 
 function openQRScanner() {
-    document.getElementById('qrModal').classList.add('show');
     document.getElementById('qrResultBox').style.display = 'none';
-    document.getElementById('qrStatusMsg').textContent = 'Starting camera...';
-    document.getElementById('qrStatusMsg').style.color = '#888';
-    document.getElementById('scanLine').style.display = 'block';
+    document.getElementById('qrStatusMsg').textContent   = 'Starting camera...';
+    document.getElementById('qrStatusMsg').style.color   = '#888';
+    document.getElementById('scanLine').style.display    = 'block';
+    openModal('qrModal');
 
     setTimeout(() => {
-        _html5QrCode = new Html5Qrcode("qr-reader");
+        _html5QrCode = new Html5Qrcode('qr-reader');
         Html5Qrcode.getCameras().then(cameras => {
             if (!cameras || cameras.length === 0) {
                 document.getElementById('qrStatusMsg').textContent = 'No camera found.';
@@ -248,14 +249,14 @@ function openQRScanner() {
                 cam.id,
                 { fps: 10, qrbox: { width: 200, height: 200 } },
                 (decodedText) => {
-                    document.getElementById('qrResultText').textContent = decodedText;
+                    document.getElementById('qrResultText').textContent  = decodedText;
                     document.getElementById('qrResultBox').style.display = 'block';
-                    document.getElementById('qrStatusMsg').textContent = 'Attendance marked as Present!';
-                    document.getElementById('qrStatusMsg').style.color = '#2e7d32';
-                    document.getElementById('scanLine').style.display = 'none';
+                    document.getElementById('qrStatusMsg').textContent   = 'Attendance marked as Present!';
+                    document.getElementById('qrStatusMsg').style.color   = '#2e7d32';
+                    document.getElementById('scanLine').style.display    = 'none';
                     _html5QrCode.stop().catch(() => {});
                 },
-                () => {}
+                () => {} // ignore per-frame errors
             ).then(() => {
                 document.getElementById('qrStatusMsg').textContent = 'Align QR code in the frame';
             }).catch(() => {
@@ -270,18 +271,38 @@ function openQRScanner() {
 }
 
 function closeQRModal() {
+    // Stop and clean up camera first
     if (_html5QrCode) {
         _html5QrCode.stop().catch(() => {}).finally(() => {
             _html5QrCode.clear();
             _html5QrCode = null;
         });
     }
-    document.getElementById('scanLine').style.display = 'block';
+    // Reset UI state
+    document.getElementById('scanLine').style.display    = 'block';
     document.getElementById('qrResultBox').style.display = 'none';
-    document.getElementById('qrModal').classList.remove('show');
+    document.getElementById('qrStatusMsg').textContent   = 'Starting camera...';
+    document.getElementById('qrStatusMsg').style.color   = '#888';
+    // Close modal
+    closeModal('qrModal');
 }
-// ── Subjects Sheet ────────────────────────────────────────
-function openSubjectsSheet() { document.getElementById('subjectsModal').classList.add('show'); }
+
+// ── Choice Overlay ────────────────────────────────────────
+function dismissChoiceOverlay() {
+    const overlay = document.getElementById('choiceOverlay');
+    if (!overlay) return;
+    overlay.classList.add('hide');
+    setTimeout(() => overlay.remove(), 300);
+}
+
+function choiceDashboard() {
+    dismissChoiceOverlay();
+}
+
+function choiceScanQR() {
+    dismissChoiceOverlay();
+    setTimeout(() => openQRScanner(), 350);
+}
 
 // ── Page Navigation ───────────────────────────────────────
 function goPage(id) {
@@ -290,20 +311,26 @@ function goPage(id) {
     document.getElementById('page-' + id).classList.add('active');
     const nb = document.getElementById('nav-' + id);
     if (nb) nb.classList.add('active');
-
     if (id === 'attendance') { attPage = 1; renderAttPage(); }
 }
 
 // ── Utilities ─────────────────────────────────────────────
-function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-function logout() { if (confirm('Are you sure you want to logout?')) window.location.href = 'login.html'; }
-
-window.addEventListener('click', e => {
-    document.querySelectorAll('.modal').forEach(m => { if (e.target === m) m.classList.remove('show'); });
-});
+function logout() {
+    if (confirm('Are you sure you want to logout?')) window.location.href = 'login.html';
+}
 
 // ── Init ──────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+    // Personalise welcome subtitle if name in session
+    try {
+        const session = JSON.parse(sessionStorage.getItem('sscr_session') || '{}');
+        if (session && session.name) {
+            const firstName = session.name.split(' ')[0];
+            const el = document.getElementById('coSubtitle');
+            if (el) el.textContent = 'Welcome, ' + firstName + '! What would you like to do?';
+        }
+    } catch(e) {}
+
     renderNotifications();
     renderRecentAttendance();
     renderAttPage();
