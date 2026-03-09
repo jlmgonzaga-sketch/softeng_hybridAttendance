@@ -91,17 +91,16 @@ document.addEventListener('click', e => {
     if (w && !w.contains(e.target)) closeNotifications();
 });
 
-// ── Recent Attendance (Home page) ─────────────────────────
+// ── Recent Attendance (Home page) — no colors ─────────────
 function renderRecentAttendance() {
     const list     = document.getElementById('recentAttendanceList');
     const recent   = ATTENDANCE_RECORDS.slice(0, 8);
-    const dotClass = { Math: 'dot-math', English: 'dot-english', Science: 'dot-science', Filipino: 'dot-filipino' };
     const badgeClass = { P: 'status-present', L: 'status-late', A: 'status-absent' };
     const badgeLabel = { P: 'Present', L: 'Late', A: 'Absent' };
 
     list.innerHTML = recent.map(r => `
         <div class="att-card" onclick="showAttDetail('${r.subject}','${r.date}','${r.weekday}','${r.status}')">
-            <div class="att-subj-dot ${dotClass[r.subject] || ''}">${r.subject.substring(0,3).toUpperCase()}</div>
+            <div class="att-subj-dot">${r.subject.substring(0,3).toUpperCase()}</div>
             <div class="att-info">
                 <div class="att-subj-name">${SUBJECT_INFO[r.subject].full}</div>
                 <div class="att-meta">${r.date} · ${r.weekday}</div>
@@ -110,7 +109,7 @@ function renderRecentAttendance() {
         </div>`).join('');
 }
 
-// ── Attendance Page ───────────────────────────────────────
+// ── Attendance Page — no colors ───────────────────────────
 const ATT_PER_PAGE = 12;
 let attPage = 1;
 
@@ -135,7 +134,6 @@ function renderAttPage() {
     const start = (attPage - 1) * ATT_PER_PAGE;
     const slice = records.slice(start, start + ATT_PER_PAGE);
 
-    const dotClass   = { Math: 'dot-math', English: 'dot-english', Science: 'dot-science', Filipino: 'dot-filipino' };
     const badgeClass = { P: 'status-present', L: 'status-late', A: 'status-absent' };
     const badgeLabel = { P: 'Present', L: 'Late', A: 'Absent' };
 
@@ -150,7 +148,7 @@ function renderAttPage() {
 
     container.innerHTML = slice.map(r => `
         <div class="att-card" onclick="showAttDetail('${r.subject}','${r.date}','${r.weekday}','${r.status}')">
-            <div class="att-subj-dot ${dotClass[r.subject] || ''}">${r.subject.substring(0,3).toUpperCase()}</div>
+            <div class="att-subj-dot">${r.subject.substring(0,3).toUpperCase()}</div>
             <div class="att-info">
                 <div class="att-subj-name">${SUBJECT_INFO[r.subject].full}</div>
                 <div class="att-meta">${r.date} · ${r.weekday}</div>
@@ -209,18 +207,13 @@ function viewClassDetail(subject, day, time) {
     openModal('classModal');
 }
 
-// ── Subjects Sheet ────────────────────────────────────────
-function openSubjectsSheet() { openModal('subjectsModal'); }
-
 // ── Modal open / close ────────────────────────────────────
 function openModal(id)  { document.getElementById(id).classList.add('show'); }
 function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 
-// Close modal when tapping the dark backdrop
 window.addEventListener('click', e => {
     document.querySelectorAll('.modal').forEach(m => {
         if (e.target === m) {
-            // If it's the QR modal, also stop the camera
             if (m.id === 'qrModal') closeQRModal();
             else m.classList.remove('show');
         }
@@ -256,7 +249,7 @@ function openQRScanner() {
                     document.getElementById('scanLine').style.display    = 'none';
                     _html5QrCode.stop().catch(() => {});
                 },
-                () => {} // ignore per-frame errors
+                () => {}
             ).then(() => {
                 document.getElementById('qrStatusMsg').textContent = 'Align QR code in the frame';
             }).catch(() => {
@@ -271,43 +264,23 @@ function openQRScanner() {
 }
 
 function closeQRModal() {
-    // Stop and clean up camera first
     if (_html5QrCode) {
         _html5QrCode.stop().catch(() => {}).finally(() => {
             _html5QrCode.clear();
             _html5QrCode = null;
         });
     }
-    // Reset UI state
     document.getElementById('scanLine').style.display    = 'block';
     document.getElementById('qrResultBox').style.display = 'none';
     document.getElementById('qrStatusMsg').textContent   = 'Starting camera...';
     document.getElementById('qrStatusMsg').style.color   = '#888';
-    // Close modal
     closeModal('qrModal');
-}
-
-// ── Choice Overlay ────────────────────────────────────────
-function dismissChoiceOverlay() {
-    const overlay = document.getElementById('choiceOverlay');
-    if (!overlay) return;
-    overlay.classList.add('hide');
-    setTimeout(() => overlay.remove(), 300);
-}
-
-function choiceDashboard() {
-    dismissChoiceOverlay();
-}
-
-function choiceScanQR() {
-    dismissChoiceOverlay();
-    setTimeout(() => openQRScanner(), 350);
 }
 
 // ── Page Navigation ───────────────────────────────────────
 function goPage(id) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.nav-btn:not(.nav-qr)').forEach(b => b.classList.remove('active'));
     document.getElementById('page-' + id).classList.add('active');
     const nb = document.getElementById('nav-' + id);
     if (nb) nb.classList.add('active');
@@ -321,15 +294,11 @@ function logout() {
 
 // ── Init ──────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-    // Personalise welcome subtitle if name in session
-    try {
-        const session = JSON.parse(sessionStorage.getItem('sscr_session') || '{}');
-        if (session && session.name) {
-            const firstName = session.name.split(' ')[0];
-            const el = document.getElementById('coSubtitle');
-            if (el) el.textContent = 'Welcome, ' + firstName + '! What would you like to do?';
-        }
-    } catch(e) {}
+    // Auto-open scanner if ?scan=1
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('scan') === '1') {
+        setTimeout(() => openQRScanner(), 400);
+    }
 
     renderNotifications();
     renderRecentAttendance();
