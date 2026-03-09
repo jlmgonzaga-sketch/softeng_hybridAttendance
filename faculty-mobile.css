@@ -259,12 +259,16 @@ body::before {
 .scan-count { font-size: 0.7rem; color: #bbb; text-align: right; margin-top: 0.35rem; }
 
 /* ── STUDENT LIST TABLE — fixed 4-column layout ── */
+/* Wrapper: solid white background, no horizontal overflow */
+.stu-table-wrap { border: 2px solid var(--gold); border-radius: 10px; overflow: hidden; background: #fff; }
 .stu-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-.stu-col-num  { width: 8%; }
-.stu-col-id   { width: 24%; }
-.stu-col-name { width: 48%; }
+/* Remove old min-width that caused side scroll */
+.stu-col-num  { width: 9%; }
+.stu-col-id   { width: 26%; }
+.stu-col-name { width: 45%; }
 .stu-col-view { width: 20%; text-align: center; }
-.stu-table td { overflow: hidden; word-break: break-word; }
+.stu-table td { overflow: hidden; word-break: break-word; padding: 0.4rem 0.4rem; font-size: 0.76rem; vertical-align: middle; border-bottom: 1px solid rgba(255,215,0,0.15); }
+.stu-table tbody tr:hover { background: rgba(255,215,0,0.07); }
 /* View Details button */
 .btn-view-stu {
   padding: 0.28rem 0.5rem; border: 1.5px solid var(--gold);
@@ -518,14 +522,25 @@ body::before {
 .pg-info { font-size: 0.72rem; color: #888; font-weight: 600; padding: 0 0.15rem; }
 
 /* ── Roster Header Row ── */
-.roster-hdr-row {
+/* ── ROSTER PAGE HEADER — solid card, no camouflage ── */
+.roster-hdr-card {
+  background: var(--gradient-gold);
+  border: 2.5px solid var(--gold-dark); border-radius: var(--radius) var(--radius) 0 0;
+  padding: 0.65rem 0.85rem;
   display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 0.65rem; padding-bottom: 0.55rem; border-bottom: 2px solid var(--gold);
+}
+.roster-hdr-row {
+  background: rgba(255,255,255,0.97);
+  border: 2.5px solid var(--gold); border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  padding: 0.55rem 0.75rem 0.55rem;
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 0;
 }
 .roster-hdr-right {
   display: flex; align-items: center; gap: 0.55rem;
 }
-.roster-count-lbl { font-size: 0.75rem; color: #888; }
+.roster-count-lbl { font-size: 0.78rem; color: #666; font-weight: 700; }
 
 /* ── Add Student Button ── */
 .btn-add-stu {
