@@ -182,21 +182,22 @@ body::before {
   color: var(--black); letter-spacing: 0.03em;
 }
 .class-pill-row {
-  display: flex; gap: 0.4rem; padding: 0.65rem;
-  flex-wrap: nowrap;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 0.4rem; padding: 0.65rem;
 }
 .class-pill-row::-webkit-scrollbar { display: none; }
 .class-pill {
-  flex: 1; min-width: 0;
-  padding: 0.6rem 0.25rem;
+  padding: 0.6rem 0.15rem;
   background: #fff; border: 2px solid var(--gold); border-radius: 10px;
-  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 0.72rem;
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: clamp(0.55rem, 2.8vw, 0.78rem);
   color: var(--primary); cursor: pointer;
-  white-space: normal; word-break: break-word;
-  transition: all 0.18s; text-align: center; line-height: 1.25;
+  overflow-wrap: anywhere; word-break: break-word;
+  transition: all 0.18s; text-align: center; line-height: 1.3;
+  width: 100%;
 }
 .class-pill:active,
-.class-pill:hover { background: var(--gradient-red); color: #fff; border-color: var(--red-dark); transform: scale(0.97); }
+.class-pill:hover { background: var(--gradient-red); color: #fff; border-color: var(--red-dark); }
 
 /* ── REPORTS CARD ── */
 .card {
