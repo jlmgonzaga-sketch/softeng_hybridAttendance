@@ -23,12 +23,22 @@ const SUBJECT_INFO = {
     Filipino:{ full: 'Filipino',    faculty: 'Gerome Carpio',   room: 'Room 103', section: 'Sec B', time: '01:00 PM', email: 'gcarpio@sscr.edu.ph' },
 };
 
+// ── Compute stats ─────────────────────────────────────────
+const SUBJECT_STATS = {};
+let grandPresent = 0, grandLate = 0, grandAbsent = 0;
 for (const [subj, days] of Object.entries(RAW_ATTENDANCE)) {
     const p = days.filter(s => s === 'P').length;
     const l = days.filter(s => s === 'L').length;
     const a = days.filter(s => s === 'A').length;
+    const total = p + l + a;
+    SUBJECT_STATS[subj] = { present: p, late: l, absent: a, total, rate: Math.round((p + l) / total * 1000) / 10 };
+    grandPresent += p; grandLate += l; grandAbsent += a;
 }
+const GRAND_TOTAL    = grandPresent + grandLate + grandAbsent;
+const GRAND_ATTENDED = grandPresent + grandLate;
+const OVERALL_RATE   = Math.round(GRAND_ATTENDED / GRAND_TOTAL * 1000) / 10;
 
+// ── Build attendance records ──────────────────────────────
 const WEEKDAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const ATTENDANCE_RECORDS = [];
 for (let day = 28; day >= 1; day--) {
@@ -39,6 +49,16 @@ for (let day = 28; day >= 1; day--) {
     for (const subj of ['Math','English','Science','Filipino']) {
         ATTENDANCE_RECORDS.push({ subject: subj, day, date: dateLabel, dateKey, weekday, status: RAW_ATTENDANCE[subj][day - 1] });
     }
+}
+
+// ── Update stat cards ─────────────────────────────────────
+function updateStatCards() {
+    const rateEl = document.getElementById('m-statRate');
+    const attEl  = document.getElementById('m-statAttended');
+    const absEl  = document.getElementById('m-statAbsent');
+    if (rateEl) rateEl.textContent = OVERALL_RATE + '%';
+    if (attEl)  attEl.textContent  = GRAND_ATTENDED;
+    if (absEl)  absEl.textContent  = grandAbsent;
 }
 
 // ── Notifications ─────────────────────────────────────────
@@ -79,25 +99,68 @@ function markRead(id)  { const n = _notifications.find(n => n.id === id); if (n)
 function markAllRead() { _notifications.forEach(n => n.unread = false); renderNotifications(); }
 
 document.addEventListener('click', e => {
-    const btn = document.getElementById('notifWrapper');
-    const dd  = document.getElementById('notifDropdown');
-    if (btn && dd && !btn.contains(e.target) && !dd.contains(e.target)) {
+    const dd = document.getElementById('notifDropdown');
+    if (dd && !dd.contains(e.target) && e.target.id !== 'notifBtn' && !e.target.closest('#notifBtn')) {
         closeNotifications();
     }
 });
 
-// ── Card builder — NO abbreviation box, just subject name + date ──
+// ── Attendance History Modal ──────────────────────────────
+function renderAHTable() {
+    const tbody = document.getElementById('m-ahTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = ATTENDANCE_RECORDS.map(r => {
+        const badge = r.status === 'P' ? 'status-present' : r.status === 'L' ? 'status-late' : 'status-absent';
+        const label = r.status === 'P' ? 'Present' : r.status === 'L' ? 'Late' : 'Absent';
+        return `<tr>
+            <td style="padding:.45rem .6rem;border-bottom:1px solid rgba(255,215,0,.15);font-size:.78rem;color:#1a1a1a;">${r.subject}</td>
+            <td style="padding:.45rem .6rem;border-bottom:1px solid rgba(255,215,0,.15);font-size:.78rem;color:#1a1a1a;">${r.date}</td>
+            <td style="padding:.45rem .6rem;border-bottom:1px solid rgba(255,215,0,.15);font-size:.78rem;color:#1a1a1a;">${r.weekday.slice(0,3)}</td>
+            <td style="padding:.45rem .6rem;border-bottom:1px solid rgba(255,215,0,.15);"><span class="status-badge ${badge}" style="font-size:.68rem;padding:.15rem .55rem;">${label}</span></td>
+        </tr>`;
+    }).join('');
+}
+
+function renderBreakdown() {
+    const grid = document.getElementById('m-breakdownGrid');
+    if (!grid) return;
+    grid.innerHTML = Object.entries(SUBJECT_STATS).map(([subj, s]) => {
+        const color = s.rate >= 90 ? '#22c55e' : s.rate >= 75 ? '#f59e0b' : '#ef4444';
+        return `<div style="background:#f9fafb;border-radius:12px;padding:.85rem 1rem;border:1.5px solid rgba(255,215,0,.3);">
+            <div style="font-weight:700;font-size:.85rem;margin-bottom:.5rem;color:#1a1a1a;">${subj} — ${SUBJECT_INFO[subj].full}</div>
+            <div style="background:#e5e7eb;border-radius:99px;height:8px;margin-bottom:.4rem;overflow:hidden;">
+                <div style="width:${s.rate}%;height:100%;border-radius:99px;background:${color};transition:width .6s ease;"></div>
+            </div>
+            <div style="font-size:.75rem;color:#555;">Present: ${s.present} &nbsp;|&nbsp; Late: ${s.late} &nbsp;|&nbsp; Absent: ${s.absent} &nbsp;|&nbsp; <strong>${s.rate}%</strong></div>
+        </div>`;
+    }).join('');
+}
+
+function mSwitchTab(tab, btn) {
+    document.querySelectorAll('.ah-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('m-panel-records').style.display   = tab === 'records'   ? 'block' : 'none';
+    document.getElementById('m-panel-breakdown').style.display = tab === 'breakdown' ? 'block' : 'none';
+    if (tab === 'breakdown') renderBreakdown();
+}
+
+// ── Card builder ──────────────────────────────────────────
 function buildCard(r) {
     const badgeClass = { P: 'status-present', L: 'status-late', A: 'status-absent' };
     const badgeLabel = { P: 'Present', L: 'Late', A: 'Absent' };
-    return `<div class="att-card" onclick="showAttDetail('${r.subject}','${r.date}','${r.weekday}','${r.status}')"><div class="att-info"><div class="att-subj-name">${SUBJECT_INFO[r.subject].full}</div><div class="att-meta">${r.date} · ${r.weekday} · ${SUBJECT_INFO[r.subject].time}</div></div><span class="status-badge ${badgeClass[r.status]}">${badgeLabel[r.status]}</span></div>`;
+    return `<div class="att-card" onclick="showAttDetail('${r.subject}','${r.date}','${r.weekday}','${r.status}')">
+        <div class="att-info">
+            <div class="att-subj-name">${SUBJECT_INFO[r.subject].full}</div>
+            <div class="att-meta">${r.date} · ${r.weekday} · ${SUBJECT_INFO[r.subject].time}</div>
+        </div>
+        <span class="status-badge ${badgeClass[r.status]}">${badgeLabel[r.status]}</span>
+    </div>`;
 }
 
 // ── Recent Attendance (Home) ───────────────────────────────
 function renderRecentAttendance() {
     const wrap = document.getElementById('recentAttendanceList');
-    const recent = ATTENDANCE_RECORDS.slice(0, 8);
-    wrap.innerHTML = recent.map(buildCard).join('');
+    wrap.innerHTML = ATTENDANCE_RECORDS.slice(0, 8).map(buildCard).join('');
 }
 
 // ── Attendance Page ───────────────────────────────────────
@@ -124,8 +187,7 @@ function renderAttPage() {
     if (attPage > totalPages) attPage = totalPages;
     const start = (attPage - 1) * ATT_PER_PAGE;
     const slice = records.slice(start, start + ATT_PER_PAGE);
-
-    const wrap = document.getElementById('attCardList');
+    const wrap  = document.getElementById('attCardList');
     document.getElementById('attCountLabel').textContent = records.length + ' records';
 
     if (!slice.length) {
@@ -157,7 +219,7 @@ function goAttPage(n) {
     renderAttPage();
 }
 
-// ── Detail helpers ────────────────────────────────────────
+// ── Detail modals ─────────────────────────────────────────
 function row(lbl, val) {
     return `<div class="detail-row"><span class="dr-lbl">${lbl}</span><span class="dr-val">${val}</span></div>`;
 }
@@ -171,7 +233,8 @@ function showAttDetail(subject, date, weekday, status) {
     const sc   = status === 'P' ? 'status-present' : status === 'L' ? 'status-late' : 'status-absent';
     document.getElementById('detailsModalBody').innerHTML =
         row('Subject', info.full) + row('Faculty', info.faculty) + row('Room', info.room) +
-        row('Section', info.section) + row('Date', date) + row('Day', weekday) + row('Time', info.time) + rowEmail('Faculty Email', info.email) +
+        row('Section', info.section) + row('Date', date) + row('Day', weekday) + row('Time', info.time) +
+        rowEmail('Faculty Email', info.email) +
         `<div class="detail-row"><span class="dr-lbl">Status</span><span class="dr-val"><span class="status-badge ${sc}">${sl}</span></span></div>`;
     openModal('detailsModal');
 }
@@ -185,7 +248,19 @@ function viewClassDetail(subject, day, time) {
 }
 
 // ── Modal open / close ────────────────────────────────────
-function openModal(id)  { document.getElementById(id).classList.add('show'); }
+function openModal(id) {
+    document.getElementById(id).classList.add('show');
+    // Populate attendance history modal when opened
+    if (id === 'attendanceHistoryModal') {
+        const cp = document.getElementById('m-chipPresent');
+        const ca = document.getElementById('m-chipAbsent');
+        const cl = document.getElementById('m-chipLate');
+        if (cp) cp.textContent = grandPresent;
+        if (ca) ca.textContent = grandAbsent;
+        if (cl) cl.textContent = grandLate;
+        renderAHTable();
+    }
+}
 function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 
 window.addEventListener('click', e => {
@@ -197,42 +272,28 @@ window.addEventListener('click', e => {
     });
 });
 
-// ── QR Scanner — async-safe close ────────────────────────
+// ── QR Scanner ────────────────────────────────────────────
 let _html5QrCode = null;
-let _qrClosing   = false;   // guard: prevent double-close race
+let _qrClosing   = false;
 
 function openQRScanner() {
-    // Reset UI
     document.getElementById('qrResultBox').style.display = 'none';
     document.getElementById('qrStatusMsg').textContent   = 'Starting camera...';
     document.getElementById('qrStatusMsg').style.color   = '#888';
     document.getElementById('scanLine').style.display    = 'block';
-
-    // Destroy any leftover instance first, then open fresh
-    _destroyQR().then(() => {
-        openModal('qrModal');
-        setTimeout(_startQR, 300);
-    });
+    _destroyQR().then(() => { openModal('qrModal'); setTimeout(_startQR, 300); });
 }
 
 function _startQR() {
     _html5QrCode = new Html5Qrcode('qr-reader');
     Html5Qrcode.getCameras().then(cameras => {
-        if (!cameras || cameras.length === 0) {
-            document.getElementById('qrStatusMsg').textContent = 'No camera found.';
-            return;
-        }
+        if (!cameras || cameras.length === 0) { document.getElementById('qrStatusMsg').textContent = 'No camera found.'; return; }
         const cam = cameras.find(c => /back|rear|environment/i.test(c.label)) || cameras[cameras.length - 1];
-        _html5QrCode.start(
-            cam.id,
-            { fps: 10, qrbox: { width: 200, height: 200 } },
+        _html5QrCode.start(cam.id, { fps: 10, qrbox: { width: 200, height: 200 } },
             (decodedText) => {
-                // QR scanned — stop camera fully, clear div, show result
-                const inst = _html5QrCode;
-                _html5QrCode = null;
+                const inst = _html5QrCode; _html5QrCode = null;
                 inst.stop().catch(() => {}).finally(() => {
                     try { inst.clear(); } catch(e) {}
-                    // Wipe the reader div so no stale video elements remain
                     const rd = document.getElementById('qr-reader');
                     if (rd) rd.innerHTML = '';
                     document.getElementById('qrResultText').textContent  = decodedText;
@@ -240,57 +301,28 @@ function _startQR() {
                     document.getElementById('qrStatusMsg').textContent   = '✅ Attendance marked as Present!';
                     document.getElementById('qrStatusMsg').style.color   = '#2e7d32';
                     document.getElementById('scanLine').style.display    = 'none';
-                    _qrClosing = false;  // unlock so Cancel/X work
+                    _qrClosing = false;
                 });
-            },
-            () => {} // per-frame errors ignored
-        ).then(() => {
-            document.getElementById('qrStatusMsg').textContent = 'Align QR code in the frame';
-        }).catch(() => {
-            document.getElementById('qrStatusMsg').textContent = 'Camera access denied.';
-            document.getElementById('qrStatusMsg').style.color = '#c62828';
-            _html5QrCode = null;
-        });
-    }).catch(() => {
-        document.getElementById('qrStatusMsg').textContent = 'Could not access camera.';
-        document.getElementById('qrStatusMsg').style.color = '#c62828';
-        _html5QrCode = null;
-    });
+            }, () => {}
+        ).then(() => { document.getElementById('qrStatusMsg').textContent = 'Align QR code in the frame'; })
+        .catch(() => { document.getElementById('qrStatusMsg').textContent = 'Camera access denied.'; document.getElementById('qrStatusMsg').style.color = '#c62828'; _html5QrCode = null; });
+    }).catch(() => { document.getElementById('qrStatusMsg').textContent = 'Could not access camera.'; document.getElementById('qrStatusMsg').style.color = '#c62828'; _html5QrCode = null; });
 }
 
-// Safely destroy the QR instance — always returns a Promise
 function _destroyQR() {
     if (!_html5QrCode) return Promise.resolve();
-    const inst = _html5QrCode;
-    _html5QrCode = null;
-    return inst.stop().catch(() => {}).finally(() => {
-        try { inst.clear(); } catch(e) {}
-    });
+    const inst = _html5QrCode; _html5QrCode = null;
+    return inst.stop().catch(() => {}).finally(() => { try { inst.clear(); } catch(e) {} });
 }
 
 function closeQRModal() {
-    if (_qrClosing) return;   // already mid-close, ignore extra taps
-    _qrClosing = true;
-
-    // Close the modal immediately so the UI feels responsive
+    if (_qrClosing) return; _qrClosing = true;
     closeModal('qrModal');
-
-    // Reset display state right away
     document.getElementById('scanLine').style.display    = 'block';
     document.getElementById('qrResultBox').style.display = 'none';
     document.getElementById('qrStatusMsg').textContent   = 'Starting camera...';
     document.getElementById('qrStatusMsg').style.color   = '#888';
-
-    // Destroy camera async in background — clears the div too
-    _destroyQR().finally(() => {
-        // Nuke and recreate the qr-reader div so html5-qrcode
-        // doesn't leave stale video elements that block next open
-        const container = document.getElementById('qr-reader');
-        if (container) {
-            container.innerHTML = '';
-        }
-        _qrClosing = false;
-    });
+    _destroyQR().finally(() => { const c = document.getElementById('qr-reader'); if (c) c.innerHTML = ''; _qrClosing = false; });
 }
 
 // ── Page Navigation ───────────────────────────────────────
@@ -303,22 +335,17 @@ function goPage(id) {
     if (id === 'attendance') { attPage = 1; renderAttPage(); }
 }
 
-// ── Utilities ─────────────────────────────────────────────
 function logout() {
     if (confirm('Are you sure you want to logout?')) window.location.href = 'login.html';
 }
 
 // ── Init ──────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-    // PORTAL: physically move notification dropdown to <body> root
-    // so NO parent stacking context can ever clip it
     const dd = document.getElementById('notifDropdown');
-    if (dd && dd.parentElement !== document.body) {
-        document.body.appendChild(dd);
-    }
-
+    if (dd && dd.parentElement !== document.body) document.body.appendChild(dd);
     const params = new URLSearchParams(window.location.search);
     if (params.get('scan') === '1') setTimeout(() => openQRScanner(), 400);
+    updateStatCards();
     renderNotifications();
     renderRecentAttendance();
     renderAttPage();
