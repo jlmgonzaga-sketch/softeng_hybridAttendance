@@ -344,7 +344,7 @@
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-hdr">
-      <div class="modal-ttl">Add Student</div>
+      <div class="modal-ttl">Add New Student</div>
       <button class="modal-close" onclick="closeModal('addStudentModal')">×</button>
     </div>
     <div class="modal-scroll">
@@ -383,9 +383,14 @@
             </label>
           </div>
         </div>
-        <button class="btn btn-primary btn-full" style="margin-top:.75rem;" onclick="submitAddStudent()">
-          Add Student
-        </button>
+        <div style="display:flex;gap:0.6rem;margin-top:1rem;">
+          <button class="btn btn-primary btn-full" onclick="submitAddStudent()">
+            ✓ &nbsp;Add Student
+          </button>
+          <button class="btn btn-secondary" style="min-width:90px;justify-content:center;" onclick="closeModal('addStudentModal')">
+            Cancel
+          </button>
+        </div>
       </div>
     </div>
   </div>
