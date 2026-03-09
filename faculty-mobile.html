@@ -27,7 +27,6 @@
 <header class="top-bar">
   <img src="sscrmnlofficiallogo.png" alt="SSC-R" class="top-logo">
   <div class="top-right">
-    <!-- Notifications -->
     <div class="notif-wrapper" id="notifWrapper">
       <button class="tb-btn" onclick="toggleNotifications(event)" id="notifBtn">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
@@ -57,26 +56,22 @@
     <button class="btn-logout" onclick="event.stopPropagation();logout()">Logout</button>
   </div>
 
-  <!-- Classes -->
+  <!-- Classes (removed "My") -->
   <div class="section">
     <div class="section-hdr">
-      <div class="section-title">My Classes</div>
+      <div class="section-title">Classes</div>
     </div>
     <div class="class-grid">
       <div class="class-card" onclick="openClassModal('Math')">
-        <span class="cc-dot math"></span>
         <div class="cc-name">Math</div>
       </div>
       <div class="class-card" onclick="openClassModal('English')">
-        <span class="cc-dot english"></span>
         <div class="cc-name">English</div>
       </div>
       <div class="class-card" onclick="openClassModal('Science')">
-        <span class="cc-dot science"></span>
         <div class="cc-name">Science</div>
       </div>
       <div class="class-card" onclick="openClassModal('Filipino')">
-        <span class="cc-dot filipino"></span>
         <div class="cc-name">Filipino</div>
       </div>
     </div>
@@ -125,6 +120,8 @@
         </table>
       </div>
       <div class="scan-count">Showing <strong id="scanShownCount">0</strong> of <strong id="scanTotalCount">0</strong> records</div>
+      <!-- Report Pagination -->
+      <div class="pagination-wrap" id="reportPagination"></div>
     </div>
   </div>
   <div class="spacer"></div>
@@ -136,7 +133,6 @@
     <div class="section-hdr"><div class="section-title">Schedule</div></div>
     <div class="sched-outer">
       <div class="sched-grid">
-        <!-- Headers -->
         <div class="sg-hdr">Time</div>
         <div class="sg-hdr">Mon</div>
         <div class="sg-hdr">Tue</div>
@@ -168,7 +164,7 @@
         <div class="sg-cell has-cls" onclick="viewClassDetails('FIL-C','Thursday','10:00 AM')"><div class="sg-code">FIL</div><div class="sg-sec">Sec C</div><div class="sg-room">Rm 103</div></div>
         <div class="sg-cell"></div>
         <div class="sg-cell"></div>
-        <!-- 01:00 -->
+        <!-- 13:00 -->
         <div class="sg-time">13:00</div>
         <div class="sg-cell has-cls" onclick="viewClassDetails('FIL-A','Monday','01:00 PM')"><div class="sg-code">FIL</div><div class="sg-sec">Sec A</div><div class="sg-room">Rm 103</div></div>
         <div class="sg-cell has-cls" onclick="viewClassDetails('MATH-C','Tuesday','01:00 PM')"><div class="sg-code">MATH</div><div class="sg-sec">Sec C</div><div class="sg-room">Rm 101</div></div>
@@ -176,7 +172,7 @@
         <div class="sg-cell has-cls" onclick="viewClassDetails('MATH-B','Thursday','01:00 PM')"><div class="sg-code">MATH</div><div class="sg-sec">Sec B</div><div class="sg-room">Rm 101</div></div>
         <div class="sg-cell has-cls" onclick="viewClassDetails('MATH-A','Friday','01:00 PM')"><div class="sg-code">MATH</div><div class="sg-sec">Sec A</div><div class="sg-room">Rm 101</div></div>
         <div class="sg-cell"></div>
-        <!-- 02:30 -->
+        <!-- 14:30 -->
         <div class="sg-time">14:30</div>
         <div class="sg-cell"></div>
         <div class="sg-cell has-cls" onclick="viewClassDetails('ENG-A','Tuesday','02:30 PM')"><div class="sg-code">ENG</div><div class="sg-sec">Sec A</div><div class="sg-room">Rm 102</div></div>
@@ -184,7 +180,7 @@
         <div class="sg-cell has-cls" onclick="viewClassDetails('ENG-C','Thursday','02:30 PM')"><div class="sg-code">ENG</div><div class="sg-sec">Sec C</div><div class="sg-room">Rm 102</div></div>
         <div class="sg-cell has-cls" onclick="viewClassDetails('FIL-C','Friday','02:30 PM')"><div class="sg-code">FIL</div><div class="sg-sec">Sec C</div><div class="sg-room">Rm 103</div></div>
         <div class="sg-cell"></div>
-        <!-- 04:00 -->
+        <!-- 16:00 -->
         <div class="sg-time">16:00</div>
         <div class="sg-cell has-cls" onclick="viewClassDetails('ENG-C','Monday','04:00 PM')"><div class="sg-code">ENG</div><div class="sg-sec">Sec C</div><div class="sg-room">Rm 102</div></div>
         <div class="sg-cell has-cls" onclick="viewClassDetails('SCI-C','Tuesday','04:00 PM')"><div class="sg-code">SCI</div><div class="sg-sec">Sec C</div><div class="sg-room">Lab 201</div></div>
@@ -198,14 +194,20 @@
   <div class="spacer"></div>
 </div>
 
-<!-- PAGE: ROSTER -->
+<!-- PAGE: STUDENT LIST (renamed from Roster) -->
 <div class="page" id="page-roster">
   <div class="section">
-    <div class="section-hdr">
+    <div class="roster-hdr-row">
       <div class="section-title">Student List</div>
-      <span style="font-size:.75rem;color:#888;">
-        <strong id="rosterShownCount">0</strong> / <strong id="rosterTotalCount">0</strong>
-      </span>
+      <div class="roster-hdr-right">
+        <span class="roster-count-lbl">
+          <strong id="rosterShownCount">0</strong> / <strong id="rosterTotalCount">0</strong>
+        </span>
+        <button class="btn-add-stu" onclick="openAddStudentModal()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Student
+        </button>
+      </div>
     </div>
     <div class="roster-search-row">
       <input type="text" id="rosterSearch" placeholder="Search by name or ID…" oninput="filterRoster()">
@@ -222,6 +224,8 @@
         <tbody id="rosterTableBody"></tbody>
       </table>
     </div>
+    <!-- Roster Pagination -->
+    <div class="pagination-wrap" id="rosterPagination"></div>
   </div>
   <div class="spacer"></div>
 </div>
@@ -258,9 +262,10 @@
     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
     <span class="nav-label">Schedule</span>
   </button>
+  <!-- nav label changed from Roster to Student List -->
   <button class="nav-btn" id="nav-roster" onclick="goPage('roster');loadRoster()">
     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-    <span class="nav-label">Roster</span>
+    <span class="nav-label">Student List</span>
   </button>
   <button class="nav-btn" id="nav-settings" onclick="goPage('settings')">
     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -277,7 +282,6 @@
       <button class="modal-close" onclick="closeModal('classModal')">×</button>
     </div>
     <div class="modal-scroll">
-      <!-- QR -->
       <div style="text-align:center;margin-bottom:1rem;">
         <img id="classQRCode" src="" alt="QR Code" class="qr-img" onclick="enlargeQR()">
         <div style="font-size:.72rem;color:#888;margin-top:.3rem;">Tap to enlarge</div>
@@ -288,20 +292,17 @@
         <p><strong>Date:</strong> <span id="sessionDate"></span></p>
         <p><strong>Time:</strong> <span id="sessionTime"></span></p>
       </div>
-      <!-- Section Tabs -->
       <div class="sec-tabs" style="margin-top:.85rem;">
         <button class="sec-tab active" id="tab-SecA" onclick="switchSection('Sec A')">Sec A <span id="count-SecA"></span></button>
         <button class="sec-tab" id="tab-SecB" onclick="switchSection('Sec B')">Sec B <span id="count-SecB"></span></button>
         <button class="sec-tab" id="tab-SecC" onclick="switchSection('Sec C')">Sec C <span id="count-SecC"></span></button>
       </div>
-      <!-- Summary -->
       <div class="att-summary">
         <div class="sum-item total">Total: <strong id="totalStudents">0</strong></div>
         <div class="sum-item present">Present: <strong id="presentCount">0</strong></div>
         <div class="sum-item absent">Absent: <strong id="absentCount">0</strong></div>
         <div class="sum-item late">Late: <strong id="lateCount">0</strong></div>
       </div>
-      <!-- Student Table -->
       <div class="stu-table-wrap">
         <table class="stu-table">
           <thead><tr><th>#</th><th>ID</th><th>Name</th><th>Time In</th><th>Status</th></tr></thead>
@@ -335,6 +336,58 @@
       <button class="modal-close" onclick="closeModal('detailsModal')">×</button>
     </div>
     <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- MODAL: Add Student -->
+<div id="addStudentModal" class="modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-hdr">
+      <div class="modal-ttl">Add Student</div>
+      <button class="modal-close" onclick="closeModal('addStudentModal')">×</button>
+    </div>
+    <div class="modal-scroll">
+      <div class="add-stu-form">
+        <div class="afs-row">
+          <label>Student ID</label>
+          <input type="text" id="newStuId" placeholder="e.g. 2024-00099" autocomplete="off">
+        </div>
+        <div class="afs-row">
+          <label>Full Name <span class="afs-hint">(Last, First Middle)</span></label>
+          <input type="text" id="newStuName" placeholder="e.g. DELA CRUZ, Juan Santos" autocomplete="off">
+        </div>
+        <div class="afs-row">
+          <label>Section</label>
+          <select id="newStuSection">
+            <option value="">Select section…</option>
+            <option value="Sec A">Sec A</option>
+            <option value="Sec B">Sec B</option>
+            <option value="Sec C">Sec C</option>
+          </select>
+        </div>
+        <div class="afs-row">
+          <label>Subjects Enrolled</label>
+          <div class="subj-checks" id="newStuSubjects">
+            <label class="subj-check-label" onclick="toggleSubjCheck(this)">
+              <input type="checkbox" value="Math"> Math
+            </label>
+            <label class="subj-check-label" onclick="toggleSubjCheck(this)">
+              <input type="checkbox" value="English"> English
+            </label>
+            <label class="subj-check-label" onclick="toggleSubjCheck(this)">
+              <input type="checkbox" value="Science"> Science
+            </label>
+            <label class="subj-check-label" onclick="toggleSubjCheck(this)">
+              <input type="checkbox" value="Filipino"> Filipino
+            </label>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-full" style="margin-top:.75rem;" onclick="submitAddStudent()">
+          Add Student
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
