@@ -11,29 +11,6 @@
 </head>
 <body>
 
-<!-- ══ CHOICE OVERLAY ══ -->
-<div id="choiceOverlay">
-  <img src="sscrmnlofficiallogo.png" alt="SSC-R" class="co-logo">
-  <div class="co-title">Welcome back!</div>
-  <div class="co-sub" id="coSubtitle">What would you like to do?</div>
-  <div class="co-grid">
-    <div class="co-box" onclick="choiceDashboard()">
-      <div class="co-icon">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      </div>
-      <div class="co-box-title">Dashboard</div>
-      <div class="co-box-sub">View attendance &amp; schedule</div>
-    </div>
-    <div class="co-box" onclick="choiceScanQR()">
-      <div class="co-icon">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 7 23 1 17 1"/><line x1="23" y1="1" x2="14" y2="10"/><polyline points="1 17 1 23 7 23"/><line x1="1" y1="23" x2="10" y2="14"/></svg>
-      </div>
-      <div class="co-box-title">Scan QR</div>
-      <div class="co-box-sub">Mark your attendance now</div>
-    </div>
-  </div>
-</div>
-
 <!-- TOP BAR -->
 <header class="top-bar">
   <img src="sscrmnlofficiallogo.png" alt="SSC-R" class="top-logo">
@@ -67,38 +44,24 @@
     <button class="btn-logout" onclick="logout()">Logout</button>
   </div>
 
+  <!-- 4 stats in 1 row -->
   <div class="stats-grid">
     <div class="stat-card sc-p">
-      <div class="stat-label-top">Attendance Rate</div>
+      <div class="stat-label-top">Att. Rate</div>
       <div class="stat-value">94.6%</div>
-      <div class="stat-label">Overall Feb 2026</div>
     </div>
     <div class="stat-card sc-s">
-      <div class="stat-label-top">Classes Attended</div>
+      <div class="stat-label-top">Attended</div>
       <div class="stat-value">106</div>
-      <div class="stat-label">Out of 112 Total</div>
     </div>
     <div class="stat-card sc-w">
       <div class="stat-label-top">Absences</div>
       <div class="stat-value">6</div>
-      <div class="stat-label">February 2026</div>
     </div>
     <div class="stat-card sc-i">
-      <div class="stat-label-top">Late Arrivals</div>
+      <div class="stat-label-top">Late</div>
       <div class="stat-value">15</div>
-      <div class="stat-label">This Month</div>
     </div>
-  </div>
-
-  <div class="qr-cta" onclick="openQRScanner()">
-    <div class="qr-cta-icon">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-    </div>
-    <div class="qr-cta-text">
-      <div class="title">Scan QR Code</div>
-      <div class="sub">Mark your attendance now</div>
-    </div>
-    <div class="qr-cta-arrow">›</div>
   </div>
 
   <div class="section" style="margin-top:.75rem;">
@@ -140,10 +103,9 @@
   <div class="spacer"></div>
 </div>
 
-<!-- PAGE: SCHEDULE -->
+<!-- PAGE: SCHEDULE — faculty style, no header title -->
 <div class="page" id="page-schedule">
   <div class="section">
-    <div class="section-hdr"><div class="section-title">My Schedule</div></div>
     <div class="sched-outer">
       <div class="sched-grid">
         <div class="sg-hdr">Time</div>
@@ -223,7 +185,7 @@
   <div class="spacer"></div>
 </div>
 
-<!-- BOTTOM NAV -->
+<!-- BOTTOM NAV — Home | Attendance | [QR] | Schedule | Settings -->
 <nav class="bottom-nav">
   <button class="nav-btn active" id="nav-home" onclick="goPage('home')">
     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -232,6 +194,13 @@
   <button class="nav-btn" id="nav-attendance" onclick="goPage('attendance')">
     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
     <span class="nav-label">Attendance</span>
+  </button>
+  <!-- QR Center Button -->
+  <button class="nav-btn nav-qr" onclick="openQRScanner()">
+    <div class="nav-qr-circle">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 7 23 1 17 1"/><line x1="23" y1="1" x2="14" y2="10"/><polyline points="1 17 1 23 7 23"/><line x1="1" y1="23" x2="10" y2="14"/></svg>
+    </div>
+    <span class="nav-label">Scan QR</span>
   </button>
   <button class="nav-btn" id="nav-schedule" onclick="goPage('schedule')">
     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
