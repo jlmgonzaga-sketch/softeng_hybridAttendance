@@ -174,25 +174,26 @@ body::before {
   overflow: hidden;
 }
 .classes-card-hdr {
-  background: linear-gradient(135deg, #8B0000, #1a1a1a);
-  padding: 0.6rem 1rem; border-bottom: 2px solid var(--gold);
+  background: var(--gradient-gold);
+  padding: 0.6rem 1rem; border-bottom: 2px solid var(--gold-dark);
 }
 .classes-card-title {
   font-family: 'Syne', sans-serif; font-weight: 800; font-size: 0.95rem;
-  color: var(--gold); letter-spacing: 0.03em;
+  color: var(--black); letter-spacing: 0.03em;
 }
 .class-pill-row {
-  display: flex; gap: 0.5rem; padding: 0.75rem;
-  overflow-x: auto; -webkit-overflow-scrolling: touch;
+  display: flex; gap: 0.4rem; padding: 0.65rem;
+  flex-wrap: nowrap;
 }
 .class-pill-row::-webkit-scrollbar { display: none; }
 .class-pill {
   flex: 1; min-width: 0;
-  padding: 0.65rem 0.5rem;
-  background: #fff; border: 2.5px solid var(--gold); border-radius: 10px;
-  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 0.82rem;
-  color: var(--primary); cursor: pointer; white-space: nowrap;
-  transition: all 0.18s; text-align: center;
+  padding: 0.6rem 0.25rem;
+  background: #fff; border: 2px solid var(--gold); border-radius: 10px;
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 0.72rem;
+  color: var(--primary); cursor: pointer;
+  white-space: normal; word-break: break-word;
+  transition: all 0.18s; text-align: center; line-height: 1.25;
 }
 .class-pill:active,
 .class-pill:hover { background: var(--gradient-red); color: #fff; border-color: var(--red-dark); transform: scale(0.97); }
