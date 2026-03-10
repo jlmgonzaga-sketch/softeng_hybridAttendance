@@ -176,7 +176,7 @@ function renderLogs() {
             '<td style="font-size:.72rem;font-weight:700;white-space:nowrap;">' + lastName + '</td>' +
             '<td style="font-size:.72rem;font-weight:800;color:' + actionColor + ';white-space:nowrap;">' + l.action + '</td>' +
             '<td style="font-size:.72rem;font-weight:700;color:' + roleColor + ';white-space:nowrap;">' + roleShort + '</td>' +
-            '<td style="font-size:.72rem;font-weight:800;color:' + sevColor + ';text-transform:capitalize;">' + l.severity.charAt(0).toUpperCase() + '</td>' +
+            '<td style="text-align:center;"><span class="sev-dot ' + l.severity + '"></span></td>' +
             '<td style="text-align:center;"><button class="action-btn view" onclick="event.stopPropagation();showLogDetail(window[\'_lref_' + (start+i) + '\'])">View</button></td>';
         tbody.appendChild(tr);
     });
