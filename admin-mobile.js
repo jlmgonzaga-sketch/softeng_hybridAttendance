@@ -140,13 +140,13 @@ function renderLogs() {
         card.onclick   = () => showLogDetail(l);
         card.innerHTML =
             '<div class="log-card-top">' +
-                '<span class="log-card-user">' + l.user + '</span>' +
+                '<span class="log-card-user">' + l.user.split(' ').slice(-1)[0] + ', ' + l.user.split(' ')[0] + '</span>' +
                 '<span class="log-card-time">' + fmtRelative(l.timestamp) + '</span>' +
             '</div>' +
             '<div class="log-card-desc">' + l.desc + '</div>' +
             '<div class="log-card-meta">' +
                 '<span class="log-badge log-' + l.action.toLowerCase() + '">' + l.action + '</span>' +
-                '<span class="role-badge' + (l.role === 'Faculty' ? ' faculty' : '') + '">' + l.role + '</span>' +
+                '<span class="role-badge' + (l.role === 'Faculty' ? ' faculty' : '') + '">' + (l.role === 'Administrator' ? 'Admin' : l.role) + '</span>' +
                 '<span class="sev-dot ' + l.severity + '"></span>' +
                 '<span class="log-ip">' + l.ip + '</span>' +
             '</div>';
@@ -334,8 +334,8 @@ function renderAttendanceTable(allRowsOverride) {
         tr.innerHTML =
             '<td style="font-family:monospace;font-size:.75rem;">' + r.id + '</td>' +
             '<td style="font-weight:600;font-size:.78rem;">' + r.name + '</td>' +
-            '<td style="font-size:.78rem;">' + r.subject + '</td>' +
-            '<td style="font-size:.78rem;">' + r.section + '</td>' +
+            '<td style="font-size:.75rem;">' + r.subject + '</td>' +
+            '<td style="font-size:.75rem;">' + r.section + '</td>' +
             '<td><span class="timein-pill ' + tc + '">' + (r.timeIn || '—') + '</span></td>' +
             '<td><span class="status-badge ' + sc + '">' + sl + '</span></td>' +
             '<td class="no-print">' +
@@ -532,7 +532,6 @@ function saveEdit(studentId, subject, section) {
     } else { rec.timeIn = ''; }
     closeModal('editModal');
     renderAttendanceTable();
-    updateStatCards();
     if (st) showToast(studentId + ' marked as ' + st + '.', st === 'Present' ? 'success' : st === 'Late' ? 'warn' : 'error', 2000);
 }
 
@@ -639,7 +638,6 @@ window.addEventListener('click', e => {
 // ════════════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
     seedDemo();
-    updateStatCards();
     const fmt = d => d.toISOString().split('T')[0];
     document.getElementById('dateFrom').value = fmt(TODAY);
     document.getElementById('dateTo').value   = fmt(TODAY);
