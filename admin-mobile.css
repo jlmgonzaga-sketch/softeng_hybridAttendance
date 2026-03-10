@@ -87,7 +87,6 @@ body {
 .section-hdr {
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 0.65rem; padding-bottom: 0.55rem;
-  border-bottom: 2px solid var(--gold);
 }
 .section-title {
   font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; color: var(--primary);
@@ -160,22 +159,28 @@ body {
 
 /* ── TABLE ── */
 .table-wrap { border: 2px solid var(--gold); border-radius: 11px; overflow-x: auto; overflow-y: visible; }
-.att-table { width: 100%; border-collapse: collapse; background: #fff; table-layout: fixed; }
+.att-table { width: 100%; border-collapse: collapse; background: #fff; }
+.att-table col.col-id     { width: 22%; }
+.att-table col.col-name   { width: 38%; }
+.att-table col.col-sec    { width: 8%; }
+.att-table col.col-status { width: 20%; }
+.att-table col.col-act    { width: 12%; }
 .att-table thead {
   background: var(--primary); color: var(--gold);
   position: sticky; top: 0; z-index: 2;
 }
 .att-table th {
-  padding: 0.45rem 0.35rem;
+  padding: 0.5rem 0.4rem;
   font-family: 'Syne', sans-serif; font-size: 0.65rem;
   font-weight: 700; text-align: left; white-space: nowrap;
   border-bottom: 2px solid var(--gold);
 }
 .att-table td {
-  padding: 0.38rem 0.35rem;
+  padding: 0.45rem 0.4rem;
   border-bottom: 1px solid rgba(255,215,0,0.15);
   font-size: 0.75rem; vertical-align: middle;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  line-height: 1.4;
 }
 .att-table tbody tr:hover { background: rgba(255,215,0,0.06); }
 .att-table tbody tr:last-child td { border-bottom: none; }
@@ -242,8 +247,8 @@ body {
   background: rgba(139,0,0,0.1); color: var(--red-dark); border-color: var(--red);
 }
 .sev-dot {
-  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
-  display: inline-block;
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  display: inline-block; vertical-align: middle;
 }
 .sev-dot.info    { background: #1565c0; }
 .sev-dot.warning { background: #e65100; }
@@ -284,15 +289,16 @@ body {
 .modal {
   display: none; position: fixed; inset: 0;
   background: rgba(0,0,0,0.72); z-index: 800;
-  align-items: flex-end; justify-content: center;
+  align-items: center; justify-content: center;
+  padding: 1rem;
 }
 .modal.show { display: flex; animation: fadeIn 0.2s ease; }
 .modal-sheet {
-  background: #fff; border-radius: 22px 22px 0 0; width: 100%;
-  max-height: 90vh; overflow-y: auto;
-  border: 3px solid var(--gold); border-bottom: none;
-  animation: slideUp 0.28s ease;
-  padding-bottom: calc(1rem + var(--safe));
+  background: #fff; border-radius: 18px; width: 100%; max-width: 480px;
+  max-height: 82vh; overflow-y: auto;
+  border: 3px solid var(--gold);
+  animation: fadeIn 0.2s ease;
+  padding-bottom: 1rem;
 }
 .modal-handle {
   width: 38px; height: 4px; border-radius: 99px;
