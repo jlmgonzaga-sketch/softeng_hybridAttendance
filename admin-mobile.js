@@ -96,18 +96,41 @@ function fmtRelative(dt) {
     return Math.floor(diff/1440) + 'd ago';
 }
 
+function applyLogPeriod() {
+    _logPage = 1;
+    renderLogs();
+    showToast('Logs filtered.', 'success', 1500);
+}
+
+function clearLogFilters() {
+    document.getElementById('logSearch').value      = '';
+    document.getElementById('filterType').value     = '';
+    document.getElementById('filterRole').value     = '';
+    document.getElementById('filterSeverity').value = '';
+    document.getElementById('filterPeriod').value   = '';
+    _logPage = 1;
+    renderLogs();
+}
+
 function renderLogs() {
-    const search = (document.getElementById('logSearch').value || '').toLowerCase();
-    const fType  = document.getElementById('filterType').value;
-    const fRole  = document.getElementById('filterRole').value;
-    const fSev   = document.getElementById('filterSeverity').value;
-    const fDate  = document.getElementById('filterDate').value;
+    const search  = (document.getElementById('logSearch').value || '').toLowerCase();
+    const fType   = document.getElementById('filterType').value;
+    const fRole   = document.getElementById('filterRole').value;
+    const fSev    = document.getElementById('filterSeverity').value;
+    const fPeriod = document.getElementById('filterPeriod').value;
+
+    const now   = new Date();
+    const startOfDay  = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfWeek = new Date(startOfDay); startOfWeek.setDate(startOfDay.getDate() - startOfDay.getDay());
+    const startOfMonth= new Date(now.getFullYear(), now.getMonth(), 1);
 
     _logFiltered = ALL_LOGS.filter(l => {
-        if (fType && l.action !== fType)                   return false;
-        if (fRole && l.role   !== fRole)                   return false;
-        if (fSev  && l.severity !== fSev)                  return false;
-        if (fDate && fmtDateOnly(l.timestamp) !== fDate)   return false;
+        if (fType && l.action   !== fType) return false;
+        if (fRole && l.role     !== fRole) return false;
+        if (fSev  && l.severity !== fSev)  return false;
+        if (fPeriod === 'today' && l.timestamp < startOfDay)   return false;
+        if (fPeriod === 'week'  && l.timestamp < startOfWeek)  return false;
+        if (fPeriod === 'month' && l.timestamp < startOfMonth) return false;
         if (search && !(
             l.user.toLowerCase().includes(search) ||
             l.action.toLowerCase().includes(search) ||
@@ -117,16 +140,14 @@ function renderLogs() {
         return true;
     });
 
-    document.getElementById('logCountBadge').textContent = _logFiltered.length;
-
-    const container  = document.getElementById('logCardList');
+    const tbody      = document.getElementById('logsTableBody');
     const total      = _logFiltered.length;
     const totalPages = Math.max(1, Math.ceil(total / LOG_ROWS_PER_PAGE));
     if (_logPage > totalPages) _logPage = totalPages;
-    container.innerHTML = '';
+    tbody.innerHTML = '';
 
     if (!total) {
-        container.innerHTML = '<div style="text-align:center;padding:2rem;color:#aaa;font-size:.85rem;">No logs found. Try adjusting your filters.</div>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#aaa;padding:2rem;font-size:.82rem;">No logs found.</td></tr>';
         buildLogPagination(0, 0);
         return;
     }
@@ -135,28 +156,26 @@ function renderLogs() {
     const pageRows = _logFiltered.slice(start, start + LOG_ROWS_PER_PAGE);
 
     pageRows.forEach((l, i) => {
-        const card = document.createElement('div');
-        card.className = 'log-card sev-' + l.severity;
-        card.onclick   = () => showLogDetail(l);
-        card.innerHTML =
-            '<div class="log-card-top">' +
-                '<span class="log-card-user">' + l.user.split(' ').slice(-1)[0] + ', ' + l.user.split(' ')[0] + '</span>' +
-                '<span class="log-card-time">' + fmtRelative(l.timestamp) + '</span>' +
-            '</div>' +
-            '<div class="log-card-desc">' + l.desc + '</div>' +
-            '<div class="log-card-meta">' +
-                '<span class="log-badge log-' + l.action.toLowerCase() + '">' + l.action + '</span>' +
-                '<span class="role-badge' + (l.role === 'Faculty' ? ' faculty' : '') + '">' + (l.role === 'Administrator' ? 'Admin' : l.role) + '</span>' +
-                '<span class="sev-dot ' + l.severity + '"></span>' +
-                '<span class="log-ip">' + l.ip + '</span>' +
-            '</div>';
-        container.appendChild(card);
+        const ac       = 'log-' + l.action.toLowerCase();
+        const roleShort = l.role === 'Administrator' ? 'Admin' : 'Faculty';
+        const sevDotColor = l.severity === 'info' ? '#1565c0' : l.severity === 'warning' ? '#e65100' : '#c62828';
+        const tr = document.createElement('tr');
+        tr.style.cursor = 'pointer';
+        tr.onclick = () => showLogDetail(l);
+        // Store ref for view button
+        window['_lref_' + (start + i)] = l;
+        tr.innerHTML =
+            '<td style="font-size:.72rem;font-weight:600;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + l.user.split(' ')[0] + ' ' + (l.user.split(' ')[1]||'')[0] + '.</td>' +
+            '<td><span class="log-badge ' + ac + '">' + l.action + '</span></td>' +
+            '<td><span class="role-badge' + (l.role === 'Faculty' ? ' faculty' : '') + '">' + roleShort + '</span></td>' +
+            '<td style="text-align:center;"><span class="sev-dot ' + l.severity + '" title="' + l.severity + '"></span></td>' +
+            '<td style="font-size:.68rem;color:#888;white-space:nowrap;">' + fmtRelative(l.timestamp) + '</td>' +
+            '<td><button class="action-btn view" onclick="event.stopPropagation();showLogDetail(window[\'_lref_' + (start+i) + '\'])">View</button></td>';
+        tbody.appendChild(tr);
     });
 
     buildLogPagination(totalPages, total);
 }
-
-function showLogDetail(log) {
     const sevColors = { info:'#1565c0', warning:'#e65100', error:'#c62828' };
     const ac = 'log-' + log.action.toLowerCase();
     document.getElementById('logDetailBody').innerHTML =
@@ -230,15 +249,6 @@ function exportLogs() {
     }
 }
 
-function clearLogFilters() {
-    document.getElementById('logSearch').value      = '';
-    document.getElementById('filterType').value     = '';
-    document.getElementById('filterRole').value     = '';
-    document.getElementById('filterSeverity').value = '';
-    document.getElementById('filterDate').value     = '';
-    _logPage = 1;
-    renderLogs();
-}
 
 // ════════════════════════════════════════════════════════
 //  ATTENDANCE
@@ -377,10 +387,7 @@ function buildPagination(totalPages, totalRows) {
 
 function generateReport() {
     const period = document.getElementById('viewPeriod').value;
-    const dfrom  = document.getElementById('dateFrom').value;
-    const dto    = document.getElementById('dateTo').value;
-    if (!period || !dfrom || !dto) { showToast('Please select a View Period and date range first.', 'warn'); return; }
-    if (dfrom > dto) { showToast('"Date From" cannot be after "Date To".', 'warn'); return; }
+    if (!period) { showToast('Please select a Period first.', 'warn'); return; }
     const allRows = buildRows();
     _lastFilteredRows = allRows;
     let c = { present: 0, absent: 0, late: 0, unmarked: 0 };
@@ -408,13 +415,9 @@ function refreshData() {
     document.getElementById('subjectFilter').value = '';
     document.getElementById('statusFilter').value  = '';
     document.getElementById('viewPeriod').value    = '';
-    const fmt = d => d.toISOString().split('T')[0];
-    document.getElementById('dateFrom').value = fmt(TODAY);
-    document.getElementById('dateTo').value   = fmt(TODAY);
     document.getElementById('reportStrip').style.display = 'none';
     _currentPage = 1;
     renderAttendanceTable();
-    updateStatCards();
 }
 
 function exportToExcel() {
@@ -435,9 +438,7 @@ function printTable() {
     const hdr      = document.getElementById('printHeader');
     const subjFilt = document.getElementById('subjectFilter').value || 'All Subjects';
     const secFilt  = document.getElementById('sectionFilter').value || 'All Sections';
-    const dfrom    = document.getElementById('dateFrom').value;
-    const dto      = document.getElementById('dateTo').value;
-    meta.textContent = subjFilt + ' | ' + secFilt + ' | ' + dfrom + ' to ' + dto + ' | Generated: ' + TODAY_STR;
+    meta.textContent = subjFilt + ' | ' + secFilt + ' | Generated: ' + TODAY_STR;
     hdr.style.display = 'block'; window.print(); hdr.style.display = 'none';
 }
 
@@ -446,10 +447,8 @@ function downloadPDF() {
     if (!rows.length) { showToast('No data to export.', 'warn'); return; }
     const subjFilt = document.getElementById('subjectFilter').value || 'All Subjects';
     const secFilt  = document.getElementById('sectionFilter').value || 'All Sections';
-    const dfrom    = document.getElementById('dateFrom').value;
-    const dto      = document.getElementById('dateTo').value;
     let html = `<style>body{font-family:Arial,sans-serif;font-size:11px;}h2{margin:0 0 4px;font-size:15px;}p{margin:0 0 10px;color:#666;font-size:10px;}table{width:100%;border-collapse:collapse;}th{background:#1A1A1A;color:#C9A227;padding:6px 8px;text-align:left;font-size:10px;}td{padding:5px 8px;border-bottom:1px solid #eee;font-size:10px;}tr:nth-child(even) td{background:#fafafa;}.badge{display:inline-block;padding:2px 7px;border-radius:12px;font-weight:700;font-size:9px;}.p{background:#e8f5e9;color:#2e7d32;}.a{background:#ffebee;color:#c62828;}.l{background:#fff3e0;color:#e65100;}.u{background:#f0f0f0;color:#999;}</style>
-    <h2>SSC-R Attendance Report</h2><p>${subjFilt} | ${secFilt} | ${dfrom} to ${dto} | Generated: ${TODAY_STR}</p>
+    <h2>SSC-R Attendance Report</h2><p>${subjFilt} | ${secFilt} | Generated: ${TODAY_STR}</p>
     <table><thead><tr><th>Student ID</th><th>Student Name</th><th>Subject</th><th>Section</th><th>Date</th><th>Time In</th><th>Status</th></tr></thead><tbody>`;
     rows.forEach(r => {
         const cls = r.status === 'Present' ? 'p' : r.status === 'Absent' ? 'a' : r.status === 'Late' ? 'l' : 'u';
@@ -638,8 +637,5 @@ window.addEventListener('click', e => {
 // ════════════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
     seedDemo();
-    const fmt = d => d.toISOString().split('T')[0];
-    document.getElementById('dateFrom').value = fmt(TODAY);
-    document.getElementById('dateTo').value   = fmt(TODAY);
     renderAttendanceTable();
 });
