@@ -5,121 +5,184 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SSC-R Admin Dashboard - Attendance System</title>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-    <!-- SheetJS for Excel export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- html2pdf for PDF download -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <!-- Student roster + global data — must load BEFORE inline scripts -->
-   <script src="auth.js"></script>
-<script src="students-data.js"></script>
+    <script src="auth.js"></script>
+    <script src="students-data.js"></script>
     <link rel="stylesheet" href="admin.css">
-    
     <!-- PWA -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#8B0000">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="sscrmnlofficiallogo.png">
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sscr_attendance/sw.js');
-  }
-</script>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#8B0000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="sscrmnlofficiallogo.png">
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sscr_attendance/sw.js');
+      }
+    </script>
 </head>
 <body>
-    <div class="container">
+<div class="container">
 
-        <!-- Header -->
-        <div class="header">
-            <div class="header-left">
-                <div class="logo-container">
-                    <img src="sscrmnlofficiallogo.png" alt="SSC-R Logo" class="logo-img">
-                </div>
-            </div>
-            <div class="header-right">
-                <button class="btn btn-secondary" onclick="viewLogs()" title="View system activity logs">
-                    System Logs
-                    
-                </button>
-                <div class="admin-profile">
-                    <div class="admin-avatar">JG</div>
-                    <div>
-                        <div class="admin-name">Julliana Louisse Gonzaga</div>
-                        <div class="admin-role">System Administrator</div>
-                    </div>
-                </div>
-                <button class="btn-logout" onclick="logout()">Logout</button>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <div class="logo-container">
+                <img src="sscrmnlofficiallogo.png" alt="SSC-R Logo" class="logo-img">
             </div>
         </div>
-
-        <!-- Unified: Attendance Records + Reports -->
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title">Student Attendance Records</div>
-                <div class="card-actions">
-                    <button class="btn btn-secondary" onclick="refreshData()"   title="Refresh table"> Refresh</button>
-                    <button class="btn btn-secondary" onclick="exportToExcel()" title="Export visible table as Excel"> Export</button>
-                    <button class="btn btn-primary"   onclick="printTable()"    title="Print table"> Print</button>
-                    <button class="btn btn-success"   onclick="downloadPDF()"   title="Download full report as PDF"> Download</button>
+        <div class="header-right">
+            <div class="admin-profile" onclick="openSettings()" style="cursor:pointer;" title="Settings">
+                <div class="admin-avatar">JG</div>
+                <div>
+                    <div class="admin-name">Julliana Louisse Gonzaga</div>
+                    <div class="admin-role">System Administrator</div>
                 </div>
             </div>
+            <button class="btn-logout" onclick="logout()">Logout</button>
+        </div>
+    </div>
 
-            <!-- Filters -->
-            <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem;">
-                <!-- Search -->
-                <div class="search-box" style="flex:2;min-width:200px;">
+    <!-- Main Tabbed Card -->
+    <div class="card">
+
+        <!-- Shared Filter Bar -->
+        <div class="shared-filter-bar" style="margin-bottom:1.1rem;">
+            <div class="filter-bar-row">
+                <div class="search-box">
                     <span class="search-icon"></span>
-                    <input type="text" id="searchInput"
-                        placeholder="Search by name or ID…"
-                        oninput="_currentPage=1;renderAttendanceTable()">
+                    <input type="text" id="sharedSearch" placeholder="Search name, ID, user, action…"
+                        oninput="_logPage=1;_currentPage=1;renderLogs();renderAttendanceTable();">
                 </div>
-                <!-- Section -->
-                <select class="filter-select" id="sectionFilter"
-                        onchange="_currentPage=1;renderAttendanceTable()"
-                        style="flex:1;min-width:120px;">
-                    <option value="">All Sections</option>
-                    <option value="Sec A">Section A</option>
-                    <option value="Sec B">Section B</option>
-                    <option value="Sec C">Section C</option>
+                <select class="filter-select" id="filterType" onchange="_logPage=1;renderLogs()">
+                    <option value="">All Actions</option>
+                    <option value="Login">Login</option>
+                    <option value="Logout">Logout</option>
+                    <option value="Edit">Edit</option>
+                    <option value="Generate">Generate</option>
+                    <option value="Export">Export</option>
+                    <option value="Print">Print</option>
+                    <option value="View">View</option>
+                    <option value="Error">Error</option>
+                    <option value="System">System</option>
                 </select>
-                <!-- Subject -->
-                <select class="filter-select" id="subjectFilter"
-                        onchange="_currentPage=1;renderAttendanceTable()"
-                        style="flex:1;min-width:110px;">
+                <select class="filter-select" id="filterRole" onchange="_logPage=1;renderLogs()">
+                    <option value="">All Roles</option>
+                    <option value="Administrator">Administrator</option>
+                    <option value="Faculty">Faculty</option>
+                </select>
+                <select class="filter-select" id="sectionFilter" onchange="_currentPage=1;renderAttendanceTable()">
+                    <option value="">All Sections</option>
+                    <option value="Sec A">Sec A</option>
+                    <option value="Sec B">Sec B</option>
+                    <option value="Sec C">Sec C</option>
+                </select>
+                <select class="filter-select" id="subjectFilter" onchange="_currentPage=1;renderAttendanceTable()">
                     <option value="">All Subjects</option>
                     <option value="Math">Math</option>
                     <option value="English">English</option>
                     <option value="Science">Science</option>
                     <option value="Filipino">Filipino</option>
                 </select>
-                <!-- Status -->
-                <select class="filter-select" id="statusFilter"
-                        onchange="_currentPage=1;renderAttendanceTable()"
-                        style="flex:1;min-width:120px;">
+                <select class="filter-select" id="statusFilter" onchange="_currentPage=1;renderAttendanceTable()">
                     <option value="">All Status</option>
                     <option value="Present">Present</option>
                     <option value="Absent">Absent</option>
                     <option value="Late">Late</option>
                     <option value="Unmarked">Unmarked</option>
                 </select>
-                <!-- View Period -->
-                <select class="filter-select" id="viewPeriod" style="flex:1;min-width:140px;">
-                    <option value="" selected>View Period</option>
-                    <option value="daily">Daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="monthly">Monthly</option>
+                <select class="filter-select" id="filterSeverity" onchange="_logPage=1;renderLogs()">
+                    <option value="">All Severity</option>
+                    <option value="info">Info</option>
+                    <option value="warning">Warning</option>
+                    <option value="error">Error</option>
                 </select>
-                <!-- Date From -->
-                <input type="date" class="form-input" id="dateFrom"
-                    style="flex:1;min-width:130px;padding:0.6rem 0.8rem;border:2px solid var(--gold);border-radius:12px;font-family:'DM Sans',sans-serif;">
-                <!-- Date To -->
-                <input type="date" class="form-input" id="dateTo"
-                    style="flex:1;min-width:130px;padding:0.6rem 0.8rem;border:2px solid var(--gold);border-radius:12px;font-family:'DM Sans',sans-serif;">
-                <!-- Generate -->
-                <button class="btn btn-primary" onclick="generateReport()" style="white-space:nowrap;"> Generate</button>
+            </div>
+        </div>
+
+        <!-- Tab Bar -->
+        <div class="tab-bar" style="justify-content:space-between;">
+            <div style="display:flex;">
+                <button class="tab-btn active" id="tab-logs-btn" onclick="switchTab('logs')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    System Logs
+                    <span class="tab-count" id="logs-count">—</span>
+                </button>
+                <button class="tab-btn" id="tab-attendance-btn" onclick="switchTab('attendance')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Student Attendance
+                    <span class="tab-count" id="attendance-count">—</span>
+                </button>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.5rem;padding:0 0.75rem;">
+                <input type="date" class="filter-select" id="filterDate" onchange="_logPage=1;renderLogs()"
+                    title="Filter logs by date"
+                    style="font-size:0.8rem;padding:0.35rem 0.6rem;border-width:1.5px;border-radius:8px;height:32px;">
+                <button class="clear-chip" onclick="clearAllFilters()">&#10005; Clear</button>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════
+             TAB 1 · SYSTEM LOGS
+        ═══════════════════════════════════════ -->
+        <div class="tab-pane active" id="tab-logs">
+
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.75rem;">
+                <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:var(--black);display:flex;align-items:center;gap:0.5rem;">
+                    <span style="width:10px;height:10px;border-radius:50%;background:var(--gold);display:inline-block;box-shadow:0 0 0 3px rgba(201,162,39,0.2);"></span>
+                    System Activity Logs
+                    <span class="live-dot" style="margin-left:.5rem;">Live</span>
+                </div>
+                <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                    <button class="btn btn-secondary" onclick="refreshLogs()">Refresh</button>
+                    <button class="btn btn-secondary" onclick="exportLogs()">Export</button>
+                </div>
             </div>
 
-            <!-- Report Summary Strip (shown after Generate) -->
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th style="width:36px;">#</th>
+                            <th>Timestamp</th>
+                            <th>User</th>
+                            <th>Role</th>
+                            <th>Action</th>
+                            <th>Description</th>
+                            <th>IP Address</th>
+                            <th style="width:60px;">Sev.</th>
+                            <th style="width:70px;">Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logsTableBody"></tbody>
+                </table>
+            </div>
+            <div class="pagination" id="logPaginationWrap"></div>
+        </div>
+
+        <!-- ═══════════════════════════════════════
+             TAB 2 · STUDENT ATTENDANCE
+        ═══════════════════════════════════════ -->
+        <div class="tab-pane" id="tab-attendance">
+
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.85rem;flex-wrap:wrap;gap:0.65rem;">
+                <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:var(--black);display:flex;align-items:center;gap:0.5rem;">
+                    <span style="width:10px;height:10px;border-radius:50%;background:var(--gold);display:inline-block;box-shadow:0 0 0 3px rgba(201,162,39,0.2);"></span>
+                    Student Attendance Records
+                </div>
+                <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+                    <button class="btn btn-secondary" onclick="refreshData()">Refresh</button>
+                    <button class="btn btn-secondary" onclick="exportToExcel()">Export</button>
+                </div>
+            </div>
+
+            <!-- Hidden inputs for JS references -->
+            <input type="hidden" id="dateFrom">
+            <input type="hidden" id="dateTo">
+            <input type="hidden" id="viewPeriod">
+
+            <!-- Report Summary Strip -->
             <div id="reportStrip" style="display:none;gap:.75rem;flex-wrap:wrap;background:#fffbf0;border:1.5px solid #C9A227;border-radius:12px;padding:.75rem 1rem;margin-bottom:1rem;">
                 <div style="text-align:center;min-width:70px;">
                     <div style="font-size:1.4rem;font-weight:800;font-family:'Syne',sans-serif;" id="rpTotal">—</div>
@@ -144,7 +207,7 @@
                 <div style="margin-left:auto;font-size:.75rem;color:#888;align-self:center;" id="rpMeta"></div>
             </div>
 
-            <!-- Table -->
+            <!-- Attendance Table -->
             <div class="table-container" id="printArea">
                 <div id="printHeader" style="display:none;margin-bottom:1rem;">
                     <h2 style="font-family:'Syne',sans-serif;">SSC-R Attendance Report</h2>
@@ -166,501 +229,108 @@
                     <tbody id="attendanceTableBody"></tbody>
                 </table>
             </div>
+            <div class="pagination" id="paginationWrap"></div>
+        </div>
 
+    </div><!-- /card -->
 
-    </div><!-- /container -->
+</div><!-- /container -->
 
-    <!-- Modal: View Details -->
-    <div id="detailsModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Attendance Details</div>
-                <button class="modal-close" onclick="closeModal('detailsModal')">x</button>
+<!-- Modal: Log Detail -->
+<div id="logDetailModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-title">Log Entry Details</div>
+            <button class="modal-close" onclick="closeModal('logDetailModal')">&#10005;</button>
+        </div>
+        <div id="logModalBody"></div>
+    </div>
+</div>
+
+<!-- Modal: Attendance View Details -->
+<div id="detailsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-title">Attendance Details</div>
+            <button class="modal-close" onclick="closeModal('detailsModal')">&#10005;</button>
+        </div>
+        <div id="modalBody"></div>
+    </div>
+</div>
+
+<!-- Modal: Edit Attendance Record -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-title">Edit Attendance Record</div>
+            <button class="modal-close" onclick="closeModal('editModal')">&#10005;</button>
+        </div>
+        <div id="editModalBody"></div>
+    </div>
+</div>
+
+<!-- Modal: Settings -->
+<div id="settingsModal" class="modal">
+    <div class="modal-content" style="max-width:420px;">
+        <div class="modal-header">
+            <div class="modal-title">Settings</div>
+            <button class="modal-close" onclick="closeModal('settingsModal')">&#10005;</button>
+        </div>
+        <!-- Profile -->
+        <div style="background:#f9f9f9;border:1.5px solid rgba(201,162,39,0.35);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1rem;">
+            <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:0.95rem;color:var(--black);margin-bottom:1rem;padding-bottom:0.6rem;border-bottom:1.5px solid #eee;">Profile</div>
+            <div style="display:flex;justify-content:center;margin-bottom:1.25rem;">
+                <div id="settingsAvatarPreview" style="width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,#DC143C,#8B0000);color:#fff;font-weight:800;font-size:1.4rem;display:flex;align-items:center;justify-content:center;border:3px solid var(--gold);box-shadow:0 4px 16px rgba(139,0,0,0.3);">JG</div>
             </div>
-            <div id="modalBody"></div>
+            <div class="edit-row">
+                <label>Full Name</label>
+                <input type="text" id="settingsName" value="Julliana Louisse Gonzaga" oninput="updateSettingsAvatar()">
+            </div>
+            <div class="edit-row">
+                <label>Email</label>
+                <input type="email" id="settingsEmail" value="julliana.gonzaga@sscr.edu.ph">
+            </div>
+            <div style="display:flex;gap:0.75rem;margin-top:1rem;">
+                <button class="btn btn-success" style="flex:1;" onclick="saveSettingsProfile()">Save Changes</button>
+                <button class="btn btn-secondary" style="flex:1;" onclick="closeModal('settingsModal')">Cancel</button>
+            </div>
+        </div>
+        <!-- Change Password -->
+        <div style="background:#f9f9f9;border:1.5px solid rgba(201,162,39,0.35);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1rem;">
+            <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:0.95rem;color:var(--black);margin-bottom:1rem;padding-bottom:0.6rem;border-bottom:1.5px solid #eee;">Change Password</div>
+            <div class="edit-row">
+                <label>Current Password</label>
+                <input type="password" id="settingsCurPwd" placeholder="Enter current password">
+            </div>
+            <div class="edit-row">
+                <label>New Password</label>
+                <input type="password" id="settingsNewPwd" placeholder="Enter new password">
+            </div>
+            <div class="edit-row" style="margin-bottom:0.75rem;">
+                <label>Confirm New Password</label>
+                <input type="password" id="settingsConfirmPwd" placeholder="Confirm new password">
+            </div>
+            <div id="settingsPwdMsg" style="font-size:0.8rem;margin-bottom:0.75rem;display:none;padding:6px 10px;border-radius:8px;"></div>
+            <button class="btn btn-primary" onclick="updatePassword()" style="padding:0.6rem 1.5rem;border-radius:50px;">Update Password</button>
+        </div>
+        <!-- Theme -->
+        <div style="background:#f9f9f9;border:1.5px solid rgba(201,162,39,0.35);border-radius:12px;padding:1.25rem 1.5rem;">
+            <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:0.95rem;color:var(--black);margin-bottom:1rem;padding-bottom:0.6rem;border-bottom:1.5px solid #eee;">Theme</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                    <div style="font-weight:700;font-size:0.88rem;">Dark Mode</div>
+                    <div style="font-size:0.76rem;color:#888;margin-top:2px;">Switch to a darker interface</div>
+                </div>
+                <label style="position:relative;display:inline-block;width:46px;height:26px;cursor:pointer;">
+                    <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode(this.checked)" style="opacity:0;width:0;height:0;">
+                    <span id="toggleTrack" style="position:absolute;inset:0;background:#ccc;border-radius:26px;transition:0.3s;"></span>
+                    <span id="toggleThumb" style="position:absolute;left:3px;top:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:0.3s;box-shadow:0 1px 4px rgba(0,0,0,0.2);"></span>
+                </label>
+            </div>
         </div>
     </div>
+</div>
 
-    <!-- Modal: Edit Record -->
-    <div id="editModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Edit Attendance Record</div>
-                <button class="modal-close" onclick="closeModal('editModal')">x</button>
-            </div>
-            <div id="editModalBody"></div>
-        </div>
-    </div>
-
-    <style>
-        /* -- Print styles -- */
-        @media print {
-            .header, .mgmt-btn, .card-header .card-actions,
-            .filter-select, #dateFrom, #dateTo, #viewPeriod,
-            .search-box, .btn, #paginationWrap,
-            #reportStrip, .timein-legend, .no-print { display: none !important; }
-            .card { box-shadow: none; border: 1px solid #ccc; padding: 1rem; }
-            body::before { display: none; }
-            .container { padding: 0; }
-            #printHeader { display: block !important; }
-        }
-
-        /* -- Status badges -- */
-        .status-badge {
-            display: inline-flex; align-items: center; gap: .3rem;
-            padding: 2px 10px; border-radius: 20px; font-size: .75rem; font-weight: 700;
-        }
-        .status-badge::before {
-            content: ''; width: 7px; height: 7px; border-radius: 50%;
-            background: currentColor; opacity: .6;
-        }
-        .status-present  { background: #e8f5e9; color: #2e7d32; }
-        .status-absent   { background: #ffebee; color: #c62828; }
-        .status-late     { background: #fff3e0; color: #e65100; }
-        .status-unmarked { background: #f0f0f0; color: #999; }
-
-        /* -- Time-in pill -- */
-        .timein-pill {
-            display: inline-block; padding: 2px 8px; border-radius: 8px;
-            font-size: .78rem; font-weight: 600; background: #f5f5f5; color: #555;
-        }
-        .timein-pill.on-time { background: #e8f5e9; color: #2e7d32; }
-        .timein-pill.late    { background: #fff3e0; color: #e65100; }
-        .timein-pill.absent  { background: #ffebee; color: #c62828; }
-
-        /* -- Time-in legend -- */
-        .timein-legend {
-            margin-top: 0.75rem; padding: 0.5rem 0.9rem;
-            background: #fffbf0; border-radius: 8px;
-            font-size: 0.75rem; color: #888;
-            border-left: 3px solid #C9A227;
-        }
-
-        /* -- Edit modal form -- */
-        .edit-row { margin-bottom: 0.85rem; }
-        .edit-row label { display: block; font-size: .82rem; font-weight: 600; margin-bottom: .3rem; color: #444; }
-        .edit-row input, .edit-row select {
-            width: 100%; padding: 8px 10px;
-            border: 1.5px solid #ddd; border-radius: 8px;
-            font-family: 'DM Sans', sans-serif; font-size: .88rem; outline: none;
-        }
-        .edit-row input:focus, .edit-row select:focus { border-color: #C9A227; }
-    </style>
-
-    <script>
-        // ── State ─────────────────────────────────────────────────────────
-        requireAuth('admin');
-        let _currentPage = 1;
-        const ROWS_PER_PAGE = 10;
-        let _lastFilteredRows = [];
-        const TODAY     = new Date();
-        const TODAY_STR = TODAY.toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
-
-        // ── Init ──────────────────────────────────────────────────────────
-        window.addEventListener('DOMContentLoaded', () => {
-            // Seed demo attendance data now that students-data.js is loaded
-            seedDemo();
-
-            const fmt = d => d.toISOString().split('T')[0];
-            document.getElementById('dateFrom').value = fmt(TODAY);
-            document.getElementById('dateTo').value   = fmt(TODAY);
-            renderAttendanceTable();
-        });
-
-        // ── Seed demo attendance ──────────────────────────────────────────
-        function seedDemo() {
-            const statuses = ['Present', 'Present', 'Present', 'Late', 'Absent', ''];
-            const times    = ['07:05 AM', '07:20 AM', '07:45 AM', '08:15 AM', '08:30 AM'];
-            SSCR_SUBJECTS.forEach(subj => {
-                SSCR_SECTIONS.forEach(sec => {
-                    SSCR_STUDENTS[sec].forEach((s, i) => {
-                        const pick = statuses[i % statuses.length];
-                        if (pick === 'Present') {
-                            attendanceDB[subj][sec][s.id] = { status: 'Present', timeIn: times[i % times.length] };
-                        } else if (pick === 'Late') {
-                            attendanceDB[subj][sec][s.id] = { status: 'Late', timeIn: '08:45 AM' };
-                        } else if (pick === 'Absent') {
-                            attendanceDB[subj][sec][s.id] = { status: 'Absent', timeIn: '' };
-                        }
-                        // '' stays unmarked
-                    });
-                });
-            });
-        }
-
-        // ── Build filtered rows ───────────────────────────────────────────
-        function buildRows() {
-            const search   = document.getElementById('searchInput').value.toUpperCase();
-            const sfilt    = document.getElementById('statusFilter').value;
-            const secFilt  = document.getElementById('sectionFilter').value;
-            const subjFilt = document.getElementById('subjectFilter').value;
-
-            const sections = secFilt  ? [secFilt]  : SSCR_SECTIONS;
-            const subjects = subjFilt ? [subjFilt] : SSCR_SUBJECTS;
-
-            let rows = [];
-            subjects.forEach(subj => {
-                sections.forEach(sec => {
-                    SSCR_STUDENTS[sec].forEach(s => {
-                        const rec    = attendanceDB[subj][sec][s.id];
-                        const status = rec.status || '';
-                        let timeIn   = '';
-                        if      (status === 'Absent')                        timeIn = '—';
-                        else if (status === 'Present' || status === 'Late')  timeIn = rec.timeIn || '—';
-                        rows.push({ id:s.id, name:s.name, section:sec, subject:subj, status, timeIn });
-                    });
-                });
-            });
-
-            if (search) rows = rows.filter(r => (r.id + r.name).toUpperCase().includes(search));
-            if (sfilt === 'Unmarked')  rows = rows.filter(r => !r.status);
-            else if (sfilt)            rows = rows.filter(r => r.status === sfilt);
-
-            return rows;
-        }
-
-        // ── Render table ──────────────────────────────────────────────────
-        function renderAttendanceTable(allRowsOverride) {
-            const allRows = allRowsOverride || buildRows();
-            _lastFilteredRows = allRows;
-
-            const tbody      = document.getElementById('attendanceTableBody');
-            const totalRows  = allRows.length;
-            const totalPages = Math.max(1, Math.ceil(totalRows / ROWS_PER_PAGE));
-            if (_currentPage > totalPages) _currentPage = totalPages;
-
-            tbody.innerHTML = '';
-
-            if (!totalRows) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#aaa;padding:2rem;">No records found.</td></tr>';
-                buildPagination(0, 0);
-                return;
-            }
-
-            const start    = (_currentPage - 1) * ROWS_PER_PAGE;
-            const pageRows = allRows.slice(start, start + ROWS_PER_PAGE);
-
-            pageRows.forEach(r => {
-                const sc    = r.status ? 'status-' + r.status.toLowerCase() : 'status-unmarked';
-                const sl    = r.status || 'Unmarked';
-                const tc    = r.status === 'Present' ? 'on-time' : r.status === 'Late' ? 'late' : r.status === 'Absent' ? 'absent' : '';
-                const eName = r.name.replace(/'/g, "\\'");
-                const tr    = document.createElement('tr');
-                tr.innerHTML =
-                    '<td style="font-family:monospace;font-size:.8rem;">' + r.id + '</td>' +
-                    '<td style="font-weight:600;">' + r.name + '</td>' +
-                    '<td>' + r.subject + '</td>' +
-                    '<td>' + r.section + '</td>' +
-                    '<td style="font-size:.82rem;color:#555;">' + TODAY_STR + '</td>' +
-                    '<td><span class="timein-pill ' + tc + '">' + (r.timeIn || '—') + '</span></td>' +
-                    '<td><span class="status-badge ' + sc + '">' + sl + '</span></td>' +
-                    '<td class="no-print">' +
-                        '<button class="action-btn view" onclick="viewDetails(\'' + r.id + '\',\'' + eName + '\',\'' + r.subject + '\',\'' + r.section + '\',\'' + r.status + '\',\'' + r.timeIn + '\')">View</button>' +
-                        '<button class="action-btn edit" onclick="openEdit(\'' + r.id + '\',\'' + eName + '\',\'' + r.subject + '\',\'' + r.section + '\',\'' + r.status + '\',\'' + r.timeIn + '\')">Edit</button>' +
-                    '</td>';
-                tbody.appendChild(tr);
-            });
-
-            buildPagination(totalPages, totalRows);
-        }
-
-        // ── Pagination ────────────────────────────────────────────────────
-        function buildPagination(totalPages, totalRows) {
-            const wrap = document.getElementById('paginationWrap');
-            wrap.innerHTML = '';
-            if (!totalRows) return;
-
-            const prev = document.createElement('button');
-            prev.className = 'page-btn';
-            prev.textContent = '\u2039';
-            prev.disabled = _currentPage === 1;
-            prev.onclick = () => { if (_currentPage > 1) { _currentPage--; renderAttendanceTable(); } };
-            wrap.appendChild(prev);
-
-            const maxVisible = 5;
-            let s = Math.max(1, _currentPage - Math.floor(maxVisible / 2));
-            let e = Math.min(totalPages, s + maxVisible - 1);
-            if (e - s < maxVisible - 1) s = Math.max(1, e - maxVisible + 1);
-            for (let p = s; p <= e; p++) {
-                const btn = document.createElement('button');
-                btn.className = 'page-btn' + (p === _currentPage ? ' active' : '');
-                btn.textContent = p;
-                const pg = p;
-                btn.onclick = () => { _currentPage = pg; renderAttendanceTable(); };
-                wrap.appendChild(btn);
-            }
-
-            const next = document.createElement('button');
-            next.className = 'page-btn';
-            next.textContent = '\u203a';
-            next.disabled = _currentPage === totalPages;
-            next.onclick = () => { if (_currentPage < totalPages) { _currentPage++; renderAttendanceTable(); } };
-            wrap.appendChild(next);
-
-            const start = (_currentPage - 1) * ROWS_PER_PAGE + 1;
-            const end   = Math.min(_currentPage * ROWS_PER_PAGE, totalRows);
-            const label = document.createElement('span');
-            label.style.cssText = 'font-size:.8rem;color:#999;margin-left:.75rem;line-height:32px;';
-            label.textContent = start + '-' + end + ' of ' + totalRows + ' students';
-            wrap.appendChild(label);
-        }
-
-        // ── Generate Report ───────────────────────────────────────────────
-        function generateReport() {
-            const period = document.getElementById('viewPeriod').value;
-            const dfrom  = document.getElementById('dateFrom').value;
-            const dto    = document.getElementById('dateTo').value;
-
-            if (!period || !dfrom || !dto) {
-                alert('Please select a View Period and a date range first.'); return;
-            }
-            if (dfrom > dto) {
-                alert('"Date From" cannot be after "Date To".'); return;
-            }
-
-            const allRows = buildRows();
-            _lastFilteredRows = allRows;
-
-            let c = { present:0, absent:0, late:0, unmarked:0 };
-            allRows.forEach(r => {
-                if      (r.status === 'Present') c.present++;
-                else if (r.status === 'Absent')  c.absent++;
-                else if (r.status === 'Late')    c.late++;
-                else                             c.unmarked++;
-            });
-
-            const strip = document.getElementById('reportStrip');
-            strip.style.display = 'flex';
-            document.getElementById('rpTotal').textContent    = allRows.length;
-            document.getElementById('rpPresent').textContent  = c.present;
-            document.getElementById('rpLate').textContent     = c.late;
-            document.getElementById('rpAbsent').textContent   = c.absent;
-            document.getElementById('rpUnmarked').textContent = c.unmarked;
-
-            const subjFilt = document.getElementById('subjectFilter').value || 'All Subjects';
-            const secFilt  = document.getElementById('sectionFilter').value || 'All Sections';
-            document.getElementById('rpMeta').innerHTML =
-                '<strong>Period:</strong> ' + period.charAt(0).toUpperCase() + period.slice(1) +
-                ' &nbsp;|&nbsp; <strong>Subject:</strong> ' + subjFilt +
-                ' &nbsp;|&nbsp; <strong>Section:</strong> ' + secFilt +
-                ' &nbsp;|&nbsp; <strong>From:</strong> ' + dfrom + ' <strong>To:</strong> ' + dto;
-
-            _currentPage = 1;
-            renderAttendanceTable(allRows);
-        }
-
-        // ── Refresh ───────────────────────────────────────────────────────
-        function refreshData() {
-            document.getElementById('searchInput').value   = '';
-            document.getElementById('sectionFilter').value = '';
-            document.getElementById('subjectFilter').value = '';
-            document.getElementById('statusFilter').value  = '';
-            document.getElementById('viewPeriod').value    = '';
-            const fmt = d => d.toISOString().split('T')[0];
-            document.getElementById('dateFrom').value = fmt(TODAY);
-            document.getElementById('dateTo').value   = fmt(TODAY);
-            document.getElementById('reportStrip').style.display = 'none';
-            _currentPage = 1;
-            renderAttendanceTable();
-        }
-
-        // ── Export to Excel ───────────────────────────────────────────────
-        function exportToExcel() {
-            const rows = _lastFilteredRows.length ? _lastFilteredRows : buildRows();
-            if (!rows.length) { alert('No data to export.'); return; }
-
-            const wsData = [['Student ID','Student Name','Subject','Section','Date','Time In','Status']];
-            rows.forEach(r => {
-                wsData.push([r.id, r.name, r.subject, r.section, TODAY_STR, r.timeIn || '—', r.status || 'Unmarked']);
-            });
-
-            const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.aoa_to_sheet(wsData);
-            ws['!cols'] = [{wch:12},{wch:32},{wch:10},{wch:10},{wch:16},{wch:10},{wch:10}];
-            XLSX.utils.book_append_sheet(wb, ws, 'Attendance');
-
-            const subjFilt = document.getElementById('subjectFilter').value || 'All';
-            XLSX.writeFile(wb, 'SSC-R_Attendance_' + subjFilt + '_' + TODAY_STR.replace(/,/g,'').replace(/ /g,'_') + '.xlsx');
-        }
-
-        // ── Print ─────────────────────────────────────────────────────────
-        function printTable() {
-            const meta     = document.getElementById('printMeta');
-            const hdr      = document.getElementById('printHeader');
-            const subjFilt = document.getElementById('subjectFilter').value || 'All Subjects';
-            const secFilt  = document.getElementById('sectionFilter').value || 'All Sections';
-            const dfrom    = document.getElementById('dateFrom').value;
-            const dto      = document.getElementById('dateTo').value;
-            meta.textContent = subjFilt + ' | ' + secFilt + ' | ' + dfrom + ' to ' + dto + ' | Generated: ' + TODAY_STR;
-            hdr.style.display = 'block';
-            window.print();
-            hdr.style.display = 'none';
-        }
-
-        // ── Download as PDF ───────────────────────────────────────────────
-        function downloadPDF() {
-            const rows = _lastFilteredRows.length ? _lastFilteredRows : buildRows();
-            if (!rows.length) { alert('No data to export.'); return; }
-
-            const subjFilt = document.getElementById('subjectFilter').value || 'All Subjects';
-            const secFilt  = document.getElementById('sectionFilter').value || 'All Sections';
-            const dfrom    = document.getElementById('dateFrom').value;
-            const dto      = document.getElementById('dateTo').value;
-
-            let html = `
-            <style>
-              body { font-family: Arial, sans-serif; font-size: 11px; }
-              h2 { margin: 0 0 4px; font-size: 15px; }
-              p  { margin: 0 0 10px; color: #666; font-size: 10px; }
-              table { width: 100%; border-collapse: collapse; }
-              th { background: #1A1A1A; color: #C9A227; padding: 6px 8px; text-align: left; font-size: 10px; }
-              td { padding: 5px 8px; border-bottom: 1px solid #eee; font-size: 10px; }
-              tr:nth-child(even) td { background: #fafafa; }
-              .badge { display:inline-block; padding:2px 7px; border-radius:12px; font-weight:700; font-size:9px; }
-              .p { background:#e8f5e9; color:#2e7d32; }
-              .a { background:#ffebee; color:#c62828; }
-              .l { background:#fff3e0; color:#e65100; }
-              .u { background:#f0f0f0; color:#999; }
-            </style>
-            <h2>SSC-R Attendance Report</h2>
-            <p>${subjFilt} | ${secFilt} | ${dfrom} to ${dto} | Generated: ${TODAY_STR}</p>
-            <table><thead><tr>
-              <th>Student ID</th><th>Student Name</th><th>Subject</th>
-              <th>Section</th><th>Date</th><th>Time In</th><th>Status</th>
-            </tr></thead><tbody>`;
-
-            rows.forEach(r => {
-                const cls = r.status === 'Present' ? 'p' : r.status === 'Absent' ? 'a' : r.status === 'Late' ? 'l' : 'u';
-                const sl  = r.status || 'Unmarked';
-                html += `<tr>
-                  <td>${r.id}</td><td>${r.name}</td><td>${r.subject}</td>
-                  <td>${r.section}</td><td>${TODAY_STR}</td>
-                  <td>${r.timeIn || '—'}</td>
-                  <td><span class="badge ${cls}">${sl}</span></td>
-                </tr>`;
-            });
-            html += '</tbody></table>';
-
-            const el = document.createElement('div');
-            el.innerHTML = html;
-
-            html2pdf().set({
-                margin:      [10, 10, 10, 10],
-                filename:    'SSC-R_Attendance_' + subjFilt + '_' + TODAY_STR.replace(/,/g,'').replace(/ /g,'_') + '.pdf',
-                image:       { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF:       { unit: 'mm', format: 'a4', orientation: 'landscape' }
-            }).from(el).save();
-        }
-
-        // ── View Details Modal ────────────────────────────────────────────
-        function viewDetails(id, name, subj, sec, status, timeIn) {
-            const sc = status ? 'status-' + status.toLowerCase() : 'status-unmarked';
-            const sl = status || 'Unmarked';
-            const td = status === 'Absent' ? '— (did not attend)'
-                     : (status === 'Present' || status === 'Late') ? timeIn
-                     : 'Not yet marked';
-            document.getElementById('modalBody').innerHTML =
-                '<div style="margin-bottom:1rem;"><strong>Student ID:</strong> ' + id + '</div>' +
-                '<div style="margin-bottom:1rem;"><strong>Full Name:</strong> ' + name + '</div>' +
-                '<div style="margin-bottom:1rem;"><strong>Subject:</strong> ' + subj + '</div>' +
-                '<div style="margin-bottom:1rem;"><strong>Section:</strong> ' + sec + '</div>' +
-                '<div style="margin-bottom:1rem;"><strong>Date:</strong> ' + TODAY_STR + '</div>' +
-                '<div style="margin-bottom:1rem;"><strong>Time In:</strong> ' + td +
-                    '<div class="timein-legend" style="margin-top:.4rem;">Present/Late = time recorded &nbsp;|&nbsp; Absent = no time (—)</div></div>' +
-                '<div style="margin-bottom:1rem;"><strong>Status:</strong> ' +
-                    '<span class="status-badge ' + sc + '" style="margin-left:.5rem;">' + sl + '</span></div>' +
-                '<div><strong>Session ID:</strong> SESSION-' + Date.now() + '</div>';
-            document.getElementById('detailsModal').classList.add('show');
-        }
-
-        // ── Edit Record Modal ─────────────────────────────────────────────
-        function openEdit(id, name, subj, sec, status, timeIn) {
-            const selOpts = ['', 'Present', 'Late', 'Absent'].map(v =>
-                '<option value="' + v + '"' + (v === status ? ' selected' : '') + '>' +
-                (v ? v : '— Unmarked —') + '</option>').join('');
-
-            document.getElementById('editModalBody').innerHTML =
-                '<div class="edit-row"><label>Student ID</label>' +
-                    '<input type="text" value="' + id + '" readonly style="background:#f5f5f5;"></div>' +
-                '<div class="edit-row"><label>Full Name</label>' +
-                    '<input type="text" value="' + name + '" readonly style="background:#f5f5f5;"></div>' +
-                '<div class="edit-row"><label>Subject</label>' +
-                    '<input type="text" value="' + subj + '" readonly style="background:#f5f5f5;"></div>' +
-                '<div class="edit-row"><label>Section</label>' +
-                    '<input type="text" value="' + sec + '" readonly style="background:#f5f5f5;"></div>' +
-                '<div class="edit-row"><label>Status</label>' +
-                    '<select id="editStatus" onchange="handleEditStatusChange()">' + selOpts + '</select></div>' +
-                '<div class="edit-row" id="editTimeRow" style="' + (status === 'Absent' || !status ? 'display:none' : '') + '">' +
-                    '<label>Time In</label>' +
-                    '<input type="time" id="editTimeIn" value="' + (timeIn && timeIn !== '—' ? to24h(timeIn) : '') + '">' +
-                    '<div class="timein-legend" style="margin-top:.4rem;">' +
-                    'Present/Late — fill time &nbsp;|&nbsp; Absent — leave blank</div></div>' +
-                '<div style="display:flex;gap:.75rem;margin-top:1.25rem;">' +
-                    '<button class="btn btn-primary" style="flex:1;" onclick="saveEdit(\'' + id + '\',\'' + subj + '\',\'' + sec + '\')">Save Changes</button>' +
-                    '<button class="btn btn-secondary" style="flex:1;" onclick="closeModal(\'editModal\')">Cancel</button></div>';
-
-            document.getElementById('editModal').classList.add('show');
-        }
-
-        function handleEditStatusChange() {
-            const st  = document.getElementById('editStatus').value;
-            const row = document.getElementById('editTimeRow');
-            if (st === 'Absent' || !st) {
-                row.style.display = 'none';
-                const ti = document.getElementById('editTimeIn'); if (ti) ti.value = '';
-            } else {
-                row.style.display = '';
-                const ti = document.getElementById('editTimeIn');
-                if (ti && !ti.value) {
-                    const n = new Date();
-                    ti.value = pad(n.getHours()) + ':' + pad(n.getMinutes());
-                }
-            }
-        }
-
-        function saveEdit(studentId, subject, section) {
-            const st  = document.getElementById('editStatus').value;
-            const ti  = document.getElementById('editTimeIn');
-            const rec = attendanceDB[subject][section][studentId];
-            rec.status = st;
-            if (st === 'Present' || st === 'Late') {
-                if (ti && ti.value) {
-                    const [h, m] = ti.value.split(':').map(Number);
-                    const ap  = h >= 12 ? 'PM' : 'AM';
-                    const h12 = h % 12 || 12;
-                    rec.timeIn = pad(h12) + ':' + pad(m) + ' ' + ap;
-                } else {
-                    rec.timeIn = new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
-                }
-            } else { rec.timeIn = ''; }
-            closeModal('editModal');
-            renderAttendanceTable();
-        }
-
-        // ── Helpers ───────────────────────────────────────────────────────
-        function to24h(t) {
-            if (!t || t === '—') return '';
-            try {
-                const [time, ap] = t.split(' ');
-                let [h, m] = time.split(':').map(Number);
-                if (ap === 'PM' && h !== 12) h += 12;
-                if (ap === 'AM' && h === 12) h = 0;
-                return pad(h) + ':' + pad(m);
-            } catch { return ''; }
-        }
-        function pad(n) { return String(n).padStart(2, '0'); }
-
-        function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-      function viewLogs() { window.location.href = 'system-logs.html'; }
-        function logout() {
-            if (confirm('Are you sure you want to logout?')) window.location.href = 'login.html';
-        }
-        window.onclick = function(e) {
-            document.querySelectorAll('.modal').forEach(m => { if (e.target === m) m.classList.remove('show'); });
-        };
-    </script>
-
-
+<script src="admin.js"></script>
 </body>
 </html>
