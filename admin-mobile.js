@@ -147,7 +147,7 @@ function renderLogs() {
     tbody.innerHTML = '';
 
     if (!total) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#aaa;padding:2rem;font-size:.82rem;">No logs found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#aaa;padding:2rem;font-size:.82rem;">No logs found.</td></tr>';
         buildLogPagination(0, 0);
         return;
     }
@@ -155,22 +155,29 @@ function renderLogs() {
     const start    = (_logPage - 1) * LOG_ROWS_PER_PAGE;
     const pageRows = _logFiltered.slice(start, start + LOG_ROWS_PER_PAGE);
 
+    // Action color map
+    const actionColors = {
+        login:'#2e7d32', logout:'#555', edit:'#1565c0', generate:'#6a1b9a',
+        export:'#00838f', print:'#4e342e', view:'#0277bd', error:'#c62828', system:'#e65100'
+    };
+    const sevColors = { info:'#1565c0', warning:'#e65100', error:'#c62828' };
+
     pageRows.forEach((l, i) => {
-        const ac       = 'log-' + l.action.toLowerCase();
-        const roleShort = l.role === 'Administrator' ? 'Admin' : 'Faculty';
-        const sevDotColor = l.severity === 'info' ? '#1565c0' : l.severity === 'warning' ? '#e65100' : '#c62828';
+        const actionColor = actionColors[l.action.toLowerCase()] || '#333';
+        const roleColor   = l.role === 'Administrator' ? '#8B0000' : '#1565c0';
+        const roleShort   = l.role === 'Administrator' ? 'Admin' : 'Faculty';
+        const sevColor    = sevColors[l.severity] || '#555';
+        const lastName    = l.user.split(' ').slice(-1)[0];
         const tr = document.createElement('tr');
         tr.style.cursor = 'pointer';
         tr.onclick = () => showLogDetail(l);
-        // Store ref for view button
         window['_lref_' + (start + i)] = l;
         tr.innerHTML =
-            '<td style="font-size:.72rem;font-weight:600;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + l.user.split(' ')[0] + ' ' + (l.user.split(' ')[1]||'')[0] + '.</td>' +
-            '<td><span class="log-badge ' + ac + '">' + l.action + '</span></td>' +
-            '<td><span class="role-badge' + (l.role === 'Faculty' ? ' faculty' : '') + '">' + roleShort + '</span></td>' +
-            '<td style="text-align:center;"><span class="sev-dot ' + l.severity + '" title="' + l.severity + '"></span></td>' +
-            '<td style="font-size:.68rem;color:#888;white-space:nowrap;">' + fmtRelative(l.timestamp) + '</td>' +
-            '<td><button class="action-btn view" onclick="event.stopPropagation();showLogDetail(window[\'_lref_' + (start+i) + '\'])">View</button></td>';
+            '<td style="font-size:.72rem;font-weight:700;white-space:nowrap;">' + lastName + '</td>' +
+            '<td style="font-size:.72rem;font-weight:800;color:' + actionColor + ';white-space:nowrap;">' + l.action + '</td>' +
+            '<td style="font-size:.72rem;font-weight:700;color:' + roleColor + ';white-space:nowrap;">' + roleShort + '</td>' +
+            '<td style="font-size:.72rem;font-weight:800;color:' + sevColor + ';text-transform:capitalize;">' + l.severity.charAt(0).toUpperCase() + '</td>' +
+            '<td style="text-align:center;"><button class="action-btn view" onclick="event.stopPropagation();showLogDetail(window[\'_lref_' + (start+i) + '\'])">View</button></td>';
         tbody.appendChild(tr);
     });
 
@@ -312,28 +319,26 @@ function renderAttendanceTable(allRowsOverride) {
     tbody.innerHTML = '';
 
     if (!totalRows) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#aaa;padding:2rem;font-size:.82rem;">No records found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#aaa;padding:2rem;font-size:.82rem;">No records found.</td></tr>';
         buildPagination(0, 0); return;
     }
 
     const start    = (_currentPage - 1) * ROWS_PER_PAGE;
     const pageRows = allRows.slice(start, start + ROWS_PER_PAGE);
     pageRows.forEach(r => {
-        const sc    = r.status ? 'status-' + r.status.toLowerCase() : 'status-unmarked';
-        const sl    = r.status || 'Unmarked';
-        const tc    = r.status === 'Present' ? 'on-time' : r.status === 'Late' ? 'late' : r.status === 'Absent' ? 'absent' : '';
-        const eName = r.name.replace(/'/g, "\\'");
-        const tr    = document.createElement('tr');
+        const sc       = r.status ? 'status-' + r.status.toLowerCase() : 'status-unmarked';
+        const sl       = r.status || 'Unmarked';
+        const lastName = r.name.split(',')[0].trim();   // "GONZAGA, Maria" → "GONZAGA"
+        const secLetter = r.section.replace(/[^A-Z]/gi, ''); // "Sec A" → "A"
+        const eName    = r.name.replace(/'/g, "\\'");
+        const tr       = document.createElement('tr');
         tr.innerHTML =
-            '<td style="font-family:monospace;font-size:.75rem;">' + r.id + '</td>' +
-            '<td style="font-weight:600;font-size:.78rem;">' + r.name + '</td>' +
-            '<td style="font-size:.75rem;">' + r.subject + '</td>' +
-            '<td style="font-size:.75rem;">' + r.section + '</td>' +
-            '<td><span class="timein-pill ' + tc + '">' + (r.timeIn || '—') + '</span></td>' +
+            '<td style="font-family:monospace;font-size:.72rem;white-space:nowrap;">' + r.id + '</td>' +
+            '<td style="font-weight:700;font-size:.78rem;">' + lastName + '</td>' +
+            '<td style="font-size:.78rem;font-weight:700;text-align:center;">' + secLetter + '</td>' +
             '<td><span class="status-badge ' + sc + '">' + sl + '</span></td>' +
-            '<td class="no-print">' +
+            '<td class="no-print" style="text-align:center;">' +
                 '<button class="action-btn view" onclick="viewDetails(\'' + r.id + '\',\'' + eName + '\',\'' + r.subject + '\',\'' + r.section + '\',\'' + r.status + '\',\'' + r.timeIn + '\')">View</button>' +
-                '<button class="action-btn edit" onclick="openEdit(\'' + r.id + '\',\'' + eName + '\',\'' + r.subject + '\',\'' + r.section + '\',\'' + r.status + '\',\'' + r.timeIn + '\')">Edit</button>' +
             '</td>';
         tbody.appendChild(tr);
     });
@@ -455,6 +460,7 @@ function viewDetails(id, name, subj, sec, status, timeIn) {
     const td = status === 'Absent' ? '— (did not attend)'
              : (status === 'Present' || status === 'Late') ? timeIn
              : 'Not yet marked';
+    const eName = name.replace(/'/g, "\\'");
     document.getElementById('detailModalBody').innerHTML =
         drow('Student ID', id) +
         drow('Full Name',  name) +
@@ -463,7 +469,9 @@ function viewDetails(id, name, subj, sec, status, timeIn) {
         drow('Date',       TODAY_STR) +
         drow('Time In',    td) +
         drow('Status',     '<span class="status-badge ' + sc + '">' + sl + '</span>') +
-        drow('Session ID', 'SESSION-' + Date.now());
+        '<div style="margin-top:1.25rem;">' +
+            '<button class="btn btn-primary btn-full" onclick="closeModal(\'detailModal\');openEdit(\'' + id + '\',\'' + eName + '\',\'' + subj + '\',\'' + sec + '\',\'' + status + '\',\'' + timeIn + '\')">Edit Attendance</button>' +
+        '</div>';
     document.getElementById('detailModal').classList.add('show');
 }
 
