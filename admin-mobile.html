@@ -50,12 +50,14 @@
     <div class="section-hdr">
       <div class="section-title">Attendance</div>
       <div style="display:flex;gap:.4rem;">
-        <button class="abtn" onclick="refreshData()">Refresh</button>
-        <button class="abtn" onclick="exportToExcel()">Export</button>
+        <button class="abtn refresh-btn" onclick="refreshData()">↺ Refresh</button>
+        <button class="abtn export-btn" onclick="exportToExcel()">↓ Export</button>
       </div>
     </div>
     <div class="controls">
-      <input type="text" class="search-input" id="searchInput" placeholder="Search…" oninput="_currentPage=1;renderAttendanceTable()">
+      <input type="text" class="search-input" id="searchInput" placeholder="Search name or ID…" oninput="_currentPage=1;renderAttendanceTable()">
+    </div>
+    <div class="controls">
       <select class="fsel" id="sectionFilter" onchange="_currentPage=1;renderAttendanceTable()">
         <option value="">All Sec</option>
         <option value="Sec A">Sec A</option>
@@ -77,9 +79,7 @@
         <option value="Unmarked">Unmarked</option>
       </select>
       <select class="fsel" id="viewPeriod"><option value="">Period</option><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select>
-      <input type="date" class="date-input" id="dateFrom">
-      <input type="date" class="date-input" id="dateTo">
-      <button class="abtn primary" onclick="generateReport()" style="white-space:nowrap;">Generate</button>
+      <button class="abtn generate-btn" onclick="generateReport()">Generate</button>
     </div>
     <div class="report-strip" id="reportStrip">
       <div class="rp-item"><div class="rp-val" id="rpTotal">—</div><div class="rp-lbl">Total</div></div>
@@ -109,14 +109,15 @@
         <span class="live-dot-sm"></span>System Logs
       </div>
       <div style="display:flex;gap:.4rem;">
-        <button class="abtn" onclick="refreshLogs()">Refresh</button>
-        <button class="abtn" onclick="exportLogs()">Export</button>
+        <button class="abtn refresh-btn" onclick="refreshLogs()">↺ Refresh</button>
+        <button class="abtn export-btn" onclick="exportLogs()">↓ Export</button>
       </div>
     </div>
 
-    <!-- Log Filters -->
     <div class="controls">
-      <input type="text" class="search-input" id="logSearch" placeholder="Search…" oninput="_logPage=1;renderLogs()">
+      <input type="text" class="search-input" id="logSearch" placeholder="Search user, action…" oninput="_logPage=1;renderLogs()">
+    </div>
+    <div class="controls">
       <select class="fsel" id="filterType" onchange="_logPage=1;renderLogs()">
         <option value="">All Actions</option>
         <option value="Login">Login</option>
@@ -135,22 +136,21 @@
         <option value="Faculty">Faculty</option>
       </select>
       <select class="fsel" id="filterSeverity" onchange="_logPage=1;renderLogs()">
-        <option value="">All Sev.</option>
+        <option value="">All Severity</option>
         <option value="info">Info</option>
         <option value="warning">Warning</option>
         <option value="error">Error</option>
       </select>
-      <input type="date" class="date-input" id="filterDate" onchange="_logPage=1;renderLogs()">
-      <button class="abtn" onclick="clearLogFilters()">✕</button>
+      <select class="fsel" id="filterPeriod"><option value="">Period</option><option value="today">Today</option><option value="week">This Week</option><option value="month">This Month</option></select>
+      <button class="abtn generate-btn" onclick="applyLogPeriod()">Generate</button>
     </div>
 
-    <!-- Log count badge -->
-    <div style="font-size:.75rem;color:#888;margin-bottom:.5rem;font-weight:600;">
-      Showing <span id="logCountBadge" style="color:var(--primary);font-weight:800;">—</span> logs
+    <div class="table-wrap">
+      <table class="att-table">
+        <thead><tr><th>User</th><th>Action</th><th>Role</th><th>Sev.</th><th>Time</th><th>View</th></tr></thead>
+        <tbody id="logsTableBody"></tbody>
+      </table>
     </div>
-
-    <!-- Log Cards (mobile-friendly card layout) -->
-    <div id="logCardList"></div>
     <div class="pagination" id="logPaginationWrap"></div>
   </div>
   <div class="spacer"></div>
