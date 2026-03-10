@@ -28,57 +28,6 @@ requireAuth('admin');
 })();
 
 // ════════════════════════════════════════════════════════
-//  NOTIFICATIONS
-// ════════════════════════════════════════════════════════
-const NOTIFICATIONS = [
-    { id:1, unread:true,  type:'alert',   avatar:'SB', text:'<strong>3 students</strong> from Sec B exceeded absences in <strong>Math</strong>.', time:'2 mins ago' },
-    { id:2, unread:true,  type:'info',    avatar:'SY', text:'<strong>Attendance report</strong> for English — Sec A generated successfully.', time:'15 mins ago' },
-    { id:3, unread:true,  type:'warn',    avatar:'KG', text:'<strong>GONZAGA, Krystine</strong> was marked Late in Science today.', time:'42 mins ago' },
-    { id:4, unread:false, type:'success', avatar:'SY', text:'System backup completed successfully.', time:'1 hr ago' },
-    { id:5, unread:false, type:'info',    avatar:'AD', text:'Reminder: Submit <strong>monthly attendance reports</strong> by end of month.', time:'3 hrs ago' },
-    { id:6, unread:false, type:'alert',   avatar:'SY', text:'High memory usage detected. System running at 87% capacity.', time:'Yesterday' },
-];
-let _notifications = [...NOTIFICATIONS];
-
-function renderNotifications() {
-    const list   = document.getElementById('notifList');
-    const unread = _notifications.filter(n => n.unread).length;
-    const badge  = document.getElementById('notificationCount');
-    badge.textContent   = unread;
-    badge.style.display = unread > 0 ? 'flex' : 'none';
-    list.innerHTML = _notifications.map(n =>
-        `<div class="nd-item ${n.unread ? 'unread' : ''}" onclick="markRead(${n.id})">
-            <div class="nd-avatar ${n.type || ''}">${n.avatar || '?'}</div>
-            <div class="nd-body">
-                <div class="nd-text">${n.text}</div>
-                <div class="nd-time">${n.time}</div>
-            </div>
-            <div class="nd-dot"></div>
-        </div>`
-    ).join('');
-}
-
-function toggleNotifications(e) {
-    e.stopPropagation();
-    const dd  = document.getElementById('notifDropdown');
-    const btn = document.getElementById('notifBtn');
-    const rect = btn.getBoundingClientRect();
-    dd.style.top   = (rect.bottom + 8) + 'px';
-    dd.style.right = (window.innerWidth - rect.right) + 'px';
-    dd.style.left  = 'auto';
-    dd.classList.toggle('open');
-    if (dd.classList.contains('open')) renderNotifications();
-}
-function closeNotifications() { document.getElementById('notifDropdown').classList.remove('open'); }
-function markRead(id) { const n = _notifications.find(n => n.id === id); if (n) n.unread = false; renderNotifications(); }
-function markAllRead() { _notifications.forEach(n => n.unread = false); renderNotifications(); }
-document.addEventListener('click', e => {
-    const wrapper = document.getElementById('notifWrapper');
-    const dd      = document.getElementById('notifDropdown');
-    if (wrapper && !wrapper.contains(e.target) && dd && !dd.contains(e.target)) closeNotifications();
-});
-
-// ════════════════════════════════════════════════════════
 //  SYSTEM LOGS
 // ════════════════════════════════════════════════════════
 const LOG_ROWS_PER_PAGE = 10;
@@ -689,7 +638,6 @@ window.addEventListener('click', e => {
 //  INIT
 // ════════════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
-    renderNotifications();
     seedDemo();
     updateStatCards();
     const fmt = d => d.toISOString().split('T')[0];
