@@ -2,9 +2,8 @@
 //  STUDENT DATA  —  sourced from studdata_prototype.xlsx
 //  Student: MALACAS, Mel Reynald L.  |  ID: 2026-0031
 //  Grade 7 · Section B  |  February 2026
-// ═════════════════════════════════════════════════════════
-// ══
-requireAuth('student');
+// ═══════════════════════════════════════════════════════════
+// requireAuth('student');  // disabled — handled by login.html redirect
 const STUDENT = {
     id:      '2026-0031',
     name:    'Mel Reynald Malacas',
@@ -21,7 +20,7 @@ const RAW_ATTENDANCE = {
     Filipino:['P','P','P','P','P','P','L','P','P','P','P','P','P','L','P','P','P','P','L','P','P','P','P','P','P','P','P','P'],
 };
 
-// ── Subject info (faculty & room from schedule) ──
+// ── Subject info ──
 const SUBJECT_INFO = {
     Math:    { full: 'Mathematics', faculty: 'Rheymard Doneza', room: 'Room 101', section: 'Sec B' },
     English: { full: 'English',     faculty: 'Gary Soriano',   room: 'Room 102', section: 'Sec B' },
@@ -29,7 +28,7 @@ const SUBJECT_INFO = {
     Filipino:{ full: 'Filipino',    faculty: 'Gerome Carpio',  room: 'Room 103', section: 'Sec B' },
 };
 
-// ── Pre-compute per-subject stats ──
+// ── Pre-compute stats ──
 const SUBJECT_STATS = {};
 let grandPresent = 0, grandLate = 0, grandAbsent = 0;
 
@@ -50,14 +49,22 @@ const OVERALL_RATE   = Math.round(GRAND_ATTENDED / GRAND_TOTAL * 1000) / 10;
 const WEEKDAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const MONTH_NAMES   = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
+// ── Subject time lookup (from weekly schedule) ──
+const SUBJECT_TIME = {
+    Math:    '07:00 AM',
+    English: '08:30 AM',
+    Science: '08:30 AM',
+    Filipino:'10:00 AM',
+};
+
 const ATTENDANCE_RECORDS = [];
 for (let day = 28; day >= 1; day--) {
-    const d       = new Date(2026, 1, day);
-    const weekday = WEEKDAY_NAMES[d.getDay()];
+    const d         = new Date(2026, 1, day);
+    const weekday   = WEEKDAY_NAMES[d.getDay()];
     const dateLabel = `Feb ${String(day).padStart(2,'0')}, 2026`;
     const dateKey   = `2026-02-${String(day).padStart(2,'0')}`;
     for (const subj of ['Math','English','Science','Filipino']) {
-        ATTENDANCE_RECORDS.push({ subject: subj, day, date: dateLabel, dateKey, weekday, status: RAW_ATTENDANCE[subj][day - 1] });
+        ATTENDANCE_RECORDS.push({ subject: subj, day, date: dateLabel, dateKey, weekday, status: RAW_ATTENDANCE[subj][day - 1], time: SUBJECT_TIME[subj] });
     }
 }
 
@@ -69,37 +76,49 @@ for (let day = 1; day <= 28; day++) {
     ATTENDANCE_DATA[key] = statuses.includes('A') ? 'absent' : statuses.includes('L') ? 'late' : 'present';
 }
 
-// ── Pagination state ──
-const ROWS_PER_PAGE = 3;
+// ── Pagination state (main table) ──
+const ROWS_PER_PAGE = 5;
 let currentPage = 1;
 let filteredRecords = [...ATTENDANCE_RECORDS];
 
 // ═══════════════════════════════════════════════════════════
 //  ON PAGE LOAD
 // ═══════════════════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', () => {
+function initDashboard() {
+    filteredRecords = ATTENDANCE_RECORDS.slice();
+    currentPage = 1;
     updateStatCards();
     updateSubjectFilter();
     renderAttendanceTable();
     renderBreakdown();
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDashboard);
+} else {
+    initDashboard();
+}
 
 function updateStatCards() {
-    document.querySelector('.stat-card.primary .stat-value').textContent  = OVERALL_RATE + '%';
-    document.querySelector('.stat-card.success .stat-value').textContent  = GRAND_ATTENDED;
-    document.querySelector('.stat-card.success .stat-label').textContent  = `Out of ${GRAND_TOTAL} Total`;
-    document.querySelector('.stat-card.warning .stat-value').textContent  = grandAbsent;
-    document.querySelector('.stat-card.warning .stat-label').textContent  = 'This Month (Feb)';
-    document.querySelector('.stat-card.info .stat-value').textContent     = grandLate;
-    document.querySelector('.stat-card.info .stat-label').textContent     = 'This Month (Feb)';
+    // Use named IDs — no class-selector guessing
+    const rateEl     = document.getElementById('statRate');
+    const rateLabel  = document.getElementById('statRateLabel');
+    const attEl      = document.getElementById('statAttended');
+    const attLabel   = document.getElementById('statAttendedLabel');
+    const absEl      = document.getElementById('statAbsent');
+    const absLabel   = document.getElementById('statAbsentLabel');
+
+    if (rateEl)  rateEl.textContent  = OVERALL_RATE + '%';
+    if (attEl)   attEl.textContent   = GRAND_ATTENDED;
+    if (absEl)   absEl.textContent   = grandAbsent;
 }
 
 // ═══════════════════════════════════════════════════════════
-//  ATTENDANCE TABLE
+//  ATTENDANCE TABLE (main card)
 // ═══════════════════════════════════════════════════════════
 function renderAttendanceTable() {
-    const tbody = document.getElementById('attendanceTableBody');
-    const start = (currentPage - 1) * ROWS_PER_PAGE;
+    const tbody    = document.getElementById('attendanceTableBody');
+    const start    = (currentPage - 1) * ROWS_PER_PAGE;
     const pageRows = filteredRecords.slice(start, start + ROWS_PER_PAGE);
 
     tbody.innerHTML = pageRows.map(r => {
@@ -110,9 +129,9 @@ function renderAttendanceTable() {
         return `
             <tr>
                 <td>${r.subject}</td>
-                <td>${info.section}</td>
                 <td>${r.date}</td>
                 <td>${r.weekday}</td>
+                <td>${r.time || '—'}</td>
                 <td><span class="status-badge ${badge}">${label}</span></td>
                 <td><button class="action-btn view" onclick="viewDetails('${recId}')">View</button></td>
             </tr>`;
@@ -124,6 +143,7 @@ function renderAttendanceTable() {
 function renderPagination() {
     const totalPages = Math.ceil(filteredRecords.length / ROWS_PER_PAGE);
     const container  = document.querySelector('.pagination');
+    if (!container) return;
 
     const maxVisible = 5;
     let winStart = Math.max(1, currentPage - Math.floor(maxVisible / 2));
@@ -131,7 +151,6 @@ function renderPagination() {
     if (winEnd - winStart < maxVisible - 1) winStart = Math.max(1, winEnd - maxVisible + 1);
 
     let html = `<button class="page-btn" onclick="goPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>‹</button>`;
-
     if (winStart > 1) {
         html += `<button class="page-btn" onclick="goPage(1)">1</button>`;
         if (winStart > 2) html += `<span style="align-self:center;padding:0 4px;color:#aaa;">…</span>`;
@@ -223,7 +242,7 @@ function viewDetails(recordId) {
 }
 
 // ═══════════════════════════════════════════════════════════
-//  VIEW CLASS DETAILS (from schedule)
+//  VIEW CLASS DETAILS (schedule)
 // ═══════════════════════════════════════════════════════════
 function viewClassDetails(classCode, day, time) {
     const info = SUBJECT_INFO[classCode] || {};
@@ -239,10 +258,35 @@ function viewClassDetails(classCode, day, time) {
 }
 
 // ═══════════════════════════════════════════════════════════
-//  QR SCANNER
+//  ATTENDANCE HISTORY — FULL TABLE (no pagination, all 112 rows)
 // ═══════════════════════════════════════════════════════════
-function openQRScanner() { openModal('qrScannerModal'); }
-function simulateScan()  { closeModal('qrScannerModal'); alert('QR Code scanned!\nAttendance marked as Present.'); }
+function renderAHFullTable() {
+    const tbody = document.getElementById('ahFullTableBody');
+    if (!tbody) return;
+
+    // Render ALL records — no pagination
+    tbody.innerHTML = ATTENDANCE_RECORDS.map(r => {
+        const badge = r.status === 'P' ? 'status-present' : r.status === 'L' ? 'status-late' : 'status-absent';
+        const label = r.status === 'P' ? 'Present' : r.status === 'L' ? 'Late' : 'Absent';
+        return `<tr>
+            <td>${r.subject}</td>
+            <td>${r.date}</td>
+            <td>${r.weekday}</td>
+            <td>${r.time || '—'}</td>
+            <td><span class="status-badge ${badge}">${label}</span></td>
+        </tr>`;
+    }).join('');
+}
+
+// Render AH table when history modal opens
+const _origOpenModal = openModal;
+window.openModal = function(modalId) {
+    _origOpenModal(modalId);
+    if (modalId === 'attendanceHistoryModal') {
+        renderAHFullTable();
+        renderBreakdown();
+    }
+};
 
 // ═══════════════════════════════════════════════════════════
 //  ATTENDANCE HISTORY TABS
@@ -252,7 +296,9 @@ function switchAHTab(tab, btn) {
     document.querySelectorAll('.ah-tab').forEach(t => t.classList.remove('active'));
     document.getElementById('ah-' + tab).style.display = 'block';
     btn.classList.add('active');
-    if (tab === 'calendar') renderCalendar();
+    if (tab === 'calendar')  renderCalendar();
+    if (tab === 'breakdown') renderBreakdown();
+    if (tab === 'records')   renderAHFullTable();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -348,9 +394,10 @@ function toggleDarkMode(checkbox) {
 // ═══════════════════════════════════════════════════════════
 //  MISC
 // ═══════════════════════════════════════════════════════════
-function refreshData()      { location.reload(); }
+function refreshData() { location.reload(); }
+
 // ═══════════════════════════════════════════════════════════
-//  NOTIFICATIONS (matches faculty theme)
+//  NOTIFICATIONS
 // ═══════════════════════════════════════════════════════════
 const STUDENT_NOTIFICATIONS = [
     { id:1, unread:true,  type:'alert',   text:'Your absences in <strong>English</strong> have reached <strong>4 days</strong> this month. Please take note.', time:'Today' },
@@ -406,58 +453,7 @@ document.addEventListener('click', function(e) {
     const wrapper = document.getElementById('notifWrapper');
     if (wrapper && !wrapper.contains(e.target)) closeNotifications();
 });
+
 function logout() {
     if (confirm('Are you sure you want to logout?')) window.location.href = 'login.html';
 }
-
-// ═══════════════════════════════════════════════════════════
-//  ATTENDANCE HISTORY — FULL RECORDS TABLE (modal)
-// ═══════════════════════════════════════════════════════════
-const AH_ROWS_PER_PAGE = 12;
-let ahPage = 1;
-
-function renderAHFullTable() {
-    const tbody = document.getElementById('ahFullTableBody');
-    if (!tbody) return;
-    const start    = (ahPage - 1) * AH_ROWS_PER_PAGE;
-    const pageRows = ATTENDANCE_RECORDS.slice(start, start + AH_ROWS_PER_PAGE);
-
-    tbody.innerHTML = pageRows.map(r => {
-        const badge = r.status === 'P' ? 'status-present' : r.status === 'L' ? 'status-late' : 'status-absent';
-        const label = r.status === 'P' ? 'Present' : r.status === 'L' ? 'Late' : 'Absent';
-        return `<tr>
-            <td>${r.subject}</td>
-            <td>${r.date}</td>
-            <td>${r.weekday}</td>
-            <td><span class="status-badge ${badge}">${label}</span></td>
-        </tr>`;
-    }).join('');
-
-    // Pagination for AH table
-    const totalPages = Math.ceil(ATTENDANCE_RECORDS.length / AH_ROWS_PER_PAGE);
-    const pg = document.getElementById('ahPagination');
-    if (!pg) return;
-    let html = `<button class="page-btn" onclick="goAHPage(${ahPage-1})" ${ahPage===1?'disabled':''}>‹</button>`;
-    for (let i = 1; i <= totalPages; i++) {
-        html += `<button class="page-btn ${i===ahPage?'active':''}" onclick="goAHPage(${i})">${i}</button>`;
-    }
-    html += `<button class="page-btn" onclick="goAHPage(${ahPage+1})" ${ahPage===totalPages?'disabled':''}>›</button>`;
-    pg.innerHTML = html;
-}
-
-function goAHPage(n) {
-    const totalPages = Math.ceil(ATTENDANCE_RECORDS.length / AH_ROWS_PER_PAGE);
-    if (n < 1 || n > totalPages) return;
-    ahPage = n;
-    renderAHFullTable();
-}
-
-// Render AH table when modal opens
-const _origOpenModal = openModal;
-window.openModal = function(modalId) {
-    _origOpenModal(modalId);
-    if (modalId === 'attendanceHistoryModal') {
-        renderAHFullTable();
-        renderBreakdown();
-    }
-};
