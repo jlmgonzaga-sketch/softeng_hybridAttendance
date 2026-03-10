@@ -57,7 +57,7 @@
     <div class="controls">
       <input type="text" class="search-input" id="searchInput" placeholder="Search name or ID…" oninput="_currentPage=1;renderAttendanceTable()">
     </div>
-    <div class="controls">
+    <div class="controls filter-row">
       <select class="fsel" id="sectionFilter" onchange="_currentPage=1;renderAttendanceTable()">
         <option value="">All Sec</option>
         <option value="Sec A">Sec A</option>
@@ -78,8 +78,6 @@
         <option value="Late">Late</option>
         <option value="Unmarked">Unmarked</option>
       </select>
-      <select class="fsel" id="viewPeriod"><option value="">Period</option><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select>
-      <button class="abtn generate-btn" onclick="generateReport()">Generate</button>
     </div>
     <div class="report-strip" id="reportStrip">
       <div class="rp-item"><div class="rp-val" id="rpTotal">—</div><div class="rp-lbl">Total</div></div>
@@ -117,7 +115,7 @@
     <div class="controls">
       <input type="text" class="search-input" id="logSearch" placeholder="Search user, action…" oninput="_logPage=1;renderLogs()">
     </div>
-    <div class="controls">
+    <div class="controls filter-row">
       <select class="fsel" id="filterType" onchange="_logPage=1;renderLogs()">
         <option value="">All Actions</option>
         <option value="Login">Login</option>
@@ -141,8 +139,7 @@
         <option value="warning">Warning</option>
         <option value="error">Error</option>
       </select>
-      <select class="fsel" id="filterPeriod"><option value="">Period</option><option value="today">Today</option><option value="week">This Week</option><option value="month">This Month</option></select>
-      <button class="abtn generate-btn" onclick="applyLogPeriod()">Generate</button>
+      <select class="fsel" id="filterPeriod" onchange="_logPage=1;renderLogs()"><option value="">Period</option><option value="today">Today</option><option value="week">This Week</option><option value="month">This Month</option></select>
     </div>
 
     <div class="table-wrap">
