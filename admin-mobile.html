@@ -50,8 +50,8 @@
     <div class="section-hdr">
       <div class="section-title">Attendance</div>
       <div style="display:flex;gap:.4rem;">
-        <button class="abtn refresh-btn" onclick="refreshData()">↺ Refresh</button>
-        <button class="abtn export-btn" onclick="exportToExcel()">↓ Export</button>
+        <button class="abtn refresh-btn" onclick="refreshData()">Refresh</button>
+        <button class="abtn export-btn" onclick="exportToExcel()">Export</button>
       </div>
     </div>
     <div class="controls">
@@ -88,7 +88,7 @@
     </div>
     <div class="table-wrap">
       <table class="att-table">
-        <thead><tr><th>ID</th><th>Name</th><th>Subj</th><th>Sec</th><th>In</th><th>St.</th><th>Act.</th></tr></thead>
+        <thead><tr><th>ID</th><th>Last Name</th><th>Sec</th><th>Status</th><th></th></tr></thead>
         <tbody id="attendanceTableBody"></tbody>
       </table>
     </div>
@@ -107,8 +107,8 @@
         <span class="live-dot-sm"></span>System Logs
       </div>
       <div style="display:flex;gap:.4rem;">
-        <button class="abtn refresh-btn" onclick="refreshLogs()">↺ Refresh</button>
-        <button class="abtn export-btn" onclick="exportLogs()">↓ Export</button>
+        <button class="abtn refresh-btn" onclick="refreshLogs()">Refresh</button>
+        <button class="abtn export-btn" onclick="exportLogs()">Export</button>
       </div>
     </div>
 
@@ -144,7 +144,7 @@
 
     <div class="table-wrap">
       <table class="att-table">
-        <thead><tr><th>User</th><th>Action</th><th>Role</th><th>Sev.</th><th>Time</th><th>View</th></tr></thead>
+        <thead><tr><th>User</th><th>Action</th><th>Role</th><th>Sev</th><th></th></tr></thead>
         <tbody id="logsTableBody"></tbody>
       </table>
     </div>
