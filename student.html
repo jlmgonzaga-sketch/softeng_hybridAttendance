@@ -7,274 +7,249 @@
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="student.css">
     <style>
-        /* ── Notification Dropdown (matches faculty theme) ── */
-        .notification-wrapper { position: relative; }
+        /* ── Global spacing ── */
+        .container   { padding: 2.5rem; }
+        .header      { margin-bottom: 2.75rem; padding: 1.5rem 2.25rem; }
+        .stats-grid  { gap: 1rem; margin-bottom: 1.75rem; }
+        .stat-card   { padding: 1.1rem 1rem 1rem; min-height: 105px; }
+        .stat-value  { margin-bottom: 0; }
+        .stat-label  { display: none !important; }
+        .grid-2      { gap: 2rem; }
+        .card        { padding: 2.25rem; margin-bottom: 2rem; }
+        .card-header { margin-bottom: 1.75rem; padding-bottom: 1.25rem; }
+        .controls-bar{ margin-bottom: 1.5rem; }
+        .table-container { margin-bottom: 0; }
+        .pagination  { margin-top: 1.25rem; padding-top: 0.5rem; }
 
-        .notif-dropdown {
+        /* ── History stat card ── */
+        .stat-card.history .stat-label-top { display: none; }
+        .stat-card.history .stat-header    { display: none; }
+        .stat-card.history .stat-value {
             display: none;
-            position: absolute;
-            top: calc(100% + 10px);
-            right: 0;
-            width: 340px;
-            background: #fff;
-            border-radius: 16px;
-            border: 2px solid var(--gold);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            z-index: 99999;
-            overflow: hidden;
-            animation: fadeInUp 0.2s ease;
-        }
-        .notif-dropdown.open { display: block; }
-
-        .notif-header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0.85rem 1rem;
-            background: #1a1a1a;
-            border-bottom: 2px solid var(--gold);
-        }
-        .notif-header-title {
             font-family: 'Syne', sans-serif;
-            font-weight: 700; font-size: 0.9rem; color: var(--gold);
+            font-weight: 800;
+            line-height: 1.25;
+            white-space: normal;
+            word-break: break-word;
+            margin-top: 0.75rem;
         }
-        .notif-mark-all {
-            font-size: 0.72rem; color: var(--gold);
-            background: none; border: none; cursor: pointer;
-            font-family: 'DM Sans', sans-serif; font-weight: 600; opacity: 0.8;
+
+        /* ── History modal — wider, taller, full scrollable table ── */
+        #attendanceHistoryModal .modal-content {
+            max-width: 860px;
+            width: 96%;
         }
-        .notif-mark-all:hover { opacity: 1; text-decoration: underline; }
-
-        .notif-list { max-height: 340px; overflow-y: auto; }
-
-        .notif-item {
-            display: flex; gap: 0.75rem;
-            padding: 0.9rem 1rem;
-            border-bottom: 1px solid #f0f0f0;
-            transition: background 0.15s; cursor: pointer;
+        #attendanceHistoryModal .modal-body-scroll {
+            max-height: 82vh;
+            padding: 0.5rem 0.25rem;
         }
-        .notif-item:last-child { border-bottom: none; }
-        .notif-item:hover { background: #fffbf0; }
-        .notif-item.unread { background: #fffde7; }
-        .notif-item.unread:hover { background: #fff9c4; }
-
-        .notif-icon { display: none; }
-
-        .notif-body { flex: 1; }
-        .notif-text { font-size: 0.82rem; color: #333; line-height: 1.4; margin-bottom: 0.2rem; }
-        .notif-text strong { color: #1a1a1a; }
-        .notif-time { font-size: 0.72rem; color: #aaa; font-weight: 600; }
-
-        .notif-dot {
-            width: 8px; height: 8px; border-radius: 50%;
-            background: var(--gold); flex-shrink: 0; margin-top: 6px;
+        #ah-records .table-container {
+            max-height: 58vh;
+            overflow-y: auto;
+            border-radius: var(--r-sm);
         }
-        .notif-item:not(.unread) .notif-dot { background: transparent; }
-
-        .notif-footer {
-            padding: 0.65rem 1rem; text-align: center;
-            border-top: 1px solid #f0f0f0;
-            font-size: 0.78rem; font-weight: 700; color: #888;
-            cursor: pointer; font-family: 'DM Sans', sans-serif;
+        /* Sticky header inside scrollable history table */
+        #ah-records .data-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: var(--black);
         }
-        .notif-footer:hover { color: #333; background: #f9f9f9; }
+
+        /* ── History summary row ── */
+        .ah-summary-row {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .ah-summary-chip {
+            flex: 1;
+            min-width: 100px;
+            padding: 0.65rem 1rem;
+            border-radius: 12px;
+            text-align: center;
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+        }
+        .ah-summary-chip.present { background: #FFF9E6; border: 2px solid var(--gold); color: #7A4F00; }
+        .ah-summary-chip.absent  { background: #FFF0F3; border: 2px solid var(--red);  color: #8B0000; }
+        .ah-summary-chip.late    { background: #FFF5E6; border: 2px solid #FFA500;     color: #7A4500; }
+        .ah-chip-val  { font-size: 1.6rem; line-height: 1; }
+        .ah-chip-lbl  { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px; }
+
+        /* ── Download cards ── */
+        .dl-card {
+            flex: 1; min-width: 140px;
+            background: #fff;
+            border: 2.5px solid var(--gold);
+            border-radius: 14px;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+        .dl-card:hover { border-color: var(--red); background: #FFF9E6; transform: translateY(-3px); box-shadow: 0 8px 24px rgba(255,215,0,0.3); }
+        .dl-card-label { font-weight: 800; font-size: 1rem; color: var(--black); font-family: 'Syne', sans-serif; }
+        .dl-card-desc  { font-size: 0.78rem; color: #888; margin-top: 0.3rem; }
+
+        /* ── Schedule card extra breathing room ── */
+        .schedule-wrapper { margin-top: 0.25rem; }
+
+        /* ── Responsive tweaks ── */
+        @media(max-width:768px){
+            .container { padding: 1.25rem; }
+            .header    { padding: 1rem 1.25rem; margin-bottom: 1.75rem; }
+            .stats-grid{ gap: 1rem; margin-bottom: 1.75rem; }
+            .card      { padding: 1.5rem; }
+        }
     </style>
 
     <!-- PWA -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#8B0000">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="sscrmnlofficiallogo.png">
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sscr_attendance/sw.js');
-  }
-</script>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#8B0000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="sscrmnlofficiallogo.png">
+    <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sscr_attendance/sw.js');}</script>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div class="header-left">
-                <div class="logo-container">
-                    <img src="sscrmnlofficiallogo.png" alt="SSC-R Logo" class="logo-img">
-                </div>
-                <!-- Quick Actions in Header -->
-                <div class="header-actions">
-                    <button class="quick-action-btn" onclick="openModal('subjectsModal')">
-                        <span class="quick-action-icon"></span>
-                        <span>Enrolled</span>
-                    </button>
-                    <button class="quick-action-btn" onclick="openQRScanner()">
-                        <span class="quick-action-icon"></span>
-                        <span>QR Scan</span>
-                    </button>
-                    <button class="quick-action-btn" onclick="openModal('contactModal')">
-                        <span class="quick-action-icon"></span>
-                        <span>Contact</span>
-                    </button>
-                    <button class="quick-action-btn" onclick="openModal('settingsModal')">
-                        <span class="quick-action-icon"></span>
-                        <span>Settings</span>
-                    </button>
+<div class="container">
+
+    <!-- ══ HEADER ══ -->
+    <div class="header">
+        <div class="header-left">
+            <div class="logo-container">
+                <img src="sscrmnlofficiallogo.png" alt="SSC-R Logo" class="logo-img">
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="notification-wrapper" id="notifWrapper">
+                <!-- Envelope -->
+                <a class="icon-btn-header" onclick="openModal('contactModal')" title="Contact Faculty" style="cursor:pointer;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="4" width="20" height="16" rx="2"/>
+                        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                    </svg>
+                </a>
+                <!-- Bell -->
+                <button class="notification-btn" onclick="toggleNotifications(event)">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2zm6-6V11a6 6 0 1 0-12 0v5l-2 2v1h16v-1l-2-2z"/></svg>
+                    <span class="notification-badge" id="notificationCount">3</span>
+                </button>
+                <!-- Dropdown -->
+                <div class="notif-dropdown" id="notifDropdown">
+                    <div class="notif-header">
+                        <span class="notif-header-title">Notifications</span>
+                        <button class="notif-mark-all" onclick="markAllRead()">Mark all as read</button>
+                    </div>
+                    <div class="notif-list" id="notifList"></div>
+                    <div class="notif-footer" onclick="closeNotifications()">Dismiss</div>
                 </div>
             </div>
-            <div class="header-right">
-                <div class="notification-wrapper" id="notifWrapper">
-                    <button class="notification-btn" onclick="toggleNotifications(event)">
-                        🔔
-                        <span class="notification-badge" id="notificationCount">3</span>
-                    </button>
-                    <div class="notif-dropdown" id="notifDropdown">
-                        <div class="notif-header">
-                            <span class="notif-header-title">Notifications</span>
-                            <button class="notif-mark-all" onclick="markAllRead()">Mark all as read</button>
-                        </div>
-                        <div class="notif-list" id="notifList"></div>
-                        <div class="notif-footer" onclick="closeNotifications()">Dismiss</div>
-                    </div>
+
+            <!-- Profile pill -->
+            <div class="student-profile" onclick="openModal('settingsModal')" title="Settings & Profile">
+                <div class="student-avatar" id="headerAvatar">ML</div>
+                <div>
+                    <div class="student-name" id="headerName">Mel Reynald Malacas</div>
+                    <div class="student-role" id="headerRole">2026-0031 · Grade 7 Sec B</div>
                 </div>
-                <div class="student-profile">
-                    <div class="student-avatar">ML</div>
-                    <div>
-                        <div class="student-name">Mel Reynald Malacas</div>
-                        <div class="student-role">2026-0031 </div>
-                    </div>
+            </div>
+
+            <button class="btn-logout" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <!-- ══ STATS ══ -->
+    <div class="stats-grid">
+
+        <!-- History -->
+        <div class="stat-card history" onclick="openModal('attendanceHistoryModal')" title="View Full History">
+            <div class="stat-history-label">View All</div>
+        </div>
+
+        <!-- Attendance Rate -->
+        <div class="stat-card primary">
+            <div class="stat-value" id="statRate">—</div>
+            <div class="stat-sublabel">Rate</div>
+        </div>
+
+        <!-- Present & Late -->
+        <div class="stat-card success">
+            <div class="stat-split">
+                <div class="stat-split-item">
+                    <div class="stat-value small" id="statAttended">—</div>
+                    <div class="stat-sublabel">Present</div>
                 </div>
-                <button class="btn-logout" onclick="logout()">Logout</button>
+                <div class="stat-split-divider"></div>
+                <div class="stat-split-item">
+                    <div class="stat-value small" id="statLate">—</div>
+                    <div class="stat-sublabel">Late</div>
+                </div>
             </div>
         </div>
 
-        <div class="stats-grid">
-            <div class="stat-card primary">
-                <div class="stat-header">
-                    <div class="stat-label-top">My Attendance Rate</div>
-                    <div class="stat-trend up">↑ February</div>
-                </div>
-                <div class="stat-value">94.6%</div>
-                <div class="stat-label">Overall This Month</div>
-            </div>
-            <div class="stat-card success">
-                <div class="stat-header">
-                    <div class="stat-label-top">Classes Attended</div>
-                    <div class="stat-trend up">Present + Late</div>
-                </div>
-                <div class="stat-value">106</div>
-                <div class="stat-label">Out of 112 Total</div>
-            </div>
-            <div class="stat-card warning">
-                <div class="stat-header">
-                    <div class="stat-label-top">Absences</div>
-                    <div class="stat-trend down">This Month</div>
-                </div>
-                <div class="stat-value">6</div>
-                <div class="stat-label">February 2026</div>
-            </div>
-            <div class="stat-card info">
-                <div class="stat-header">
-                    <div class="stat-label-top">Late Arrivals</div>
-                    <div class="stat-trend up">—</div>
-                </div>
-                <div class="stat-value">15</div>
-                <div class="stat-label">This Month</div>
-            </div>
+        <!-- Absences -->
+        <div class="stat-card warning">
+            <div class="stat-value" id="statAbsent">—</div>
+            <div class="stat-sublabel">Absences</div>
         </div>
 
-        <!-- Main Content Grid: Attendance and Schedule Side by Side -->
-        <div class="grid-2">
-            <!-- My Attendance Records -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">Attendance</div>
-                    <div class="card-actions">
-                        <button class="btn btn-secondary" onclick="refreshData()">Refresh</button>
-                    </div>
-                </div>
+    </div>
 
-                <div class="controls-bar">
-                    <div class="search-box">
-                        <span class="search-icon"></span>
-                        <input type="text" id="searchInput" placeholder="Search by subject or date..." onkeyup="searchTable()">
-                    </div>
-                    <div class="filter-group">
-                        <select class="filter-select" id="statusFilter" onchange="filterTable()">
-                            <option value="">All Status</option>
-                            <option value="present">Present</option>
-                            <option value="absent">Absent</option>
-                            <option value="late">Late</option>
-                        </select>
-                        <select class="filter-select" id="subjectFilter" onchange="filterTable()">
-                            <option value="">All Subjects</option>
-                            <option value="MATH">MATH</option>
-                            <option value="ENG">ENG</option>
-                            <option value="SCI">SCI</option>
-                            <option value="FIL">FIL</option>
-                        </select>
-                    </div>
-                </div>
+    <!-- ══ MAIN GRID ══ -->
+    <div class="grid-2">
 
-                <div class="table-container">
-                    <table class="data-table" id="attendanceTable">
-                        <thead>
-                            <tr>
-                                <th>Subject</th>
-                                <th>Section</th>
-                                <th>Date</th>
-                                <th>Time</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="attendanceTableBody">
-                            <tr><td>MATH</td><td>B</td><td>Feb 28, 2026</td><td>07:00 AM</td><td><span class="status-badge status-present">Present</span></td><td><button class="action-btn view" onclick="viewDetails('MATH','Feb 28')">View</button></td></tr>
-                            <tr><td>ENG</td><td>B</td><td>Feb 28, 2026</td><td>08:30 AM</td><td><span class="status-badge status-present">Present</span></td><td><button class="action-btn view" onclick="viewDetails('ENG','Feb 28')">View</button></td></tr>
-                            <tr><td>SCI</td><td>B</td><td>Feb 28, 2026</td><td>08:30 AM</td><td><span class="status-badge status-present">Present</span></td><td><button class="action-btn view" onclick="viewDetails('SCI','Feb 28')">View</button></td></tr>
-                            <tr><td>FIL</td><td>B</td><td>Feb 28, 2026</td><td>10:00 AM</td><td><span class="status-badge status-present">Present</span></td><td><button class="action-btn view" onclick="viewDetails('FIL','Feb 28')">View</button></td></tr>
-                            <tr><td>MATH</td><td>B</td><td>Feb 27, 2026</td><td>07:00 AM</td><td><span class="status-badge status-present">Present</span></td><td><button class="action-btn view" onclick="viewDetails('MATH','Feb 27')">View</button></td></tr>
-                            <tr><td>ENG</td><td>B</td><td>Feb 27, 2026</td><td>08:30 AM</td><td><span class="status-badge status-present">Present</span></td><td><button class="action-btn view" onclick="viewDetails('ENG','Feb 27')">View</button></td></tr>
-                            <tr><td>SCI</td><td>B</td><td>Feb 27, 2026</td><td>08:30 AM</td><td><span class="status-badge status-present">Present</span></td><td><button class="action-btn view" onclick="viewDetails('SCI','Feb 27')">View</button></td></tr>
-                            <tr><td>FIL</td><td>B</td><td>Feb 27, 2026</td><td>10:00 AM</td><td><span class="status-badge status-present">Present</span></td><td><button class="action-btn view" onclick="viewDetails('FIL','Feb 27')">View</button></td></tr>
-                            <tr><td>MATH</td><td>B</td><td>Feb 26, 2026</td><td>07:00 AM</td><td><span class="status-badge status-present">Present</span></td><td><button class="action-btn view" onclick="viewDetails('MATH','Feb 26')">View</button></td></tr>
-                            <tr><td>ENG</td><td>B</td><td>Feb 26, 2026</td><td>08:30 AM</td><td><span class="status-badge status-present">Present</span></td><td><button class="action-btn view" onclick="viewDetails('ENG','Feb 26')">View</button></td></tr>
-                            <tr><td>SCI</td><td>B</td><td>Feb 26, 2026</td><td>08:30 AM</td><td><span class="status-badge status-present">Present</span></td><td><button class="action-btn view" onclick="viewDetails('SCI','Feb 26')">View</button></td></tr>
-                            <tr><td>FIL</td><td>B</td><td>Feb 26, 2026</td><td>10:00 AM</td><td><span class="status-badge status-present">Present</span></td><td><button class="action-btn view" onclick="viewDetails('FIL','Feb 26')">View</button></td></tr>
-                            <tr><td>MATH</td><td>B</td><td>Feb 25, 2026</td><td>07:00 AM</td><td><span class="status-badge status-present">Present</span></td><td><button class="action-btn view" onclick="viewDetails('MATH','Feb 25')">View</button></td></tr>
-                            <tr><td>ENG</td><td>B</td><td>Feb 25, 2026</td><td>08:30 AM</td><td><span class="status-badge status-present">Present</span></td><td><button class="action-btn view" onclick="viewDetails('ENG','Feb 25')">View</button></td></tr>
-                            <tr><td>SCI</td><td>B</td><td>Feb 25, 2026</td><td>08:30 AM</td><td><span class="status-badge status-late">Late</span></td><td><button class="action-btn view" onclick="viewDetails('SCI','Feb 25')">View</button></td></tr>
-                            <tr><td>FIL</td><td>B</td><td>Feb 25, 2026</td><td>10:00 AM</td><td><span class="status-badge status-present">Present</span></td><td><button class="action-btn view" onclick="viewDetails('FIL','Feb 25')">View</button></td></tr>
-                            <tr><td>MATH</td><td>B</td><td>Feb 24, 2026</td><td>07:00 AM</td><td><span class="status-badge status-late">Late</span></td><td><button class="action-btn view" onclick="viewDetails('MATH','Feb 24')">View</button></td></tr>
-                            <tr><td>ENG</td><td>B</td><td>Feb 24, 2026</td><td>08:30 AM</td><td><span class="status-badge status-present">Present</span></td><td><button class="action-btn view" onclick="viewDetails('ENG','Feb 24')">View</button></td></tr>
-                            <tr><td>SCI</td><td>B</td><td>Feb 24, 2026</td><td>08:30 AM</td><td><span class="status-badge status-present">Present</span></td><td><button class="action-btn view" onclick="viewDetails('SCI','Feb 24')">View</button></td></tr>
-                            <tr><td>FIL</td><td>B</td><td>Feb 24, 2026</td><td>10:00 AM</td><td><span class="status-badge status-present">Present</span></td><td><button class="action-btn view" onclick="viewDetails('FIL','Feb 24')">View</button></td></tr>
-                            <tr><td>MATH</td><td>B</td><td>Feb 21, 2026</td><td>07:00 AM</td><td><span class="status-badge status-late">Late</span></td><td><button class="action-btn view" onclick="viewDetails('MATH','Feb 21')">View</button></td></tr>
-                            <tr><td>ENG</td><td>B</td><td>Feb 21, 2026</td><td>08:30 AM</td><td><span class="status-badge status-present">Present</span></td><td><button class="action-btn view" onclick="viewDetails('ENG','Feb 21')">View</button></td></tr>
-                            <tr><td>SCI</td><td>B</td><td>Feb 21, 2026</td><td>08:30 AM</td><td><span class="status-badge status-present">Present</span></td><td><button class="action-btn view" onclick="viewDetails('SCI','Feb 21')">View</button></td></tr>
-                            <tr><td>FIL</td><td>B</td><td>Feb 21, 2026</td><td>10:00 AM</td><td><span class="status-badge status-present">Present</span></td><td><button class="action-btn view" onclick="viewDetails('FIL','Feb 21')">View</button></td></tr>
-                            <tr><td>MATH</td><td>B</td><td>Feb 20, 2026</td><td>07:00 AM</td><td><span class="status-badge status-present">Present</span></td><td><button class="action-btn view" onclick="viewDetails('MATH','Feb 20')">View</button></td></tr>
-                            <tr><td>ENG</td><td>B</td><td>Feb 20, 2026</td><td>08:30 AM</td><td><span class="status-badge status-absent">Absent</span></td><td><button class="action-btn view" onclick="viewDetails('ENG','Feb 20')">View</button></td></tr>
-                            <tr><td>SCI</td><td>B</td><td>Feb 20, 2026</td><td>08:30 AM</td><td><span class="status-badge status-present">Present</span></td><td><button class="action-btn view" onclick="viewDetails('SCI','Feb 20')">View</button></td></tr>
-                            <tr><td>FIL</td><td>B</td><td>Feb 20, 2026</td><td>10:00 AM</td><td><span class="status-badge status-present">Present</span></td><td><button class="action-btn view" onclick="viewDetails('FIL','Feb 20')">View</button></td></tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="pagination">
-                    <button class="page-btn">‹</button>
-                    <button class="page-btn active">1</button>
-                    <button class="page-btn">2</button>
-                    <button class="page-btn">3</button>
-                    <button class="page-btn">4</button>
-                    <button class="page-btn">5</button>
-                    <button class="page-btn">›</button>
+        <!-- Attendance Records -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Recent Attendance</div>
+                <div class="card-actions">
+                    <button class="btn btn-secondary" onclick="refreshData()">Refresh</button>
                 </div>
             </div>
-
-            <!-- My Weekly Schedule -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">Schedule</div>
+            <div class="controls-bar">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search by subject or date..." onkeyup="searchTable()">
                 </div>
+                <div class="filter-group">
+                    <select class="filter-select" id="statusFilter" onchange="filterTable()">
+                        <option value="">All Status</option>
+                        <option value="present">Present</option>
+                        <option value="absent">Absent</option>
+                        <option value="late">Late</option>
+                    </select>
+                    <select class="filter-select" id="subjectFilter" onchange="filterTable()">
+                        <option value="">All Subjects</option>
+                    </select>
+                </div>
+            </div>
+            <div class="table-container">
+                <table class="data-table" id="attendanceTable">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Date</th>
+                            <th>Day</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceTableBody"></tbody>
+                </table>
+            </div>
+            <div class="pagination"></div>
+        </div>
+
+        <!-- Weekly Schedule -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Weekly Schedule</div>
+            </div>
+            <div class="schedule-wrapper">
                 <div class="schedule-grid">
-                    <!-- Header Row -->
                     <div class="schedule-header">Time</div>
                     <div class="schedule-header">Monday</div>
                     <div class="schedule-header">Tuesday</div>
@@ -283,318 +258,315 @@
                     <div class="schedule-header">Friday</div>
                     <div class="schedule-header">Saturday</div>
 
-                    <!-- 07:00 AM — MATH: Mon, Wed, Fri -->
+                    <!-- 07:00 AM -->
                     <div class="schedule-time-cell">07:00 AM</div>
-                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('Math','Monday','07:00 AM')">
-                        <div class="class-code">MATH</div><div class="class-name">Mathematics</div><div class="class-room">Sec B · Room 101</div>
-                    </div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('Math','Monday','07:00 AM')"><div class="class-code">MATH</div><div class="class-name">Mathematics</div><div class="class-room">Sec B · Room 101</div></div>
                     <div class="schedule-class-cell"></div>
-                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('Math','Wednesday','07:00 AM')">
-                        <div class="class-code">MATH</div><div class="class-name">Mathematics</div><div class="class-room">Sec B · Room 101</div>
-                    </div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('Math','Wednesday','07:00 AM')"><div class="class-code">MATH</div><div class="class-name">Mathematics</div><div class="class-room">Sec B · Room 101</div></div>
                     <div class="schedule-class-cell"></div>
-                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('Math','Friday','07:00 AM')">
-                        <div class="class-code">MATH</div><div class="class-name">Mathematics</div><div class="class-room">Sec B · Room 101</div>
-                    </div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('Math','Friday','07:00 AM')"><div class="class-code">MATH</div><div class="class-name">Mathematics</div><div class="class-room">Sec B · Room 101</div></div>
                     <div class="schedule-class-cell"></div>
 
-                    <!-- 08:30 AM — ENG: Mon, Wed, Thu | SCI: Tue, Fri -->
+                    <!-- 08:30 AM -->
                     <div class="schedule-time-cell">08:30 AM</div>
-                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('English','Monday','08:30 AM')">
-                        <div class="class-code">ENG</div><div class="class-name">English</div><div class="class-room">Sec B · Room 102</div>
-                    </div>
-                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('Science','Tuesday','08:30 AM')">
-                        <div class="class-code">SCI</div><div class="class-name">Science</div><div class="class-room">Sec B · Lab 201</div>
-                    </div>
-                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('English','Wednesday','08:30 AM')">
-                        <div class="class-code">ENG</div><div class="class-name">English</div><div class="class-room">Sec B · Room 102</div>
-                    </div>
-                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('English','Thursday','08:30 AM')">
-                        <div class="class-code">ENG</div><div class="class-name">English</div><div class="class-room">Sec B · Room 102</div>
-                    </div>
-                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('Science','Friday','08:30 AM')">
-                        <div class="class-code">SCI</div><div class="class-name">Science</div><div class="class-room">Sec B · Lab 201</div>
-                    </div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('English','Monday','08:30 AM')"><div class="class-code">ENG</div><div class="class-name">English</div><div class="class-room">Sec B · Room 102</div></div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('Science','Tuesday','08:30 AM')"><div class="class-code">SCI</div><div class="class-name">Science</div><div class="class-room">Sec B · Lab 201</div></div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('English','Wednesday','08:30 AM')"><div class="class-code">ENG</div><div class="class-name">English</div><div class="class-room">Sec B · Room 102</div></div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('English','Thursday','08:30 AM')"><div class="class-code">ENG</div><div class="class-name">English</div><div class="class-room">Sec B · Room 102</div></div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('Science','Friday','08:30 AM')"><div class="class-code">SCI</div><div class="class-name">Science</div><div class="class-room">Sec B · Lab 201</div></div>
                     <div class="schedule-class-cell"></div>
 
-                    <!-- 10:00 AM — FIL: Tue only -->
+                    <!-- 10:00 AM -->
                     <div class="schedule-time-cell">10:00 AM</div>
                     <div class="schedule-class-cell"></div>
-                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('Filipino','Tuesday','10:00 AM')">
-                        <div class="class-code">FIL</div><div class="class-name">Filipino</div><div class="class-room">Sec B · Room 103</div>
-                    </div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('Filipino','Tuesday','10:00 AM')"><div class="class-code">FIL</div><div class="class-name">Filipino</div><div class="class-room">Sec B · Room 103</div></div>
                     <div class="schedule-class-cell"></div>
                     <div class="schedule-class-cell"></div>
                     <div class="schedule-class-cell"></div>
                     <div class="schedule-class-cell"></div>
 
-                    <!-- 01:00 PM — MATH: Tue, Thu -->
+                    <!-- 01:00 PM -->
                     <div class="schedule-time-cell">01:00 PM</div>
                     <div class="schedule-class-cell"></div>
-                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('Math','Tuesday','01:00 PM')">
-                        <div class="class-code">MATH</div><div class="class-name">Mathematics</div><div class="class-room">Sec B · Room 101</div>
-                    </div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('Math','Tuesday','01:00 PM')"><div class="class-code">MATH</div><div class="class-name">Mathematics</div><div class="class-room">Sec B · Room 101</div></div>
                     <div class="schedule-class-cell"></div>
-                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('Math','Thursday','01:00 PM')">
-                        <div class="class-code">MATH</div><div class="class-name">Mathematics</div><div class="class-room">Sec B · Room 101</div>
-                    </div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('Math','Thursday','01:00 PM')"><div class="class-code">MATH</div><div class="class-name">Mathematics</div><div class="class-room">Sec B · Room 101</div></div>
                     <div class="schedule-class-cell"></div>
                     <div class="schedule-class-cell"></div>
 
-                    <!-- 02:30 PM — ENG: Tue, Thu -->
+                    <!-- 02:30 PM -->
                     <div class="schedule-time-cell">02:30 PM</div>
                     <div class="schedule-class-cell"></div>
-                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('English','Tuesday','02:30 PM')">
-                        <div class="class-code">ENG</div><div class="class-name">English</div><div class="class-room">Sec B · Room 102</div>
-                    </div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('English','Tuesday','02:30 PM')"><div class="class-code">ENG</div><div class="class-name">English</div><div class="class-room">Sec B · Room 102</div></div>
                     <div class="schedule-class-cell"></div>
-                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('English','Thursday','02:30 PM')">
-                        <div class="class-code">ENG</div><div class="class-name">English</div><div class="class-room">Sec B · Room 102</div>
-                    </div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('English','Thursday','02:30 PM')"><div class="class-code">ENG</div><div class="class-name">English</div><div class="class-room">Sec B · Room 102</div></div>
                     <div class="schedule-class-cell"></div>
                     <div class="schedule-class-cell"></div>
 
-                    <!-- 04:00 PM — ENG: Mon | FIL: Fri -->
+                    <!-- 04:00 PM -->
                     <div class="schedule-time-cell">04:00 PM</div>
-                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('English','Monday','04:00 PM')">
-                        <div class="class-code">ENG</div><div class="class-name">English</div><div class="class-room">Sec B · Room 102</div>
-                    </div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('English','Monday','04:00 PM')"><div class="class-code">ENG</div><div class="class-name">English</div><div class="class-room">Sec B · Room 102</div></div>
                     <div class="schedule-class-cell"></div>
                     <div class="schedule-class-cell"></div>
                     <div class="schedule-class-cell"></div>
-                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('Filipino','Friday','04:00 PM')">
-                        <div class="class-code">FIL</div><div class="class-name">Filipino</div><div class="class-room">Sec B · Room 103</div>
-                    </div>
+                    <div class="schedule-class-cell has-class" onclick="viewClassDetails('Filipino','Friday','04:00 PM')"><div class="class-code">FIL</div><div class="class-name">Filipino</div><div class="class-room">Sec B · Room 103</div></div>
                     <div class="schedule-class-cell"></div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Modal for Viewing Details -->
-    <div id="detailsModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Attendance Details</div>
-                <button class="modal-close" onclick="closeModal('detailsModal')">×</button>
-            </div>
-            <div id="modalBody"></div>
+    </div><!-- end grid-2 -->
+</div><!-- end container -->
+
+
+<!-- ══ MODAL: Attendance Details ══ -->
+<div id="detailsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-title">Attendance Details</div>
+            <button class="modal-close" onclick="closeModal('detailsModal')">×</button>
         </div>
+        <div id="modalBody" style="padding-top:0.5rem;"></div>
     </div>
+</div>
 
-    <!-- Modal for Class Details -->
-    <div id="classDetailsModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Class Details</div>
-                <button class="modal-close" onclick="closeModal('classDetailsModal')">×</button>
-            </div>
-            <div id="classModalBody"></div>
+<!-- ══ MODAL: Class Details ══ -->
+<div id="classDetailsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-title">Class Details</div>
+            <button class="modal-close" onclick="closeModal('classDetailsModal')">×</button>
         </div>
+        <div id="classModalBody" style="padding-top:0.5rem;"></div>
     </div>
+</div>
 
-    <!-- Modal for QR Scanner -->
-    <div id="qrScannerModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Scan QR Code</div>
-                <button class="modal-close" onclick="closeModal('qrScannerModal')">×</button>
-            </div>
-            <div style="text-align:center; padding:1.5rem;">
-                <div class="scanner-box">
-                    <p style="margin-bottom:1rem;">Align the QR code inside the frame</p>
-                    <div style="
-                        width:260px;
-                        height:260px;
-                        border:3px dashed #8b5cf6;
-                        border-radius:16px;
-                        margin:0 auto 1.5rem;
-                        display:flex;
-                        align-items:center;
-                        justify-content:center;
-                        color:#999;
-                    ">
-                        Camera Preview
+<!-- ══ MODAL: Contact Faculty ══ -->
+<div id="contactModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-title">Contact Faculty</div>
+            <button class="modal-close" onclick="closeModal('contactModal')">×</button>
+        </div>
+        <div class="modal-body-scroll">
+            <div class="faculty-list">
+                <a class="faculty-card" href="mailto:gsoriano@sscr.edu.ph">
+                    <div class="faculty-avatar">GS</div>
+                    <div class="faculty-info">
+                        <div class="faculty-name">Gary Soriano</div>
+                        <div class="faculty-subject">English</div>
+                        <div class="faculty-email">gsoriano@sscr.edu.ph</div>
                     </div>
-                    <button class="btn btn-primary" onclick="simulateScan()">
-                        Scan QR Code
-                    </button>
+                </a>
+                <a class="faculty-card" href="mailto:rdoneza@sscr.edu.ph">
+                    <div class="faculty-avatar">RD</div>
+                    <div class="faculty-info">
+                        <div class="faculty-name">Rheymard Doneza</div>
+                        <div class="faculty-subject">Mathematics</div>
+                        <div class="faculty-email">rdoneza@sscr.edu.ph</div>
+                    </div>
+                </a>
+                <a class="faculty-card" href="mailto:abernal@sscr.edu.ph">
+                    <div class="faculty-avatar">AB</div>
+                    <div class="faculty-info">
+                        <div class="faculty-name">Agnes Bernal</div>
+                        <div class="faculty-subject">Science</div>
+                        <div class="faculty-email">abernal@sscr.edu.ph</div>
+                    </div>
+                </a>
+                <a class="faculty-card" href="mailto:gcarpio@sscr.edu.ph">
+                    <div class="faculty-avatar">GC</div>
+                    <div class="faculty-info">
+                        <div class="faculty-name">Gerome Carpio</div>
+                        <div class="faculty-subject">Filipino</div>
+                        <div class="faculty-email">gcarpio@sscr.edu.ph</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══ MODAL: Attendance History ══ -->
+<div id="attendanceHistoryModal" class="modal">
+    <div class="modal-content modal-wide">
+        <div class="modal-header">
+            <div class="modal-title">Attendance History</div>
+            <button class="modal-close" onclick="closeModal('attendanceHistoryModal')">×</button>
+        </div>
+        <div class="modal-body-scroll">
+
+            <!-- Summary chips -->
+            <div class="ah-summary-row">
+                <div class="ah-summary-chip present">
+                    <div class="ah-chip-val" id="ahChipPresent">—</div>
+                    <div class="ah-chip-lbl">Present</div>
+                </div>
+                <div class="ah-summary-chip absent">
+                    <div class="ah-chip-val" id="ahChipAbsent">—</div>
+                    <div class="ah-chip-lbl">Absent</div>
+                </div>
+                <div class="ah-summary-chip late">
+                    <div class="ah-chip-val" id="ahChipLate">—</div>
+                    <div class="ah-chip-lbl">Late</div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="ah-tabs">
+                <button class="ah-tab active" onclick="switchAHTab('records',this)">All Records</button>
+                <button class="ah-tab" onclick="switchAHTab('breakdown',this)">By Subject</button>
+            </div>
+
+            <!-- All Records — scrollable, no pagination -->
+            <div id="ah-records" class="ah-panel">
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Date</th>
+                                <th>Day</th>
+                                <th>Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ahFullTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- By Subject -->
+            <div id="ah-breakdown" class="ah-panel" style="display:none;">
+                <div class="ah-breakdown-grid"></div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+<!-- ══ MODAL: Settings ══ -->
+<div id="settingsModal" class="modal">
+    <div class="modal-content modal-wide">
+        <div class="modal-header">
+            <div class="modal-title">Settings</div>
+            <button class="modal-close" onclick="closeModal('settingsModal')">×</button>
+        </div>
+        <div class="modal-body-scroll">
+            <div class="settings-section">
+                <div class="settings-section-title">Edit Profile</div>
+                <div class="settings-avatar-row">
+                    <div class="student-avatar" style="width:64px;height:64px;font-size:1.4rem;" id="settingsAvatar">ML</div>
+                    <button class="btn btn-secondary" style="font-size:0.82rem;padding:0.45rem 1rem;" onclick="alert('Photo upload coming soon!')">Change Photo</button>
+                </div>
+                <div class="settings-form-row">
+                    <label>Student Number</label>
+                    <input type="text" class="settings-input" value="2026-0031" id="settingsStudentNo" readonly style="background:#f3f4f6;cursor:not-allowed;opacity:0.7;">
+                </div>
+                <div class="settings-form-row">
+                    <label>Full Name</label>
+                    <input type="text" class="settings-input" value="Mel Reynald Malacas" id="settingsName">
+                </div>
+                <div class="settings-form-row">
+                    <label>Section</label>
+                    <input type="text" class="settings-input" value="Grade 7 - Section B" id="settingsSection">
+                </div>
+                <button class="btn btn-primary" style="margin-top:0.75rem;" onclick="saveProfile()">Save Changes</button>
+            </div>
+            <div class="settings-section">
+                <div class="settings-section-title">Change Password</div>
+                <div class="settings-form-row">
+                    <label>Current Password</label>
+                    <input type="password" class="settings-input" placeholder="Enter current password" id="currentPass">
+                </div>
+                <div class="settings-form-row">
+                    <label>New Password</label>
+                    <input type="password" class="settings-input" placeholder="Enter new password" id="newPass">
+                </div>
+                <div class="settings-form-row">
+                    <label>Confirm New Password</label>
+                    <input type="password" class="settings-input" placeholder="Confirm new password" id="confirmPass">
+                </div>
+                <button class="btn btn-primary" style="margin-top:0.75rem;" onclick="updatePassword()">Update Password</button>
+            </div>
+            <div class="settings-section">
+                <div class="settings-section-title">Theme</div>
+                <div class="settings-toggle-row">
+                    <div>
+                        <div style="font-weight:700;font-size:0.95rem;">Dark Mode</div>
+                        <div style="font-size:0.78rem;color:#888;font-weight:400;margin-top:2px;">Switch to a darker interface</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode(this)">
+                        <span class="toggle-slider"></span>
+                    </label>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- ── Contact Faculty Modal ─────────────────────────────────── -->
-    <div id="contactModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Contact Faculty</div>
-                <button class="modal-close" onclick="closeModal('contactModal')">×</button>
-            </div>
-            <div class="modal-body-scroll">
-                <div class="faculty-list">
-                    <a class="faculty-card" href="/cdn-cgi/l/email-protection#533432212a7d203c213a323d3c13202030213e3d3f7d3637267d233b">
-                        <div class="faculty-avatar">GS</div>
-                        <div class="faculty-info">
-                            <div class="faculty-name">Gary Soriano</div>
-                            <div class="faculty-subject">English</div>
-                            <div class="faculty-email"><span class="__cf_email__" data-cfemail="385f594a41164b574a51595657784b4b5b4a555654165d5c4d164850">[email&#160;protected]</span></div>
-                        </div>
-                    </a>
-                    <a class="faculty-card" href="/cdn-cgi/l/email-protection#394b515c4054584b5d175d56575c4358794a4a5a4b545755175c5d4c174951">
-                        <div class="faculty-avatar">RD</div>
-                        <div class="faculty-info">
-                            <div class="faculty-name">Rheymard Doneza</div>
-                            <div class="faculty-subject">Math</div>
-                            <div class="faculty-email"><span class="__cf_email__" data-cfemail="61130904180c0013054f050e0f041b0021121202130c0f0d4f0405144f1109">[email&#160;protected]</span></div>
-                        </div>
-                    </a>
-                    <a class="faculty-card" href="/cdn-cgi/l/email-protection#4627212823356824233428272a06353525342b282a6823223368362e">
-                        <div class="faculty-avatar">AB</div>
-                        <div class="faculty-info">
-                            <div class="faculty-name">Agnes Bernal</div>
-                            <div class="faculty-subject">Science</div>
-                            <div class="faculty-email"><span class="__cf_email__" data-cfemail="fc9d9b92998fd29e998e929d90bc8f8f9f8e919290d2999889d28c94">[email&#160;protected]</span></div>
-                        </div>
-                    </a>
-                    <a class="faculty-card" href="/cdn-cgi/l/email-protection#690e0c1b06040c470a081b190006291a1a0a1b040705470c0d1c471901">
-                        <div class="faculty-avatar">GC</div>
-                        <div class="faculty-info">
-                            <div class="faculty-name">Gerome Carpio</div>
-                            <div class="faculty-subject">Filipino</div>
-                            <div class="faculty-email"><span class="__cf_email__" data-cfemail="bcdbd9ced3d1d992dfddceccd5d3fccfcfdfced1d2d092d9d8c992ccd4">[email&#160;protected]</span></div>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
+<!-- ══ TOAST ══ -->
+<div id="toast-container"></div>
 
-    <!-- ── Settings Modal ────────────────────────────────────────── -->
-    <div id="settingsModal" class="modal">
-        <div class="modal-content modal-wide">
-            <div class="modal-header">
-                <div class="modal-title">Settings</div>
-                <button class="modal-close" onclick="closeModal('settingsModal')">×</button>
-            </div>
-            <div class="modal-body-scroll">
+<script src="student.js"></script>
+<script>
+// ── Toast system ──────────────────────────────────────────
+(function(){
+    var c = document.getElementById('toast-container');
+    var I = {success:'✓',error:'✕',info:'ℹ',warn:'⚠'};
+    window.showToast = function(msg, type, dur){
+        type = type||'info'; dur = dur||3500;
+        var t = document.createElement('div');
+        t.className = 'toast toast-'+type;
+        t.innerHTML = '<span class="toast-icon">'+(I[type]||'ℹ')+'</span><span class="toast-msg">'+msg+'</span><button class="toast-close" onclick="this.parentElement._d()">×</button>';
+        t._d = function(){ t.classList.add('toast-out'); setTimeout(function(){ t.remove(); }, 280); };
+        c.appendChild(t);
+        var tm = setTimeout(function(){ t._d(); }, dur);
+        t.addEventListener('mouseenter', function(){ clearTimeout(tm); });
+        t.addEventListener('mouseleave', function(){ tm = setTimeout(function(){ t._d(); }, 1500); });
+    };
+})();
 
-                <!-- Section: Edit Profile -->
-                <div class="settings-section">
-                    <div class="settings-section-title"> Edit Profile</div>
-                    <div class="settings-avatar-row">
-                        <div class="student-avatar" style="width:64px;height:64px;font-size:1.4rem;" id="settingsAvatar">MM</div>
-                        <button class="btn btn-secondary" onclick="alert('Photo upload coming soon!')">Change Photo</button>
-                    </div>
-                    <div class="settings-form-row">
-                        <label>Student Number</label>
-                        <input type="text" class="settings-input" value="2026-0031" id="settingsStudentNo" readonly style="background:#f3f4f6; cursor:not-allowed;">
-                    </div>
-                    <div class="settings-form-row">
-                        <label>Full Name</label>
-                        <input type="text" class="settings-input" value="Mel Reynald Malacas" id="settingsName">
-                    </div>
-                    <div class="settings-form-row">
-                        <label>Section</label>
-                        <input type="text" class="settings-input" value="Grade 7 - Section B" id="settingsSection">
-                    </div>
-                    <button class="btn btn-primary" style="margin-top:0.75rem;" onclick="saveProfile()">Save Changes</button>
-                </div>
+// ── Password update ───────────────────────────────────────
+function updatePassword(){
+    var cur = document.getElementById('currentPass').value;
+    var nw  = document.getElementById('newPass').value;
+    var cf  = document.getElementById('confirmPass').value;
+    if(!cur||!nw||!cf){ showToast('Please fill in all password fields.','warn'); return; }
+    if(nw!==cf){ showToast('New passwords do not match.','error'); return; }
+    if(nw.length<6){ showToast('Password must be at least 6 characters.','warn'); return; }
+    document.getElementById('currentPass').value='';
+    document.getElementById('newPass').value='';
+    document.getElementById('confirmPass').value='';
+    showToast('Password updated successfully.','success');
+}
 
-                <!-- Section: Change Password -->
-                <div class="settings-section">
-                    <div class="settings-section-title"> Change Password</div>
-                    <div class="settings-form-row">
-                        <label>Current Password</label>
-                        <input type="password" class="settings-input" placeholder="Enter current password">
-                    </div>
-                    <div class="settings-form-row">
-                        <label>New Password</label>
-                        <input type="password" class="settings-input" placeholder="Enter new password">
-                    </div>
-                    <div class="settings-form-row">
-                        <label>Confirm New Password</label>
-                        <input type="password" class="settings-input" placeholder="Confirm new password">
-                    </div>
-                    <button class="btn btn-primary" style="margin-top:0.75rem;" onclick="alert('Password updated!')">Update Password</button>
-                </div>
+// ── Populate summary chips when history modal opens ───────
+// Extend the openModal already defined in student.js
+var _origOpenModalHTML = window.openModal;
+window.openModal = function(modalId){
+    _origOpenModalHTML(modalId);
+    if(modalId === 'attendanceHistoryModal'){
+        if(typeof grandPresent !== 'undefined'){
+            document.getElementById('ahChipPresent').textContent = grandPresent;
+            document.getElementById('ahChipAbsent').textContent  = grandAbsent;
+            document.getElementById('ahChipLate').textContent    = grandLate;
+        }
+    }
+};
 
-
-                <!-- Section: Theme -->
-                
-                <div class="settings-section">
-                    <div class="settings-section-title"> Theme</div>
-                    <div class="settings-toggle-row">
-                        <span>Dark Mode</span>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode(this)">
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
-    <!-- ── Subjects Enrolled Modal ───────────────────────────── -->
-    <div id="subjectsModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Subjects Enrolled</div>
-                <button class="modal-close" onclick="closeModal('subjectsModal')">×</button>
-            </div>
-            <div class="modal-body-scroll">
-                </p>
-                <div class="faculty-list">
-
-                    <div class="faculty-card" style="cursor:default;">
-                        <div class="faculty-avatar" style="background:#6366f1;">M</div>
-                        <div class="faculty-info">
-                            <div class="faculty-name">Mathematics</div>
-                            <div class="faculty-subject">Rheymard Doneza</div>
-                            <div class="faculty-email">Room 101 · Mon/Wed/Fri 07:00 AM &amp; Tue/Thu 01:00 PM</div>
-                        </div>
-                        
-                    </div>
-
-                    <div class="faculty-card" style="cursor:default;">
-                        <div class="faculty-avatar" style="background:#0ea5e9;">E</div>
-                        <div class="faculty-info">
-                            <div class="faculty-name">English</div>
-                            <div class="faculty-subject">Gary Soriano</div>
-                            <div class="faculty-email">Room 102 · Mon/Wed/Thu 08:30 AM, Tue/Thu 02:30 PM &amp; Mon 04:00 PM</div>
-                        </div>
-                     
-                    </div>
-
-                    <div class="faculty-card" style="cursor:default;">
-                        <div class="faculty-avatar" style="background:#10b981;">S</div>
-                        <div class="faculty-info">
-                            <div class="faculty-name">Science</div>
-                            <div class="faculty-subject">Agnes Bernal</div>
-                            <div class="faculty-email">Lab 201 · Tue/Fri 08:30 AM</div>
-                        </div>
-                        
-                    </div>
-
-                    <div class="faculty-card" style="cursor:default;">
-                        <div class="faculty-avatar" style="background:#f59e0b;">F</div>
-                        <div class="faculty-info">
-                            <div class="faculty-name">Filipino</div>
-                            <div class="faculty-subject">Gerome Carpio</div>
-                            <div class="faculty-email">Room 103 · Tue 10:00 AM &amp; Fri 04:00 PM</div>
-                        </div>
-                        
-                    </div>
-
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="auth.js"></script>
-<script src="students-data.js"></script>
-    <script src="student.js"></script>
+// ── Safety net: ensure table renders after all scripts load ──
+window.addEventListener('load', function(){
+    if(typeof filteredRecords !== 'undefined' && typeof renderAttendanceTable === 'function'){
+        if(document.getElementById('attendanceTableBody').innerHTML.trim() === ''){
+            filteredRecords = ATTENDANCE_RECORDS.slice();
+            currentPage = 1;
+            renderAttendanceTable();
+        }
+    }
+});
+</script>
 </body>
 </html>
