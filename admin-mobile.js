@@ -185,17 +185,24 @@ function renderLogs() {
 }
 
 function showLogDetail(log) {
-    const sevColors = { info:'#1565c0', warning:'#e65100', error:'#c62828' };
-    const ac = 'log-' + log.action.toLowerCase();
+    const sevColors    = { info:'#1565c0', warning:'#e65100', error:'#c62828' };
+    const actionColors = {
+        login:'#2e7d32', logout:'#555', edit:'#1565c0', generate:'#6a1b9a',
+        export:'#00838f', print:'#4e342e', view:'#0277bd', error:'#c62828', system:'#e65100'
+    };
+    const sevColor    = sevColors[log.severity] || '#555';
+    const actionColor = actionColors[log.action.toLowerCase()] || '#333';
+    const roleColor   = log.role === 'Administrator' ? '#8B0000' : '#1565c0';
+    const sevLabel    = log.severity.charAt(0).toUpperCase() + log.severity.slice(1);
     document.getElementById('logDetailBody').innerHTML =
-        drow('Log ID',     '<code style="font-size:.82rem;background:#f5f5f5;padding:2px 7px;border-radius:5px;">' + log.id + '</code>') +
+        drow('Log ID',     '<code style="font-size:.8rem;background:#f5f5f5;padding:2px 7px;border-radius:5px;">' + log.id + '</code>') +
         drow('Timestamp',  fmtTimestamp(log.timestamp)) +
         drow('User',       '<strong>' + log.user + '</strong>') +
-        drow('Role',       '<span class="role-badge' + (log.role === 'Faculty' ? ' faculty' : '') + '">' + log.role + '</span>') +
-        drow('Action',     '<span class="log-badge ' + ac + '">' + log.action + '</span>') +
-        drow('Severity',   '<span style="font-weight:700;color:' + (sevColors[log.severity]||'#555') + ';">' + log.severity.charAt(0).toUpperCase() + log.severity.slice(1) + '</span>') +
-        drow('IP Address', '<code style="font-size:.82rem;">' + log.ip + '</code>') +
-        '<div class="detail-desc">' + log.desc + '</div>';
+        drow('Role',       '<span style="font-weight:700;color:' + roleColor + ';">' + log.role + '</span>') +
+        drow('Action',     '<span style="font-weight:800;color:' + actionColor + ';">' + log.action + '</span>') +
+        drow('Severity',   '<span style="font-weight:700;color:' + sevColor + ';">' + sevLabel + '</span>') +
+        drow('IP Address', '<code style="font-size:.8rem;">' + log.ip + '</code>') +
+        drow('Description','<span style="font-size:.82rem;color:#444;">' + log.desc + '</span>');
     document.getElementById('logDetailModal').classList.add('show');
 }
 
@@ -328,8 +335,11 @@ function renderAttendanceTable(allRowsOverride) {
     pageRows.forEach(r => {
         const sc       = r.status ? 'status-' + r.status.toLowerCase() : 'status-unmarked';
         const sl       = r.status || 'Unmarked';
-        const lastName = r.name.split(',')[0].trim();   // "GONZAGA, Maria" → "GONZAGA"
-        const secLetter = r.section.replace(/[^A-Z]/gi, ''); // "Sec A" → "A"
+        // Handle "LAST, First" or "First LAST" — always show last name only
+        const lastName = r.name.includes(',')
+            ? r.name.split(',')[0].trim()
+            : r.name.trim().split(' ').slice(-1)[0];
+        const secLetter = r.section.replace(/[^A-Za-z]/g, '').slice(-1).toUpperCase(); // last letter: A/B/C
         const eName    = r.name.replace(/'/g, "\\'");
         const tr       = document.createElement('tr');
         tr.innerHTML =
