@@ -176,6 +176,8 @@ function renderLogs() {
 
     buildLogPagination(totalPages, total);
 }
+
+function showLogDetail(log) {
     const sevColors = { info:'#1565c0', warning:'#e65100', error:'#c62828' };
     const ac = 'log-' + log.action.toLowerCase();
     document.getElementById('logDetailBody').innerHTML =
@@ -272,25 +274,6 @@ function seedDemo() {
             });
         });
     });
-}
-
-function updateStatCards() {
-    const allStudents = getAllStudents();
-    document.getElementById('statTotal').textContent = allStudents.length;
-    let present = 0, late = 0, absent = 0;
-    SSCR_SUBJECTS.forEach(subj => {
-        SSCR_SECTIONS.forEach(sec => {
-            SSCR_STUDENTS[sec].forEach(s => {
-                const rec = attendanceDB[subj][sec][s.id];
-                if      (rec.status === 'Present') present++;
-                else if (rec.status === 'Late')    late++;
-                else if (rec.status === 'Absent')  absent++;
-            });
-        });
-    });
-    document.getElementById('statPresent').textContent = present;
-    document.getElementById('statLate').textContent    = late;
-    document.getElementById('statAbsent').textContent  = absent;
 }
 
 function buildRows() {
@@ -638,4 +621,4 @@ window.addEventListener('click', e => {
 window.addEventListener('DOMContentLoaded', () => {
     seedDemo();
     renderAttendanceTable();
-});
+});;
