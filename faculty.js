@@ -5,13 +5,59 @@
 
 // ── Notifications ─────────────────────────────────────────────────────────
 requireAuth('faculty');
+
+// ── Toast / Snackbar System ──────────────────────────────────────────────
+(function() {
+    var container = document.createElement('div');
+    container.id = 'toast-container';
+    document.body.appendChild(container);
+
+    var ICONS = { success:'✓', error:'✕', info:'ℹ', warn:'⚠' };
+
+    window.showToast = function(msg, type, duration) {
+        type = type || 'info';
+        duration = duration || 3500;
+        var toast = document.createElement('div');
+        toast.className = 'toast toast-' + type;
+        toast.innerHTML =
+            '<span class="toast-icon">' + (ICONS[type] || 'ℹ') + '</span>' +
+            '<span class="toast-msg">' + msg + '</span>' +
+            '<button class="toast-close" onclick="this.parentElement._dismiss()">×</button>';
+        toast._dismiss = function() {
+            toast.classList.add('toast-out');
+            setTimeout(function() { toast.remove(); }, 280);
+        };
+        container.appendChild(toast);
+        var t = setTimeout(function() { toast._dismiss(); }, duration);
+        toast.addEventListener('mouseenter', function() { clearTimeout(t); });
+        toast.addEventListener('mouseleave', function() { t = setTimeout(function() { toast._dismiss(); }, 1500); });
+    };
+})();
+
+// ── Shared Class Info (previously inline in viewClassDetails) ─────────────
+const CLASS_INFO = {
+    'MATH-A': { name:'Mathematics', room:'Room 101', section:'Sec A' },
+    'MATH-B': { name:'Mathematics', room:'Room 101', section:'Sec B' },
+    'MATH-C': { name:'Mathematics', room:'Room 101', section:'Sec C' },
+    'ENG-A':  { name:'English',     room:'Room 102', section:'Sec A' },
+    'ENG-B':  { name:'English',     room:'Room 102', section:'Sec B' },
+    'ENG-C':  { name:'English',     room:'Room 102', section:'Sec C' },
+    'SCI-A':  { name:'Science',     room:'Lab 201',  section:'Sec A' },
+    'SCI-B':  { name:'Science',     room:'Lab 201',  section:'Sec B' },
+    'SCI-C':  { name:'Science',     room:'Lab 201',  section:'Sec C' },
+    'FIL-A':  { name:'Filipino',    room:'Room 103', section:'Sec A' },
+    'FIL-B':  { name:'Filipino',    room:'Room 103', section:'Sec B' },
+    'FIL-C':  { name:'Filipino',    room:'Room 103', section:'Sec C' },
+};
+
+
 const NOTIFICATIONS = [
-    { id:1, unread:true,  type:'alert', text:'<strong>3 students</strong> from Sec B have exceeded the maximum absences in <strong>Math</strong>.', time:'2 mins ago' },
-    { id:2, unread:true,  type:'info', text:'<strong>Attendance report</strong> for English — Sec A has been generated successfully.', time:'15 mins ago' },
-    { id:3, unread:true,  type:'warn', text:'<strong>GONZAGA, Krystine</strong> was marked Late in Science class today.', time:'42 mins ago' },
-    { id:4, unread:false, type:'success', text:'QR attendance session for <strong>Filipino — Sec C</strong> completed. 11/11 students recorded.', time:'1 hr ago' },
-    { id:5, unread:false, type:'info',  text:'Reminder: Submit <strong>monthly attendance reports</strong> by Feb 28, 2026.', time:'3 hrs ago' },
-    { id:6, unread:false, type:'alert', text:'System maintenance scheduled on <strong>Feb 22, 2026 at 11:00 PM</strong>. Save your work.', time:'Yesterday' },
+    { id:1, unread:true,  type:'alert',   avatar:'SB', avatarColor:'#c62828,#ffcdd2', text:'<strong>3 students</strong> from Sec B have exceeded the maximum absences in <strong>Math</strong>.', time:'2 mins ago' },
+    { id:2, unread:true,  type:'info',    avatar:'SY', avatarColor:'#1565c0,#bbdefb', text:'<strong>Attendance report</strong> for English — Sec A has been generated successfully.', time:'15 mins ago' },
+    { id:3, unread:true,  type:'warn',    avatar:'KG', avatarColor:'#e65100,#ffe0b2', text:'<strong>GONZAGA, Krystine</strong> was marked Late in Science class today.', time:'42 mins ago' },
+    { id:4, unread:false, type:'success', avatar:'QR', avatarColor:'#2e7d32,#c8e6c9', text:'QR attendance session for <strong>Filipino — Sec C</strong> completed. 11/11 students recorded.', time:'1 hr ago' },
+    { id:5, unread:false, type:'info',    avatar:'AD', avatarColor:'#1565c0,#bbdefb', text:'Reminder: Submit <strong>monthly attendance reports</strong> by Feb 28, 2026.', time:'3 hrs ago' },
+    { id:6, unread:false, type:'alert',   avatar:'SY', avatarColor:'#7b1fa2,#e1bee7', text:'System maintenance scheduled on <strong>Feb 22, 2026 at 11:00 PM</strong>. Save your work.', time:'Yesterday' },
 ];
 
 let _notifications = [...NOTIFICATIONS];
@@ -22,15 +68,19 @@ function renderNotifications() {
     const badge = document.getElementById('notificationCount');
     badge.textContent = unread;
     badge.style.display = unread > 0 ? 'flex' : 'none';
-    list.innerHTML = _notifications.map(n => `
+    list.innerHTML = _notifications.map(n => {
+        var cols = (n.avatarColor || '#555,#eee').split(',');
+        var avatarStyle = 'background:' + cols[1] + ';color:' + cols[0] + ';border-color:' + cols[0] + ';';
+        return `
         <div class="notif-item ${n.unread ? 'unread' : ''}" onclick="markRead(${n.id})">
-            <div class="notif-icon ${n.type}"></div>
+            <div class="notif-icon ${n.type}" style="${avatarStyle}" title="Profile photo placeholder">${n.avatar || '?'}</div>
             <div class="notif-body">
                 <div class="notif-text">${n.text}</div>
                 <div class="notif-time">${n.time}</div>
             </div>
             <div class="notif-dot"></div>
-        </div>`).join('');
+        </div>`;
+    }).join('');
 }
 
 function toggleNotifications(e) {
@@ -61,22 +111,23 @@ document.addEventListener('click', function(e) {
 });
 
 
-// ── Scan Preview ──────────────────────────────────────────────────────────
+// ── Scan Preview (paginated · 6 rows per page) ───────────────────────────
+
+let _scanFiltered = [];
+let _scanPage = 1;
+const _SCAN_PER_PAGE = 4;
 
 function refreshScanPreview() {
-    const typeVal  = document.getElementById('rptType').value;    // '' | 'Present' | 'Late' | 'Absent'
-    const subjVal  = document.getElementById('rptSubject').value; // '' | 'Math' | 'English' | 'Science' | 'Filipino'
-    const secVal   = document.getElementById('rptSection').value; // '' | 'Sec A' | 'Sec B' | 'Sec C'
+    const typeVal = document.getElementById('rptType').value;
+    const subjVal = document.getElementById('rptSubject').value;
+    const secVal  = document.getElementById('rptSection').value;
 
-    // Live filter — all three work independently and combine
-    const filtered = RECENT_SCANS.filter(function(r) {
-        const okType = !typeVal || r.status  === typeVal;
-        const okSubj = !subjVal || r.subject === subjVal;
-        const okSec  = !secVal  || r.section === secVal;
-        return okType && okSubj && okSec;
+    _scanFiltered = RECENT_SCANS.filter(function(r) {
+        return (!typeVal || r.status  === typeVal)
+            && (!subjVal || r.subject === subjVal)
+            && (!secVal  || r.section === secVal);
     });
 
-    // Update label
     const parts = [];
     if (typeVal) parts.push(typeVal);
     if (subjVal) parts.push(subjVal);
@@ -84,14 +135,24 @@ function refreshScanPreview() {
     document.getElementById('scanPreviewLabel').textContent =
         (parts.length ? parts.join(' · ') : 'All records') + ' · Feb 2026';
 
-    // Render ALL matching rows (this is the report preview, not just a peek)
+    _scanPage = 1;
+    _renderScanPage();
+}
+
+function _renderScanPage() {
+    const total = _scanFiltered.length;
+    const totalPages = Math.max(1, Math.ceil(total / _SCAN_PER_PAGE));
+    if (_scanPage > totalPages) _scanPage = totalPages;
+    const start    = (_scanPage - 1) * _SCAN_PER_PAGE;
+    const pageRows = _scanFiltered.slice(start, start + _SCAN_PER_PAGE);
+
     const tbody = document.getElementById('scanPreviewBody');
     tbody.innerHTML = '';
 
-    if (filtered.length === 0) {
+    if (pageRows.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#bbb;font-style:italic;padding:1.5rem;">No records match the selected filters.</td></tr>';
     } else {
-        filtered.forEach(function(r) {
+        pageRows.forEach(function(r) {
             const tc = r.status === 'Present' ? '#1a7a1a' : r.status === 'Late' ? '#c45c00' : '#999';
             const bs = r.status === 'Present'
                 ? 'background:#e8f5e9;color:#2e7d32;border:1.5px solid #66bb6a;'
@@ -100,33 +161,66 @@ function refreshScanPreview() {
                 : 'background:#ffebee;color:#c62828;border:1.5px solid #ef9a9a;';
             const tr = document.createElement('tr');
             tr.innerHTML =
-                '<td style="font-size:0.72rem;font-weight:700;color:#888;">'         + r.id      + '</td>' +
-                '<td style="font-size:0.8rem;font-weight:600;">'                     + r.name    + '</td>' +
-                '<td style="font-size:0.78rem;">'                                    + r.subject + '</td>' +
-                '<td style="font-size:0.78rem;">'                                    + r.section + '</td>' +
-                '<td style="font-size:0.78rem;font-weight:600;color:' + tc + ';">'  + (r.timeIn || '—') + '</td>' +
+                '<td style="font-size:0.72rem;font-weight:700;color:#888;">'        + r.id      + '</td>' +
+                '<td style="font-size:0.8rem;font-weight:600;">'                    + r.name    + '</td>' +
+                '<td style="font-size:0.78rem;">'                                   + r.subject + '</td>' +
+                '<td style="font-size:0.78rem;">'                                   + r.section + '</td>' +
+                '<td style="font-size:0.78rem;font-weight:600;color:' + tc + ';">' + (r.timeIn || '—') + '</td>' +
                 '<td><span style="display:inline-block;padding:2px 10px;border-radius:20px;font-size:0.72rem;font-weight:700;' + bs + '">' + r.status + '</span></td>';
             tbody.appendChild(tr);
         });
     }
 
-    document.getElementById('scanShownCount').textContent = filtered.length;
-    document.getElementById('scanTotalCount').textContent  = RECENT_SCANS.length;
+    const s2 = total === 0 ? 0 : start + 1;
+    const e2 = Math.min(start + _SCAN_PER_PAGE, total);
+    document.getElementById('scanShownCount').textContent = total === 0 ? '0' : s2 + '\u2013' + e2;
+    document.getElementById('scanTotalCount').textContent = total;
+    _buildScanPagination(totalPages, total);
+}
+
+function _buildScanPagination(totalPages, total) {
+    const wrap = document.getElementById('scanPaginationWrap');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    if (total <= _SCAN_PER_PAGE) return;
+
+    function mkBtn(label, disabled, active) {
+        const b = document.createElement('button');
+        b.className = 'page-btn' + (active ? ' active' : '');
+        b.textContent = label;
+        b.disabled = !!disabled;
+        return b;
+    }
+
+    const prev = mkBtn('\u2039', _scanPage === 1);
+    prev.onclick = function() { if (_scanPage > 1) { _scanPage--; _renderScanPage(); } };
+    wrap.appendChild(prev);
+
+    let s = Math.max(1, _scanPage - 2);
+    let e = Math.min(totalPages, s + 4);
+    if (e - s < 4) s = Math.max(1, e - 4);
+    for (let p = s; p <= e; p++) {
+        const b = mkBtn(p, false, p === _scanPage);
+        (function(pg) { b.onclick = function() { _scanPage = pg; _renderScanPage(); }; })(p);
+        wrap.appendChild(b);
+    }
+
+    const next = mkBtn('\u203a', _scanPage === totalPages);
+    next.onclick = function() { if (_scanPage < totalPages) { _scanPage++; _renderScanPage(); } };
+    wrap.appendChild(next);
 }
 
 
-// ── Scan Search ──────────────────────────────────────────────────────────
+// ── Scan Search ───────────────────────────────────────────────────────────
 
 function filterScanSearch() {
-    const q = document.getElementById('scanSearch').value.toUpperCase();
-    const rows = document.querySelectorAll('#scanPreviewBody tr');
-    let shown = 0;
-    rows.forEach(function(row) {
-        const match = !q || row.textContent.toUpperCase().includes(q);
-        row.style.display = match ? '' : 'none';
-        if (match) shown++;
+    const q = document.getElementById('scanSearch').value.trim().toUpperCase();
+    if (!q) { refreshScanPreview(); return; }
+    _scanFiltered = RECENT_SCANS.filter(function(r) {
+        return (r.id + ' ' + r.name + ' ' + r.subject + ' ' + r.section).toUpperCase().includes(q);
     });
-    document.getElementById('scanShownCount').textContent = shown;
+    _scanPage = 1;
+    _renderScanPage();
 }
 
 
@@ -136,10 +230,10 @@ function downloadReport() {
     const subject = document.getElementById('rptSubject').value;
     const section = document.getElementById('rptSection').value;
     if (!subject || !section) {
-        alert('Please select a Subject and Section first.');
+        showToast('Please select a Subject and Section first.', 'warn'); return;
         return;
     }
-    alert('Downloading report for ' + subject + ' — ' + section + '...\n(PDF/Excel export in full system)');
+    showToast('Downloading report for ' + subject + ' — ' + section + '…', 'success');
 }
 
 
@@ -244,69 +338,161 @@ function enlargeQR() {
 }
 
 
+// ── Profile Modal ─────────────────────────────────────────────────────────
+
+function openProfileModal() {
+    document.getElementById('profileName').value  = document.getElementById('headerName').textContent;
+    document.getElementById('profileRole').value  = document.getElementById('headerRole').textContent;
+    updateAvatarPreview();
+    document.getElementById('profileModal').classList.add('show');
+}
+
+function updateAvatarPreview() {
+    var name = document.getElementById('profileName').value.trim();
+    var initials = name.split(' ').map(function(w){ return w[0]; }).filter(Boolean).slice(0,2).join('').toUpperCase() || '?';
+    document.getElementById('profileAvatarPreview').textContent = initials;
+}
+
+function saveProfile() {
+    var name = document.getElementById('profileName').value.trim();
+    var role = document.getElementById('profileRole').value.trim();
+    if (!name) { showToast('Name cannot be empty.', 'error'); return; }
+    var initials = name.split(' ').map(function(w){ return w[0]; }).filter(Boolean).slice(0,2).join('').toUpperCase();
+    document.getElementById('headerName').textContent   = name;
+    document.getElementById('headerRole').textContent   = role;
+    document.getElementById('headerAvatar').textContent = initials;
+    closeModal('profileModal');
+    showToast('Profile updated successfully.', 'success');
+}
+
+
 // ── Student Roster Modal ──────────────────────────────────────────────────
 
-function openStudentListModal() {
-    const tbody = document.getElementById('rosterTableBody');
-    tbody.innerHTML = '';
-    const allStudents = getAllStudents();
-    document.getElementById('rosterTotalCount').textContent = allStudents.length;
-    allStudents.forEach(function(s, idx) {
-        const tr = document.createElement('tr');
-        const subjectTags = SSCR_SUBJECTS.map(function(sub) {
-            return '<span class="subj-tag">' + sub + '</span>';
-        }).join('');
-        tr.innerHTML =
-            '<td style="color:#999;font-size:0.8rem;">' + (idx + 1) + '</td>' +
-            '<td style="font-weight:700;font-size:0.82rem;color:#555;">' + s.id + '</td>' +
-            '<td style="font-weight:500;">' + s.name + '</td>' +
-            '<td><span style="display:inline-block;background:#eee;border-radius:20px;padding:2px 10px;font-size:0.78rem;font-weight:700;">' + s.section + '</span></td>' +
-            '<td>' + subjectTags + '</td>';
-        tbody.appendChild(tr);
+var _rosterData = null;
+
+function _initRoster() {
+    if (_rosterData) return;
+    _rosterData = getAllStudents().map(function(s) {
+        return { id: s.id, name: s.name, section: s.section, subjects: Array.isArray(s.subjects) ? s.subjects.slice() : SSCR_SUBJECTS.slice() };
     });
-    document.getElementById('rosterShownCount').textContent = allStudents.length;
+}
+
+function openStudentListModal() {
+    _initRoster();
+    document.getElementById('addStudentForm').style.display = 'none';
     document.getElementById('rosterSearch').value = '';
     document.getElementById('rosterSectionFilter').value = '';
+    _renderRoster(_rosterData);
     document.getElementById('studentListModal').classList.add('show');
 }
 
-function filterRoster() {
-    const search    = document.getElementById('rosterSearch').value.toUpperCase();
-    const secFilter = document.getElementById('rosterSectionFilter').value;
-    const rows      = document.querySelectorAll('#rosterTableBody tr');
-    let shown = 0;
-    rows.forEach(function(row) {
-        const text    = row.textContent.toUpperCase();
-        const secCell = row.cells[3] ? row.cells[3].textContent.trim() : '';
-        if ((!search || text.includes(search)) && (!secFilter || secCell.includes(secFilter))) {
-            row.style.display = '';
-            shown++;
-        } else {
-            row.style.display = 'none';
-        }
+function _renderRoster(list) {
+    var tbody = document.getElementById('rosterTableBody');
+    tbody.innerHTML = '';
+    document.getElementById('rosterTotalCount').textContent = _rosterData.length;
+    document.getElementById('rosterShownCount').textContent = list.length;
+    if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#bbb;font-style:italic;padding:1.5rem;">No students found.</td></tr>';
+        return;
+    }
+    list.forEach(function(s, idx) {
+        var tags = (s.subjects || []).map(function(sub){ return '<span class="subj-tag">' + sub + '</span>'; }).join('');
+        var secBg = s.section === 'Sec A' ? 'background:#e8f5e9;color:#2e7d32' : s.section === 'Sec B' ? 'background:#e3f2fd;color:#1565c0' : 'background:#fff3e0;color:#e65100';
+        var tr = document.createElement('tr');
+        tr.innerHTML =
+            '<td style="color:#999;font-size:0.78rem;">' + (idx+1) + '</td>' +
+            '<td style="font-weight:700;font-size:0.82rem;color:#555;font-family:monospace;">' + s.id + '</td>' +
+            '<td style="font-weight:500;">' + s.name + '</td>' +
+            '<td><span style="display:inline-block;' + secBg + ';border-radius:20px;padding:2px 12px;font-size:0.78rem;font-weight:700;">' + s.section + '</span></td>' +
+            '<td>' + tags + '</td>' +
+            '<td style="text-align:center;white-space:nowrap;">' +
+                '<button class="action-btn edit" onclick="openEditStudent(\'' + s.id + '\')" style="margin-right:4px;">Edit</button>' +
+                '<button class="action-btn delete" onclick="removeStudent(\'' + s.id + '\')">Remove</button>' +
+            '</td>';
+        tbody.appendChild(tr);
     });
-    document.getElementById('rosterShownCount').textContent = shown;
 }
+
+function filterRoster() {
+    if (!_rosterData) return;
+    var search    = document.getElementById('rosterSearch').value.trim().toUpperCase();
+    var secFilter = document.getElementById('rosterSectionFilter').value;
+    var filtered  = _rosterData.filter(function(s) {
+        var text = (s.id + ' ' + s.name + ' ' + s.section + ' ' + (s.subjects||[]).join(' ')).toUpperCase();
+        return (!search || text.includes(search)) && (!secFilter || s.section === secFilter);
+    });
+    _renderRoster(filtered);
+}
+
+function openAddStudentForm() {
+    var f = document.getElementById('addStudentForm');
+    f.style.display = 'block';
+    document.getElementById('newStudentId').value       = '';
+    document.getElementById('newStudentName').value     = '';
+    document.getElementById('newStudentSection').value  = 'Sec A';
+    document.getElementById('newStudentSubjects').value = '';
+    document.getElementById('newStudentId').focus();
+}
+
+function cancelAddStudent() {
+    document.getElementById('addStudentForm').style.display = 'none';
+}
+
+function confirmAddStudent() {
+    var id       = document.getElementById('newStudentId').value.trim();
+    var name     = document.getElementById('newStudentName').value.trim();
+    var section  = document.getElementById('newStudentSection').value;
+    var subjRaw  = document.getElementById('newStudentSubjects').value.trim();
+    if (!id || !name) { showToast('Student ID and Name are required.', 'error'); return; }
+    if (_rosterData.find(function(s){ return s.id === id; })) { showToast('A student with this ID already exists.', 'warn'); return; }
+    var subjects = subjRaw ? subjRaw.split(',').map(function(s){ return s.trim(); }).filter(Boolean) : SSCR_SUBJECTS.slice();
+    _rosterData.push({ id: id, name: name, section: section, subjects: subjects });
+    cancelAddStudent();
+    filterRoster();
+    showToast(name + ' added to ' + section + '.', 'success');
+}
+
+function removeStudent(id) {
+    var s = _rosterData.find(function(s){ return s.id === id; });
+    if (!s) return;
+    if (!window.confirm('Remove ' + s.name + ' from the roster?')) return;
+    _rosterData = _rosterData.filter(function(r){ return r.id !== id; });
+    filterRoster();
+    showToast(s.name + ' removed from roster.', 'info');
+}
+
+function openEditStudent(id) {
+    var s = _rosterData.find(function(s){ return s.id === id; });
+    if (!s) return;
+    document.getElementById('editStudentOrigId').value      = s.id;
+    document.getElementById('editStudentId').value          = s.id;
+    document.getElementById('editStudentName').value        = s.name;
+    document.getElementById('editStudentSection').value     = s.section;
+    document.getElementById('editStudentSubjects').value    = (s.subjects||[]).join(', ');
+    document.getElementById('editStudentModal').classList.add('show');
+}
+
+function saveEditedStudent() {
+    var origId   = document.getElementById('editStudentOrigId').value;
+    var newId    = document.getElementById('editStudentId').value.trim();
+    var name     = document.getElementById('editStudentName').value.trim();
+    var section  = document.getElementById('editStudentSection').value;
+    var subjects = document.getElementById('editStudentSubjects').value.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+    if (!newId || !name) { showToast('ID and Name are required.', 'error'); return; }
+    var idx = _rosterData.findIndex(function(s){ return s.id === origId; });
+    if (idx === -1) return;
+    _rosterData[idx] = { id: newId, name: name, section: section, subjects: subjects };
+    closeModal('editStudentModal');
+    filterRoster();
+    showToast('Student record updated.', 'success');
+}
+
 
 
 // ── Schedule Click ────────────────────────────────────────────────────────
 
 function viewClassDetails(classCode, day, time) {
-    const classInfo = {
-        'MATH-A': { name:'Mathematics', room:'Room 101', section:'Sec A' },
-        'MATH-B': { name:'Mathematics', room:'Room 101', section:'Sec B' },
-        'MATH-C': { name:'Mathematics', room:'Room 101', section:'Sec C' },
-        'ENG-A':  { name:'English',     room:'Room 102', section:'Sec A' },
-        'ENG-B':  { name:'English',     room:'Room 102', section:'Sec B' },
-        'ENG-C':  { name:'English',     room:'Room 102', section:'Sec C' },
-        'SCI-A':  { name:'Science',     room:'Lab 201',  section:'Sec A' },
-        'SCI-B':  { name:'Science',     room:'Lab 201',  section:'Sec B' },
-        'SCI-C':  { name:'Science',     room:'Lab 201',  section:'Sec C' },
-        'FIL-A':  { name:'Filipino',    room:'Room 103', section:'Sec A' },
-        'FIL-B':  { name:'Filipino',    room:'Room 103', section:'Sec B' },
-        'FIL-C':  { name:'Filipino',    room:'Room 103', section:'Sec C' },
-    };
-    const info = classInfo[classCode] || { name:'Unknown', room:'—', section:'—' };
+    const info = CLASS_INFO[classCode] || { name:'Unknown', room:'\u2014', section:'\u2014' };
     document.getElementById('modalBody').innerHTML =
         '<div style="margin-bottom:1rem;"><strong>Subject:</strong> '  + info.name    + '</div>' +
         '<div style="margin-bottom:1rem;"><strong>Section:</strong> '  + info.section + '</div>' +
@@ -325,7 +511,7 @@ function closeModal(id) {
 }
 
 function startSession() {
-    alert('Attendance session started!');
+    showToast('Attendance session started! QR code is now active.', 'success');
 }
 
 function logout() {
