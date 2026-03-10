@@ -1,1001 +1,1817 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   SSC-R  —  Student Dashboard  |  Crimson · Gold · Black
+   student.css  ↔  student.html
+   ═══════════════════════════════════════════════════════════════════════ */
+
+
+/* ──────────────────────────────────────────────────────────
+   1. CSS CUSTOM PROPERTIES  (design tokens used everywhere)
+   <:root> block at the top of <head>
+   ────────────────────────────────────────────────────────── */
 :root {
-    --primary: #1a1a1a;
-    --secondary: #2d2d2d;
-    --gold: #FFD700;
-    --gold-dark: #DAA520;
+    /* Colour palette */
+    --gold:       #FFD700;
+    --gold-dark:  #DAA520;
     --gold-light: #FFED4E;
-    --red: #DC143C;
-    --red-dark: #8B0000;
-    --red-light: #FF6B6B;
-    --black: #000000;
-    --white: #FFFFFF;
-    --text-dark: #1a1a1a;
-    --text-light: #ffffff;
-    --gradient-gold: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-    --gradient-red: linear-gradient(135deg, #DC143C 0%, #8B0000 100%);
-    --gradient-black-gold: linear-gradient(135deg, #1a1a1a 0%, #FFD700 100%);
-    --gradient-red-gold: linear-gradient(135deg, #DC143C 0%, #FFD700 100%);
+    --red:        #DC143C;
+    --red-dark:   #8B0000;
+    --red-light:  #FF6B6B;
+    --black:      #000;
+    --white:      #fff;
+    --primary:    #1a1a1a;
+    --secondary:  #2d2d2d;
+
+    /* Gradients */
+    --grad-gold:     linear-gradient(135deg, #FFD700, #FFA500);
+    --grad-red:      linear-gradient(135deg, #DC143C, #8B0000);
+    --grad-bk-gold:  linear-gradient(135deg, #1a1a1a, #FFD700);
+    --grad-red-gold: linear-gradient(135deg, #DC143C, #FFD700);
+
+    /* Alias gradients (legacy compat) */
+    --gradient-gold:        linear-gradient(135deg, #FFD700, #FFA500);
+    --gradient-red:         linear-gradient(135deg, #DC143C, #8B0000);
+    --gradient-black-gold:  linear-gradient(135deg, #1a1a1a, #FFD700);
+    --gradient-red-gold:    linear-gradient(135deg, #DC143C, #FFD700);
+
+    /* Shadows */
+    --sg: 0 8px 24px rgba(255, 215,   0, 0.35);  /* gold glow  */
+    --sr: 0 8px 24px rgba(220,  20,  60, 0.40);  /* red glow   */
+
+    /* Border-radius */
+    --r:    16px;
+    --r-sm: 10px;
+
+    /* Text colours */
+    --text-dark:  #1a1a1a;
+    --text-light: #fff;
 }
 
-* {
-    margin: 0;
-    padding: 0;
+
+/* ──────────────────────────────────────────────────────────
+   2. RESET  (applies to every element)
+   ────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+    margin:     0;
+    padding:    0;
     box-sizing: border-box;
 }
 
+
+/* ──────────────────────────────────────────────────────────
+   3. BODY & BACKGROUND
+   <body> + full-page blurred overlay
+   ────────────────────────────────────────────────────────── */
 body {
-    font-family: 'DM Sans', sans-serif;
-    background-image: url(sscr.png);
-    background-size: cover;
+    font-family:        'DM Sans', sans-serif;
+    background-image:   url(sscr.png);
+    background-size:    cover;
     background-position: center;
     background-attachment: fixed;
-    background-repeat: no-repeat;
-    min-height: 100vh;
-    color: var(--text-dark);
-    overflow-x: hidden;
-    position: relative;
+    min-height:  100vh;
+    color:       var(--primary);
+    overflow-x:  hidden;
+    position:    relative;
 }
 
+/* White frost overlay sitting behind all content */
 body::before {
-    content: '';
+    content:  '';
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.5);
-    z-index: 0;
+    inset:    0;
+    background: rgba(255, 248, 220, 0.55);
+    z-index:  0;
 }
 
+
+/* ──────────────────────────────────────────────────────────
+   4. PAGE CONTAINER
+   <div class="container">  —  centres & pads all content
+   ────────────────────────────────────────────────────────── */
 .container {
-    position: relative;
-    z-index: 1;
-    max-width: 1600px;
-    margin: 0 auto;
-    padding: 2rem;
+    position:   relative;
+    z-index:    1;
+    max-width:  1600px;
+    margin:     0 auto;
+    padding:    2rem;
 }
 
-/* Header */
+
+/* ──────────────────────────────────────────────────────────
+   5. HEADER
+   <div class="header">  —  crimson bar at top of page
+   ────────────────────────────────────────────────────────── */
 .header {
-    display: flex;
+    display:         flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 3rem;
-    animation: fadeInDown 0.8s ease;
-    background: rgba(139, 0, 0, 0.85);
-    padding: 1.5rem 2rem;
-    border-radius: 20px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-    border: 3px solid var(--gold);
+    align-items:     center;
+    margin-bottom:   2.5rem;
+    background:      var(--grad-red);
+    padding:         1.25rem 2rem;
+    border-radius:   var(--r);
+    box-shadow:      0 10px 40px rgba(0, 0, 0, 0.30);
+    border:          2.5px solid var(--gold);
+    animation:       fadeInDown 0.7s ease;
+    position:        relative;
+    overflow:        visible;
 }
 
+/* Subtle gold shimmer inside the header */
+.header::after {
+    content:        '';
+    position:       absolute;
+    inset:          0;
+    background:     linear-gradient(135deg, rgba(255, 215, 0, 0.07), transparent 60%);
+    pointer-events: none;
+}
+
+/* Left side — logo block */
 .header-left {
-    display: flex;
+    display:     flex;
     align-items: center;
-    gap: 1.5rem;
+    gap:         1.25rem;
 }
 
 .logo-container {
-    display: flex;
+    display:     flex;
     align-items: center;
 }
 
 .logo-img {
-    height: 100px;
-    width: auto;
-    object-fit: contain;
+    height:      90px;
+    width:       auto;
+    object-fit:  contain;
+    filter:      drop-shadow(0 2px 8px rgba(0, 0, 0, 0.30));
 }
 
-.header-info {
-    color: var(--white);
-}
-
-.header-info h2 {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 0.25rem;
-    color: var(--gold);
-}
-
-.header-info p {
-    font-size: 0.95rem;
-    opacity: 0.9;
-    color: var(--white);
-}
-
+/* Right side — notification, profile, logout */
 .header-right {
-    display: flex;
+    display:     flex;
     align-items: center;
-    gap: 1rem;
+    gap:         0.85rem;
+    position:    relative;
+    z-index:     2;
 }
 
-/* Quick Actions in Header - Minimalist */
-.header-actions {
-    display: flex;
-    gap: 0.75rem;
+
+/* ──────────────────────────────────────────────────────────
+   6. NOTIFICATION BELL  (inside .header-right)
+   <div class="notification-wrapper">
+     <button class="notification-btn">
+       <span class="notification-badge">
+   ────────────────────────────────────────────────────────── */
+.notification-wrapper {
+    position:   relative;
+    display:    inline-flex;
     align-items: center;
-    margin-left: 2rem;
+    gap:        0.5rem;
 }
 
-.quick-action-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.65rem 1.25rem;
-    min-width: auto;
-    height: auto;
-    background-color: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
-    color: white;
-    font-size: 0.9rem;
-    font-weight: 600;
-    white-space: nowrap;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-}
-
-.quick-action-btn:hover {
-    background-color: rgba(255, 215, 0, 0.3);
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
-    border-color: rgba(255, 215, 0, 0.4);
-}
-
-
-
-/* Notification Bell */
 .notification-btn {
-    position: relative;
-    display: flex;
-    align-items: center;
+    position:      relative;
+    width:         42px;
+    height:        42px;
+    background:    rgba(0, 0, 0, 0.25);
+    border:        2px solid rgba(255, 215, 0, 0.50);
+    border-radius: var(--r-sm);
+    color:         #fff;
+    font-size:     1.2rem;
+    cursor:        pointer;
+    display:       flex;
+    align-items:   center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    background-color: rgba(255, 255, 255, 0.15);
-    border: none;
-    border-radius: 10px;
-    color: white;
-    font-size: 1.2rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-right: 0.5rem;
+    transition:    all 0.25s;
 }
 
 .notification-btn:hover {
-    background-color: rgba(255, 215, 0, 0.3);
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+    background:    rgba(255, 215, 0, 0.22);
+    border-color:  var(--gold);
+    transform:     translateY(-2px);
+    box-shadow:    var(--sg);
 }
 
+/* Red pulsing dot showing unread count */
 .notification-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background: var(--red);
-    color: white;
-    font-size: 0.7rem;
-    font-weight: 700;
-    width: 20px;
-    height: 20px;
+    position:      absolute;
+    top:           -6px;
+    right:         -6px;
+    background:    var(--red);
+    color:         #fff;
+    font-size:     0.65rem;
+    font-weight:   800;
+    width:         20px;
+    height:        20px;
     border-radius: 50%;
-    display: flex;
-    align-items: center;
+    display:       flex;
+    align-items:   center;
     justify-content: center;
-    border: 2px solid white;
+    border:        2px solid var(--red-dark);
+    animation:     badgePulse 2s ease-in-out infinite;
 }
 
+@keyframes badgePulse {
+    0%, 100% { box-shadow: 0 0 0 0   rgba(220, 20, 60, 0.60); }
+    50%       { box-shadow: 0 0 0 5px rgba(220, 20, 60, 0.10); }
+}
+
+
+/* ──────────────────────────────────────────────────────────
+   7. NOTIFICATION DROPDOWN
+   <div class="notif-dropdown" id="notifDropdown">
+   ────────────────────────────────────────────────────────── */
+.notif-dropdown {
+    display:       none;
+    position:      absolute;
+    top:           calc(100% + 10px);
+    right:         0;
+    width:         340px;
+    background:    #fff;
+    border-radius: var(--r);
+    border:        2.5px solid var(--gold);
+    box-shadow:    0 16px 50px rgba(0, 0, 0, 0.35);
+    z-index:       999999;
+    overflow:      hidden;
+}
+
+.notif-dropdown.open {
+    display:   block;
+    animation: notifDrop 0.22s ease;
+}
+
+@keyframes notifDrop {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0);     }
+}
+
+/* Dropdown header bar */
+.notif-header {
+    display:         flex;
+    justify-content: space-between;
+    align-items:     center;
+    padding:         0.85rem 1rem;
+    background:      var(--black);
+    border-bottom:   2px solid var(--gold);
+}
+
+.notif-header-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size:   0.88rem;
+    color:       var(--gold);
+}
+
+/* "Mark all as read" pill button */
+.notif-mark-all {
+    font-size:     0.72rem;
+    color:         rgba(255, 215, 0, 0.85);
+    background:    rgba(255, 215, 0, 0.10);
+    border:        1px solid rgba(255, 215, 0, 0.35);
+    border-radius: 20px;
+    padding:       0.18rem 0.65rem;
+    cursor:        pointer;
+    font-weight:   700;
+    transition:    all 0.18s;
+}
+
+.notif-mark-all:hover {
+    color:       var(--gold);
+    border-color: var(--gold);
+    background:  rgba(255, 215, 0, 0.20);
+}
+
+/* Scrollable list of notifications */
+.notif-list {
+    max-height: 340px;
+    overflow-y: auto;
+}
+
+/* Individual notification row */
+.notif-item {
+    display:     flex;
+    gap:         0.75rem;
+    padding:     0.9rem 1rem;
+    border-bottom: 1px solid #f0f0f0;
+    transition:  background 0.15s;
+    cursor:      pointer;
+    align-items: flex-start;
+}
+
+.notif-item:last-child   { border-bottom: none; }
+.notif-item:hover        { background: #fffbf0; }
+.notif-item.unread       { background: #fffde7; border-left: 3px solid var(--gold); }
+
+/* Coloured circle icon */
+.notif-icon {
+    width:         38px;
+    height:        38px;
+    border-radius: 50%;
+    display:       flex;
+    align-items:   center;
+    justify-content: center;
+    font-size:     0.78rem;
+    font-weight:   800;
+    flex-shrink:   0;
+    border:        2px solid transparent;
+    overflow:      hidden;
+    letter-spacing: 0.02em;
+}
+
+.notif-icon.alert   { background: #ffebee; color: #c62828; border-color: #ef9a9a; }
+.notif-icon.info    { background: #e3f2fd; color: #1565c0; border-color: #90caf9; }
+.notif-icon.warn    { background: #fff3e0; color: #e65100; border-color: #ffcc80; }
+.notif-icon.success { background: #e8f5e9; color: #2e7d32; border-color: #a5d6a7; }
+
+/* Text body */
+.notif-body { flex: 1; min-width: 0; }
+
+.notif-text {
+    font-size:     0.82rem;
+    color:         #333;
+    line-height:   1.4;
+    margin-bottom: 0.2rem;
+}
+
+.notif-text strong { color: #1a1a1a; }
+
+.notif-time {
+    font-size:   0.7rem;
+    color:       #aaa;
+    font-weight: 600;
+}
+
+/* Unread indicator dot */
+.notif-dot {
+    width:         8px;
+    height:        8px;
+    border-radius: 50%;
+    background:    var(--gold);
+    flex-shrink:   0;
+    margin-top:    6px;
+}
+
+.notif-item:not(.unread) .notif-dot { background: transparent; }
+
+/* "Dismiss" footer link */
+.notif-footer {
+    padding:    0.65rem 1rem;
+    text-align: center;
+    border-top: 2px solid var(--gold);
+    font-size:  0.8rem;
+    font-weight: 700;
+    color:      var(--black);
+    cursor:     pointer;
+    transition: all 0.18s;
+}
+
+.notif-footer:hover { background: var(--gold); color: var(--black); }
+
+
+/* ──────────────────────────────────────────────────────────
+   8. HEADER ICON BUTTON  (envelope / small square buttons)
+   <a class="icon-btn-header">  —  sits beside the bell
+   ────────────────────────────────────────────────────────── */
+.icon-btn-header {
+    display:         inline-flex;
+    align-items:     center;
+    justify-content: center;
+    width:           42px;
+    height:          42px;
+    background:      rgba(0, 0, 0, 0.22);
+    border:          2px solid rgba(255, 215, 0, 0.45);
+    border-radius:   var(--r-sm);
+    color:           rgba(255, 255, 255, 0.85);
+    cursor:          pointer;
+    transition:      all 0.22s;
+    text-decoration: none;
+    flex-shrink:     0;
+}
+
+.icon-btn-header:hover {
+    background:   rgba(255, 215, 0, 0.20);
+    border-color: var(--gold);
+    color:        var(--gold);
+    transform:    translateY(-2px);
+    box-shadow:   var(--sg);
+}
+
+
+/* ──────────────────────────────────────────────────────────
+   9. STUDENT PROFILE PILL  (click → opens Settings modal)
+   <div class="student-profile">
+     <div class="student-avatar">
+     <div class="student-name"> / <div class="student-role">
+   ────────────────────────────────────────────────────────── */
 .student-profile {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 0.75rem 1.5rem;
-    border-radius: 50px;
+    display:         flex;
+    align-items:     center;
+    gap:             0.85rem;
+    background:      rgba(0, 0, 0, 0.25);
+    padding:         0.5rem 1.25rem 0.5rem 0.5rem;
+    border-radius:   50px;
+    border:          2px solid var(--gold);
     backdrop-filter: blur(10px);
-    border: 2px solid var(--gold);
+    transition:      all 0.25s;
+    cursor:          pointer;
+}
+
+.student-profile:hover {
+    background: rgba(255, 215, 0, 0.15);
+    box-shadow: var(--sg);
 }
 
 .student-avatar {
-    width: 45px;
-    height: 45px;
-    background: var(--gradient-gold);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
+    width:           44px;
+    height:          44px;
+    border-radius:   50%;
+    background:      var(--grad-gold);
+    color:           var(--black);
+    font-weight:     800;
+    font-size:       1rem;
+    display:         flex;
+    align-items:     center;
     justify-content: center;
-    color: var(--black);
-    font-weight: 700;
-    font-size: 1.2rem;
-    border: 2px solid var(--red);
+    border:          2px solid var(--gold-dark);
+    flex-shrink:     0;
 }
 
 .student-name {
-    color: var(--white);
-    font-weight: 600;
+    color:       #fff;
+    font-weight: 700;
+    font-size:   0.9rem;
+    line-height: 1.2;
 }
 
 .student-role {
-    color: var(--gold);
-    font-size: 0.85rem;
+    color:       var(--gold);
+    font-size:   0.75rem;
+    font-weight: 600;
 }
 
+
+/* ──────────────────────────────────────────────────────────
+   10. LOGOUT BUTTON
+   <button class="btn-logout">
+   ────────────────────────────────────────────────────────── */
 .btn-logout {
-    padding: 0.75rem 1.5rem;
-    background: var(--gradient-red);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-family: 'Syne', sans-serif;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 5px 15px rgba(220, 20, 60, 0.4);
-    border: 2px solid var(--gold);
+    padding:       0.52rem 1.45rem;
+    background:    #fff;
+    color:         var(--red-dark);
+    border:        2.5px solid var(--red-dark);
+    border-radius: var(--r-sm);
+    font-family:   'Syne', sans-serif;
+    font-weight:   800;
+    font-size:     0.85rem;
+    cursor:        pointer;
+    transition:    all 0.25s;
+    white-space:   nowrap;
+    box-shadow:    0 3px 10px rgba(139, 0, 0, 0.20);
+    letter-spacing: 0.03em;
 }
 
 .btn-logout:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(220, 20, 60, 0.5);
-    background: var(--red-dark);
+    background:  var(--grad-red);
+    color:       #fff;
+    border-color: var(--red-dark);
+    transform:   translateY(-2px);
+    box-shadow:  0 6px 20px rgba(139, 0, 0, 0.50);
 }
 
-/* Stats Grid */
+
+/* ──────────────────────────────────────────────────────────
+   11. STATS GRID  (four summary cards below header)
+   <div class="stats-grid">
+     <div class="stat-card history | primary | success | warning">
+   ────────────────────────────────────────────────────────── */
 .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
+    display:               grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap:                   0.9rem;
+    margin-bottom:         1.75rem;
 }
 
+/* ── Base stat card ── */
 .stat-card {
-    background: var(--white);
-    padding: 2rem;
-    border-radius: 20px;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease;
-    animation: fadeInUp 0.8s ease;
-    border: 3px solid var(--gold);
+    padding:         1.1rem 1rem 1rem;
+    border-radius:   16px;
+    position:        relative;
+    overflow:        hidden;
+    transition:      all 0.35s cubic-bezier(.25,.8,.25,1);
+    animation:       fadeInUp 0.6s ease both;
+    display:         flex;
+    flex-direction:  column;
+    align-items:     center;
+    justify-content: center;
+    gap:             0.2rem;
+    min-height:      105px;
+    border:          2px solid transparent;
 }
 
+/* Top sheen line */
+.stat-card::after {
+    content:       '';
+    position:      absolute;
+    top: 0; left: 20%; right: 20%;
+    height:        1.5px;
+    border-radius: 2px;
+    opacity:       0.55;
+}
+
+/* Glow blob */
 .stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 6px;
+    content:        '';
+    position:       absolute;
+    width:          110px; height: 110px;
+    border-radius:  50%;
+    opacity:        0.13;
+    bottom:         -35px; right: -25px;
+    filter:         blur(24px);
+    pointer-events: none;
 }
 
-.stat-card.primary::before { background: var(--gradient-black-gold); }
-.stat-card.success::before { background: var(--gradient-gold); }
-.stat-card.warning::before { background: var(--gradient-red-gold); }
-.stat-card.info::before { background: var(--gradient-red); }
+/* ── HISTORY — crimson ── */
+.stat-card.history {
+    background:   linear-gradient(145deg, #8B0000, #DC143C);
+    border-color: rgba(255,215,0,0.5);
+    box-shadow:   0 4px 20px rgba(139,0,0,0.4);
+    cursor:       pointer;
+}
+.stat-card.history::after  { background: linear-gradient(90deg, transparent, rgba(255,215,0,0.6), transparent); }
+.stat-card.history::before { background: rgba(255,215,0,0.3); }
+.stat-card.history:hover {
+    transform:    translateY(-6px) scale(1.025);
+    border-color: #FFD700;
+    box-shadow:   0 16px 38px rgba(139,0,0,0.5);
+}
 
-.stat-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 15px 40px rgba(255, 215, 0, 0.4);
+/* ── PRIMARY — rate, gold ── */
+.stat-card.primary {
+    background:   linear-gradient(145deg, #DAA520, #FFD700);
+    border-color: rgba(139,0,0,0.35);
+    box-shadow:   0 4px 20px rgba(218,165,32,0.4);
+}
+.stat-card.primary::after  { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent); }
+.stat-card.primary::before { background: rgba(255,255,255,0.3); }
+.stat-card.primary:hover {
+    transform:    translateY(-6px) scale(1.025);
+    border-color: var(--red-dark);
+    box-shadow:   0 16px 38px rgba(218,165,32,0.5);
+}
+.stat-card.primary .stat-value {
+    background:              linear-gradient(135deg, #8B0000, #DC143C);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip:         text;
+}
+.stat-card.primary .stat-sublabel { color: rgba(139,0,0,0.6); }
+
+/* ── SUCCESS — present & late, warm gold/amber ── */
+.stat-card.success {
+    background:   linear-gradient(145deg, #FFA500, #FFD700);
+    border-color: rgba(139,0,0,0.3);
+    box-shadow:   0 4px 20px rgba(255,165,0,0.35);
+}
+.stat-card.success::after  { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent); }
+.stat-card.success::before { background: rgba(255,255,255,0.3); }
+.stat-card.success:hover {
+    transform:    translateY(-6px) scale(1.025);
     border-color: var(--red);
+    box-shadow:   0 16px 38px rgba(255,165,0,0.5);
 }
+.stat-card.success .stat-value {
+    background:              linear-gradient(135deg, #8B0000, #DC143C);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip:         text;
+}
+.stat-card.success .stat-sublabel { color: rgba(139,0,0,0.6); }
 
+/* ── WARNING — absences, crimson ── */
+.stat-card.warning {
+    background:   linear-gradient(145deg, #DC143C, #FF4466);
+    border-color: rgba(255,215,0,0.45);
+    box-shadow:   0 4px 20px rgba(220,20,60,0.35);
+}
+.stat-card.warning::after  { background: linear-gradient(90deg, transparent, rgba(255,215,0,0.5), transparent); }
+.stat-card.warning::before { background: rgba(255,215,0,0.2); }
+.stat-card.warning:hover {
+    transform:    translateY(-6px) scale(1.025);
+    border-color: #FFD700;
+    box-shadow:   0 16px 38px rgba(220,20,60,0.5);
+}
+.stat-card.warning .stat-value {
+    background:              linear-gradient(135deg, #FFD700, #FFF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip:         text;
+}
+.stat-card.warning .stat-sublabel { color: rgba(255,215,0,0.75); }
+
+/* Small label above the value */
 .stat-header {
-    display: flex;
+    display:         flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
+    align-items:     center;
+    margin-bottom:   0.5rem;
 }
 
 .stat-label-top {
-    font-size: 0.85rem;
-    color: var(--black);
-    font-weight: 700;
+    font-size:      0.7rem;
+    color:          #888;
+    font-weight:    700;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 
-.stat-trend {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-    font-weight: 700;
-    padding: 0.3rem 0.7rem;
-    border-radius: 20px;
-}
+.stat-trend { display: none; }
 
-.stat-trend.up {
-    background: rgba(255, 215, 0, 0.2);
-    color: var(--gold-dark);
-}
-
-.stat-trend.down {
-    background: rgba(220, 20, 60, 0.2);
-    color: var(--red);
-}
-
+/* Big number */
 .stat-value {
-    font-family: 'Syne', sans-serif;
-    font-size: 3rem;
-    font-weight: 800;
-    background: var(--gradient-red-gold);
+    font-family:             'Syne', sans-serif;
+    font-size:               2rem;
+    font-weight:             800;
+    background:              linear-gradient(135deg, #FFD700, #DC143C);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 0.5rem;
-    line-height: 1;
+    background-clip:         text;
+    line-height:             1;
+    letter-spacing:          -0.5px;
 }
 
-.stat-label {
-    color: var(--black);
-    font-weight: 600;
-    font-size: 0.95rem;
+.stat-value.small { font-size: 1.55rem; }
+
+/* Subtitle under number */
+.stat-sublabel {
+    font-family:    'DM Sans', sans-serif;
+    font-size:      0.68rem;
+    font-weight:    700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color:          rgba(255,255,255,0.3);
+    margin-top:     0.1rem;
 }
 
-/* Card */
+/* History pill + arrow */
+.stat-history-label {
+    font-family:     'Syne', sans-serif;
+    font-size:       1rem;
+    font-weight:     800;
+    color:           #FFD700;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 2px;
+    letter-spacing:  0.5px;
+}
+
+.stat-pill  { display: none; }
+.stat-arrow { display: none; }
+.stat-card.history:hover .stat-arrow { transform: translateX(5px); }
+
+/* Present / Late split layout */
+.stat-split {
+    display:         flex;
+    align-items:     center;
+    gap:             0.75rem;
+    width:           100%;
+    justify-content: center;
+}
+.stat-split-item {
+    display:        flex;
+    flex-direction: column;
+    align-items:    center;
+    gap:            0.15rem;
+}
+.stat-split-divider {
+    width:         1.5px;
+    height:        38px;
+    background:    linear-gradient(to bottom, transparent, rgba(139,0,0,0.3), transparent);
+    border-radius: 2px;
+    flex-shrink:   0;
+}
+
+/* Legacy — hidden */
+.stat-header    { display: none; }
+.stat-label-top { display: none; }
+.stat-label     { display: none !important; }
+
+
+/* ──────────────────────────────────────────────────────────
+   12. CONTENT CARDS  (white panels holding table / schedule)
+   <div class="card">
+     <div class="card-header">
+       <div class="card-title">
+       <div class="card-actions">
+   ────────────────────────────────────────────────────────── */
 .card {
-    background: var(--white);
-    border-radius: 20px;
-    padding: 2rem;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-    margin-bottom: 2rem;
-    animation: fadeInUp 0.8s ease;
-    border: 3px solid var(--gold);
+    background:    rgba(255, 252, 235, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: var(--r);
+    padding:       2rem;
+    box-shadow:    0 4px 28px rgba(139,0,0,0.12);
+    margin-bottom: 1.75rem;
+    border:        2px solid rgba(255, 215, 0, 0.5);
+    animation:     fadeInUp 0.7s ease both;
+    transition:    box-shadow 0.3s, border-color 0.3s;
 }
 
-.card:hover {
-    box-shadow: 0 25px 70px rgba(255, 215, 0, 0.3);
-}
+.card:hover { box-shadow: 0 8px 36px rgba(255, 215, 0, 0.3); border-color: var(--gold); }
 
 .card-header {
-    display: flex;
+    display:         flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 3px solid var(--gold);
+    align-items:     center;
+    margin-bottom:   1.5rem;
+    padding-bottom:  1rem;
+    border-bottom:   2.5px solid var(--gold);
 }
 
 .card-title {
     font-family: 'Syne', sans-serif;
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--black);
+    font-size:   1.4rem;
+    font-weight: 800;
+    color:       var(--black);
 }
 
 .card-actions {
-    display: flex;
-    gap: 0.75rem;
+    display:    flex;
+    gap:        0.65rem;
+    flex-wrap:  wrap;
 }
 
-/* Buttons */
+
+/* ──────────────────────────────────────────────────────────
+   13. BUTTONS  (general .btn + colour variants)
+   <button class="btn btn-primary | btn-success | btn-secondary | btn-dark">
+   ────────────────────────────────────────────────────────── */
 .btn {
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 10px;
-    font-family: 'Syne', sans-serif;
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
+    padding:         0.65rem 1.35rem;
+    border:          none;
+    border-radius:   var(--r-sm);
+    font-family:     'Syne', sans-serif;
+    font-size:       0.88rem;
+    font-weight:     700;
+    cursor:          pointer;
+    transition:      all 0.25s;
+    display:         inline-flex;
+    align-items:     center;
+    gap:             0.45rem;
+    white-space:     nowrap;
 }
 
 .btn-primary {
-    background: var(--gradient-gold);
-    color: var(--black);
-    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
-    border: 2px solid var(--gold-dark);
+    background:  var(--grad-gold);
+    color:       var(--black);
+    border:      2px solid var(--gold-dark);
+    box-shadow:  0 4px 14px rgba(255, 215, 0, 0.35);
 }
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(255, 215, 0, 0.5);
-    background: var(--gold);
-}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: var(--sg); }
 
 .btn-success {
-    background: var(--gradient-red-gold);
-    color: var(--white);
-    box-shadow: 0 5px 15px rgba(220, 20, 60, 0.4);
-    border: 2px solid var(--gold);
+    background: var(--grad-red);
+    color:      #fff;
+    border:     2px solid var(--red-dark);
+    box-shadow: 0 4px 14px rgba(220, 20, 60, 0.30);
 }
-
-.btn-success:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(220, 20, 60, 0.5);
-}
+.btn-success:hover { transform: translateY(-2px); box-shadow: var(--sr); }
 
 .btn-secondary {
     background: var(--black);
-    color: var(--gold);
-    border: 2px solid var(--gold);
+    color:      var(--gold);
+    border:     2px solid var(--gold);
 }
-
 .btn-secondary:hover {
     background: var(--gold);
-    color: var(--black);
+    color:      var(--black);
+    transform:  translateY(-2px);
+    box-shadow: var(--sg);
 }
 
-/* Table */
+.btn-dark {
+    background: var(--primary);
+    color:      var(--gold);
+    border:     2px solid var(--gold);
+}
+.btn-dark:hover {
+    background:  var(--black);
+    border-color: var(--gold-light);
+    transform:   translateY(-2px);
+    box-shadow:  0 6px 16px rgba(0, 0, 0, 0.30);
+}
+
+
+/* ──────────────────────────────────────────────────────────
+   14. ATTENDANCE TABLE  (inside Recent Attendance card)
+   <div class="table-container">
+     <table class="data-table">
+   ────────────────────────────────────────────────────────── */
 .table-container {
-    overflow-x: auto;
-    border-radius: 12px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
-    border: 2px solid var(--gold);
+    overflow-x:    auto;
+    border-radius: var(--r-sm);
+    border:        2px solid var(--gold);
+    box-shadow:    0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 .data-table {
-    width: 100%;
+    width:           100%;
     border-collapse: collapse;
-    background: white;
+    background:      #fff;
 }
 
-.data-table thead {
-    background: var(--black);
-    color: var(--gold);
-}
+.data-table thead { background: var(--black); }
 
 .data-table th {
-    padding: 1rem;
-    text-align: left;
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 0.9rem;
+    padding:        0.75rem 1rem;
+    text-align:     left;
+    font-family:    'Syne', sans-serif;
+    font-weight:    700;
+    font-size:      0.8rem;
     text-transform: uppercase;
     letter-spacing: 1px;
-    border-bottom: 2px solid var(--gold);
+    color:          var(--gold);
+    border-bottom:  2px solid var(--gold);
+    white-space:    nowrap;
 }
 
 .data-table td {
-    padding: 1rem;
+    padding:       0.65rem 1rem;
     border-bottom: 1px solid rgba(255, 215, 0, 0.2);
-    font-size: 0.95rem;
-    color: var(--black);
+    font-size:     0.88rem;
+    color:         var(--primary);
+    vertical-align: middle;
 }
 
-.data-table tbody tr {
-    transition: background 0.2s ease;
-}
+.data-table tbody tr              { transition: background 0.18s; }
+.data-table tbody tr:hover        { background: rgba(255, 215, 0, 0.08); }
+.data-table tbody tr:last-child td { border-bottom: none; }
 
-.data-table tbody tr:hover {
-    background: rgba(255, 215, 0, 0.1);
-}
 
+/* ──────────────────────────────────────────────────────────
+   15. STATUS BADGES  (Present / Absent / Late chips in table)
+   <span class="status-badge status-present | status-absent | status-late">
+   ────────────────────────────────────────────────────────── */
 .status-badge {
-    display: inline-block;
-    padding: 0.4rem 1rem;
+    display:     inline-flex;
+    align-items: center;
+    gap:         0.3rem;
+    padding:     0.25rem 0.75rem;
     border-radius: 20px;
-    font-size: 0.85rem;
+    font-size:   0.78rem;
     font-weight: 700;
-    border: 2px solid;
+    border:      1.5px solid;
 }
 
-.status-present {
-    background: rgba(255, 215, 0, 0.2);
-    color: var(--gold-dark);
-    border-color: var(--gold);
-}
+.status-present  { background: #FFF9E6; color: #7A4F00; border-color: var(--gold);   }
+.status-absent   { background: #FFF0F3; color: #8B0000; border-color: var(--red);    }
+.status-late     { background: #FFF5E6; color: #7A4500; border-color: #FFA500;       }
+.status-unmarked { background: #f5f5f5; color: #555;    border-color: #ccc;          }
 
-.status-absent {
-    background: rgba(220, 20, 60, 0.2);
-    color: var(--red-dark);
-    border-color: var(--red);
-}
 
-.status-late {
-    background: rgba(255, 215, 0, 0.15);
-    color: #FF8C00;
-    border-color: #FFA500;
-}
-
-/* Search and Filter */
+/* ──────────────────────────────────────────────────────────
+   16. SEARCH & FILTER BAR  (above the attendance table)
+   <div class="controls-bar">
+     <div class="search-box"><input>
+     <div class="filter-group"><select class="filter-select">
+   ────────────────────────────────────────────────────────── */
 .controls-bar {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    display:   flex;
+    gap:       0.85rem;
+    margin-bottom: 1.25rem;
     flex-wrap: wrap;
 }
 
 .search-box {
-    flex: 1;
-    min-width: 250px;
-    position: relative;
+    flex:      1;
+    min-width: 240px;
+    position:  relative;
 }
 
 .search-box input {
-    width: 100%;
-    padding: 0.9rem 1.2rem 0.9rem 3rem;
-    border: 2px solid var(--gold);
-    border-radius: 12px;
-    font-size: 0.95rem;
-    font-family: 'DM Sans', sans-serif;
-    transition: all 0.3s ease;
-    background: white;
+    width:         100%;
+    padding:       0.75rem 1rem;
+    border:        2px solid rgba(255,215,0,0.6);
+    border-radius: var(--r-sm);
+    font-size:     0.9rem;
+    font-family:   'DM Sans', sans-serif;
+    background:    #fff;
+    color:         var(--primary);
+    transition:    all 0.25s;
 }
 
 .search-box input:focus {
-    outline: none;
+    outline:    none;
     border-color: var(--red);
-    box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.2);
+    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
 }
 
-.search-icon {
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 1.2rem;
-    color: var(--gold-dark);
-}
+.search-box input::placeholder { color: #bbb; }
 
 .filter-group {
-    display: flex;
-    gap: 0.75rem;
+    display:     flex;
+    gap:         0.65rem;
     align-items: center;
+    flex-wrap:   wrap;
 }
 
 .filter-row {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 12px;
+    display:   flex;
+    gap:       0.75rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
 }
 
 .filter-row .form-select,
-.filter-row .form-input {
-    flex: 1;
-}
+.filter-row .form-input { flex: 1; }
 
 select.filter-select {
-    padding: 0.9rem 1.2rem;
-    border: 2px solid var(--gold);
-    border-radius: 12px;
-    font-size: 0.95rem;
-    font-family: 'DM Sans', sans-serif;
-    background: white;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: var(--black);
-    font-weight: 600;
+    padding:       0.75rem 1rem;
+    border:        2px solid rgba(255,215,0,0.6);
+    border-radius: var(--r-sm);
+    font-size:     0.9rem;
+    font-family:   'DM Sans', sans-serif;
+    background:    #fff;
+    cursor:        pointer;
+    color:         var(--primary);
+    font-weight:   600;
+    transition:    all 0.25s;
+    outline:       none;
 }
 
 select.filter-select:focus {
-    outline: none;
     border-color: var(--red);
-    box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.2);
+    box-shadow:   0 0 0 3px rgba(255, 215, 0, 0.2);
 }
 
-/* Grid Layouts */
-.grid-2 {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-    gap: 1.5rem;
-    align-items: start;   /* 🔥 ADD THIS */
-}
 
-/* Action Buttons in Table */
+/* ──────────────────────────────────────────────────────────
+   17. TABLE ACTION BUTTONS  (View / Edit / Delete per row)
+   <button class="action-btn view | edit | delete">
+   ────────────────────────────────────────────────────────── */
 .action-btn {
-    padding: 0.4rem 0.9rem;
-    border: 2px solid;
+    padding:       0.3rem 0.75rem;
+    border:        2px solid;
     border-radius: 8px;
-    font-size: 0.85rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    margin-right: 0.5rem;
-    background: white;
+    font-size:     0.8rem;
+    font-weight:   700;
+    cursor:        pointer;
+    transition:    all 0.22s;
+    margin-right:  0.35rem;
+    background:    #fff;
+    display:       inline-flex;
+    align-items:   center;
+    gap:           0.25rem;
 }
 
-.action-btn.view {
-    border-color: var(--gold);
-    color: var(--gold-dark);
-}
-
+.action-btn.view { border-color: var(--gold); color: #7A4F00; }
 .action-btn.view:hover {
-    background: var(--gold);
-    color: var(--black);
+    background:  var(--gold);
+    color:       var(--black);
+    transform:   translateY(-2px);
+    box-shadow:  0 4px 12px rgba(255, 215, 0, 0.45);
 }
 
-.action-btn.edit {
-    border-color: var(--black);
-    color: var(--black);
-}
-
+.action-btn.edit { border-color: var(--primary); color: var(--primary); }
 .action-btn.edit:hover {
-    background: var(--black);
-    color: var(--gold);
+    background: var(--primary);
+    color:      var(--gold);
+    transform:  translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
-.action-btn.delete {
-    border-color: var(--red);
-    color: var(--red);
-}
-
+.action-btn.delete { border-color: var(--red); color: var(--red); }
 .action-btn.delete:hover {
     background: var(--red);
-    color: var(--white);
+    color:      #fff;
+    transform:  translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 20, 60, 0.40);
 }
 
-/* Modal */
+
+/* ──────────────────────────────────────────────────────────
+   18. PAGINATION  (below the attendance table)
+   <div class="pagination">
+     <button class="page-btn [active]">
+   ────────────────────────────────────────────────────────── */
+.pagination {
+    display:         flex;
+    justify-content: center;
+    align-items:     center;
+    gap:             0.4rem;
+    margin-top:      1rem;
+    flex-wrap:       wrap;
+}
+
+.page-btn {
+    min-width:      36px;
+    height:         36px;
+    padding:        0 0.7rem;
+    border:         2px solid var(--gold-dark);
+    background:     rgba(255, 215, 0, 0.08);
+    border-radius:  var(--r-sm);
+    font-weight:    700;
+    font-size:      0.83rem;
+    cursor:         pointer;
+    color:          #7A4F00;
+    font-family:    'DM Sans', sans-serif;
+    display:        inline-flex;
+    align-items:    center;
+    justify-content: center;
+    transition:     all 0.2s;
+}
+
+.page-btn:hover:not(:disabled) {
+    background:  var(--grad-gold);
+    border-color: var(--gold-dark);
+    color:       var(--black);
+    transform:   translateY(-1px);
+    box-shadow:  0 4px 12px rgba(255, 215, 0, 0.40);
+}
+
+.page-btn.active {
+    background:  var(--grad-red);
+    border-color: var(--red-dark);
+    color:       #fff;
+    font-weight: 800;
+    box-shadow:  0 4px 14px rgba(220, 20, 60, 0.40);
+    transform:   scale(1.08);
+}
+
+.page-btn:disabled {
+    opacity:   0.3;
+    cursor:    not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+
+/* ──────────────────────────────────────────────────────────
+   19. MODALS  (overlay + content box)
+   <div class="modal [show]">
+     <div class="modal-content [modal-wide | modal-large]">
+       <div class="modal-header">
+         <div class="modal-title">
+         <button class="modal-close">
+   ────────────────────────────────────────────────────────── */
 .modal {
-    display: none;
+    display:  none;
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    z-index: 1000;
-    animation: fadeIn 0.3s ease;
+    inset:    0;
+    background: rgba(0, 0, 0, 0.75);
+    z-index:  1000;
 }
 
 .modal.show {
-    display: flex;
-    align-items: center;
+    display:         flex;
+    align-items:     center;
     justify-content: center;
+    animation:       fadeIn 0.25s ease;
 }
 
 .modal-content {
-    background: white;
-    border-radius: 20px;
-    padding: 2rem;
-    max-width: 600px;
-    width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-    animation: fadeInUp 0.4s ease;
-    border: 4px solid var(--gold);
+    background:    #fff;
+    border-radius: var(--r);
+    padding:       2rem;
+    max-width:     600px;
+    width:         90%;
+    max-height:    90vh;
+    overflow-y:    auto;
+    border:        3px solid var(--gold);
+    box-shadow:    0 20px 60px rgba(0, 0, 0, 0.40);
+    animation:     fadeInUp 0.3s ease;
 }
 
+.modal-content.modal-large { max-width: 1100px; width: 95%; }
+.modal-content.modal-wide  { max-width:  720px; width: 95%; }
+
 .modal-header {
-    display: flex;
+    display:         flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 3px solid var(--gold);
+    align-items:     center;
+    margin-bottom:   1.5rem;
+    padding-bottom:  1rem;
+    border-bottom:   2.5px solid var(--gold);
 }
 
 .modal-title {
     font-family: 'Syne', sans-serif;
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--black);
+    font-size:   1.35rem;
+    font-weight: 800;
+    color:       var(--black);
 }
 
 .modal-close {
-    width: 35px;
-    height: 35px;
-    border: 2px solid var(--red);
-    background: var(--white);
+    width:         34px;
+    height:        34px;
+    border:        2px solid var(--red);
+    background:    #fff;
     border-radius: 50%;
-    font-size: 1.5rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: var(--red);
-    font-weight: 700;
+    font-size:     1.3rem;
+    cursor:        pointer;
+    color:         var(--red);
+    font-weight:   700;
+    display:       flex;
+    align-items:   center;
+    justify-content: center;
+    transition:    all 0.22s;
 }
 
 .modal-close:hover {
     background: var(--red);
-    color: var(--white);
+    color:      #fff;
+    transform:  rotate(90deg);
 }
 
-/* Form Elements */
-.form-group {
-    margin-bottom: 1.5rem;
+/* Scrollable inner area used in taller modals */
+.modal-body-scroll {
+    padding:    0.25rem;
+    max-height: 70vh;
+    overflow-y: auto;
 }
+
+
+/* ──────────────────────────────────────────────────────────
+   20. FORM ELEMENTS  (used inside Settings & Details modals)
+   <div class="form-group">
+     <label class="form-label">
+     <input class="form-input"> / <select class="form-select">
+   ────────────────────────────────────────────────────────── */
+.form-group    { margin-bottom: 1.35rem; }
 
 .form-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 700;
-    color: var(--black);
-    font-size: 0.95rem;
+    display:       block;
+    margin-bottom: 0.45rem;
+    font-weight:   700;
+    color:         var(--primary);
+    font-size:     0.9rem;
 }
 
-.form-input, .form-select, .form-textarea {
-    width: 100%;
-    padding: 0.9rem 1.2rem;
-    border: 2px solid var(--gold);
-    border-radius: 12px;
-    font-size: 0.95rem;
-    font-family: 'DM Sans', sans-serif;
-    transition: all 0.3s ease;
-    background: white;
+.form-input,
+.form-select,
+.form-textarea {
+    width:         100%;
+    padding:       0.75rem 1rem;
+    border:        2px solid var(--gold);
+    border-radius: var(--r-sm);
+    font-size:     0.9rem;
+    font-family:   'DM Sans', sans-serif;
+    background:    #fff;
+    color:         var(--primary);
+    transition:    all 0.25s;
+    outline:       none;
 }
 
-.form-input:focus, .form-select:focus, .form-textarea:focus {
-    outline: none;
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
     border-color: var(--red);
-    box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.2);
+    box-shadow:   0 0 0 3px rgba(255, 215, 0, 0.20);
 }
 
 .form-textarea {
-    resize: vertical;
+    resize:     vertical;
     min-height: 100px;
 }
 
-/* Animations */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+
+/* ──────────────────────────────────────────────────────────
+   21. WEEKLY SCHEDULE GRID  (inside Schedule card)
+   <div class="schedule-wrapper">
+     <div class="schedule-grid">
+       <div class="schedule-header">  — day/time labels
+       <div class="schedule-time-cell">
+       <div class="schedule-class-cell [has-class]">
+         <div class="class-code">
+         <div class="class-name">
+         <div class="class-room">
+   ────────────────────────────────────────────────────────── */
+.schedule-wrapper {
+    overflow-x:              auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius:           var(--r-sm);
+    border:                  2px solid var(--gold);
 }
 
-@keyframes fadeInDown {
-    from {
-        opacity: 0;
-        transform: translateY(-30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Pagination */
-.pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 1.5rem;
-}
-
-.page-btn {
-    padding: 0.6rem 1rem;
-    border: 2px solid var(--gold);
-    background: white;
-    border-radius: 8px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: var(--black);
-}
-
-.page-btn:hover, .page-btn.active {
-    background: var(--gradient-gold);
-    color: var(--black);
-    border-color: var(--red);
-    transform: scale(1.05);
-}
-
-/* Weekly Schedule Grid Styles */
 .schedule-grid {
-    display: grid;
+    display:               grid;
     grid-template-columns: 80px repeat(6, 1fr);
-    gap: 1px;
-    background-color: #e0e0e0;
-    border: 1px solid #e0e0e0;
-    overflow-x: auto;
+    gap:                   1px;
+    background:            #e0e0e0;
+    border:                none;
+    min-width:             640px;
 }
 
+/* Shared base for all grid cells */
 .schedule-header,
 .schedule-time-cell,
 .schedule-class-cell {
-    background-color: white;
-    padding: 0.5rem;
-    min-height: 50px;
-    display: flex;
-    align-items: center;
+    background:      #fff;
+    padding:         0.5rem;
+    min-height:      50px;
+    display:         flex;
+    align-items:     center;
     justify-content: center;
 }
 
 .schedule-header {
-    font-weight: 600;
-    background-color: #f8f9fa;
-    font-size: 0.8rem;
-    text-align: center;
+    font-weight: 700;
+    background:  var(--black);
+    font-size:   0.78rem;
+    color:       var(--gold);
 }
 
 .schedule-time-cell {
-    font-weight: 500;
-    background-color: #f8f9fa;
-    font-size: 0.75rem;
+    font-weight:     600;
+    background:      #fdf6e3;
+    font-size:       0.72rem;
     justify-content: flex-start;
-    padding-left: 0.5rem;
+    padding-left:    0.5rem;
+    color:           var(--red-dark);
 }
 
 .schedule-class-cell {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction:  column;
+    align-items:     flex-start;
     justify-content: flex-start;
-    padding: 0.4rem;
-    position: relative;
+    padding:         0.4rem;
 }
 
 .schedule-class-cell.has-class {
-    background-color: #e3f2fd;
-    border-left: 3px solid #2196F3;
+    background:  #fff9e6;
+    border-left: 3px solid var(--gold-dark);
+    cursor:      pointer;
+    transition:  background 0.15s;
 }
 
-.schedule-class-cell.has-class:hover {
-    background-color: #bbdefb;
-    cursor: pointer;
-}
+.schedule-class-cell.has-class:hover { background: #ffeeaa; }
 
 .class-code {
-    font-weight: 600;
-    color: #1976D2;
-    font-size: 0.75rem;
+    font-weight:   700;
+    color:         var(--red-dark);
+    font-size:     0.75rem;
     margin-bottom: 0.2rem;
 }
 
 .class-name {
-    font-size: 0.65rem;
-    color: #424242;
+    font-size:     0.65rem;
+    color:         #424242;
     margin-bottom: 0.2rem;
-    line-height: 1.2;
+    line-height:   1.2;
 }
 
 .class-room {
     font-size: 0.6rem;
-    color: #757575;
+    color:     #757575;
 }
 
-/* Responsive */
-@media (max-width: 1400px) {
-    .header-actions {
-        display: none;
-    }
+
+/* ──────────────────────────────────────────────────────────
+   22. LAYOUT HELPERS
+   ────────────────────────────────────────────────────────── */
+/* Two-column card grid (Attendance + Schedule) */
+.grid-2 {
+    display:               grid;
+    grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+    gap:                   1.5rem;
 }
 
+/* Generic horizontal button row */
+.button-row {
+    display:    flex;
+    gap:        0.65rem;
+    margin-top: 0.85rem;
+    flex-wrap:  wrap;
+}
+
+
+/* ──────────────────────────────────────────────────────────
+   23. FACULTY CONTACT MODAL
+   <div class="faculty-list">
+     <a class="faculty-card">
+       <div class="faculty-avatar">
+       <div class="faculty-info">
+         <div class="faculty-name">
+         <div class="faculty-subject">
+         <div class="faculty-email">
+       <div class="faculty-arrow">
+   ────────────────────────────────────────────────────────── */
+.faculty-list {
+    display:        flex;
+    flex-direction: column;
+    gap:            0.75rem;
+}
+
+.faculty-card {
+    display:         flex;
+    align-items:     center;
+    gap:             1rem;
+    padding:         1rem 1.25rem;
+    background:      #fff;
+    border:          2.5px solid var(--gold);
+    border-radius:   14px;
+    cursor:          pointer;
+    transition:      all 0.22s;
+    text-decoration: none;
+    color:           inherit;
+}
+
+.faculty-card:hover {
+    border-color: var(--red);
+    box-shadow:   0 6px 20px rgba(255, 215, 0, 0.30);
+    transform:    translateX(4px);
+}
+
+.faculty-avatar {
+    width:           44px;
+    height:          44px;
+    border-radius:   50%;
+    background:      var(--grad-gold);
+    color:           var(--black);
+    font-weight:     800;
+    font-size:       1rem;
+    display:         flex;
+    align-items:     center;
+    justify-content: center;
+    border:          2px solid var(--gold-dark);
+    flex-shrink:     0;
+}
+
+.faculty-info    { flex: 1; }
+.faculty-name    { font-weight: 700; font-size: 0.95rem; color: var(--black); }
+.faculty-subject { font-size: 0.8rem; color: var(--gold-dark); font-weight: 600; margin: 1px 0; }
+.faculty-email   { font-size: 0.78rem; color: #888; }
+.faculty-arrow   { font-size: 1.2rem; color: var(--gold-dark); font-weight: 700; }
+
+
+/* ──────────────────────────────────────────────────────────
+   24. ATTENDANCE HISTORY MODAL — tabs & panels
+   <div class="ah-tabs">
+     <button class="ah-tab [active]">
+   <div class="ah-panel" id="ah-records | ah-breakdown | ah-calendar | ah-download">
+   ────────────────────────────────────────────────────────── */
+.ah-tabs {
+    display:       flex;
+    gap:           0.5rem;
+    flex-wrap:     wrap;
+    border-bottom: 2px solid var(--gold);
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.ah-tab {
+    background:    none;
+    border:        2px solid var(--gold);
+    padding:       0.45rem 1rem;
+    font-size:     0.85rem;
+    font-weight:   700;
+    cursor:        pointer;
+    border-radius: 20px;
+    color:         var(--primary);
+    transition:    all 0.22s;
+}
+
+.ah-tab:hover { background: rgba(255, 215, 0, 0.15); transform: translateY(-1px); }
+
+.ah-tab.active {
+    background:   var(--grad-gold);
+    border-color: var(--gold-dark);
+    color:        var(--black);
+    box-shadow:   0 4px 12px rgba(255, 215, 0, 0.40);
+}
+
+
+/* ──────────────────────────────────────────────────────────
+   25. ATTENDANCE HISTORY — By Subject breakdown panel
+   <div class="ah-breakdown-grid">
+     <div class="ah-subject-card">
+       <div class="ah-subject-name">
+       <div class="ah-subject-bar-wrap">
+         <div class="ah-subject-bar">
+       <div class="ah-subject-stats">
+   ────────────────────────────────────────────────────────── */
+.ah-breakdown-grid {
+    display:        flex;
+    flex-direction: column;
+    gap:            0.75rem;
+}
+
+.ah-subject-card {
+    background:    #f9fafb;
+    border-radius: 12px;
+    padding:       1rem 1.25rem;
+    border:        1.5px solid rgba(255, 215, 0, 0.30);
+}
+
+.ah-subject-name {
+    font-weight:   700;
+    font-size:     0.9rem;
+    margin-bottom: 0.6rem;
+    color:         var(--primary);
+}
+
+.ah-subject-bar-wrap {
+    background:    #e5e7eb;
+    border-radius: 99px;
+    height:        10px;
+    margin-bottom: 0.5rem;
+    overflow:      hidden;
+}
+
+.ah-subject-bar {
+    height:        100%;
+    border-radius: 99px;
+    background:    var(--grad-gold);
+    transition:    width 0.6s ease;
+}
+
+.ah-subject-stats { font-size: 0.8rem; color: #555; }
+
+
+/* ──────────────────────────────────────────────────────────
+   26. ATTENDANCE HISTORY — Calendar panel
+   <div class="ah-calendar-header">
+   <div class="ah-calendar-grid" id="ah-calendar-grid">
+     <div class="cal-header">  — Sun/Mon… labels
+     <div class="cal-day [present | late | absent | empty]">
+   <div class="ah-legend">
+     <span class="legend-dot present | late | absent | none">
+   ────────────────────────────────────────────────────────── */
+.ah-calendar-header {
+    display:         flex;
+    align-items:     center;
+    justify-content: center;
+    gap:             1.5rem;
+    margin:          1rem 0;
+    font-weight:     700;
+    font-size:       1rem;
+    color:           var(--primary);
+}
+
+.ah-calendar-header button {
+    background:    #f3f4f6;
+    border:        2px solid var(--gold);
+    border-radius: 8px;
+    padding:       0.3rem 0.75rem;
+    cursor:        pointer;
+    font-size:     1.1rem;
+    color:         var(--primary);
+    transition:    all 0.2s;
+}
+
+.ah-calendar-header button:hover { background: var(--gold); color: var(--black); }
+
+.ah-calendar-grid {
+    display:               grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap:                   4px;
+}
+
+.cal-header {
+    text-align:  center;
+    font-size:   0.75rem;
+    font-weight: 700;
+    color:       #888;
+    padding:     4px 0;
+}
+
+.cal-day {
+    text-align:    center;
+    padding:       8px 4px;
+    border-radius: 8px;
+    font-size:     0.85rem;
+    font-weight:   500;
+}
+
+.cal-day.present { background: #FFF9E6; color: #7A4F00; }
+.cal-day.late    { background: #FFF5E6; color: #7A4500; }
+.cal-day.absent  { background: #FFF0F3; color: #8B0000; }
+
+.ah-legend {
+    display:     flex;
+    gap:         1.25rem;
+    margin-top:  1rem;
+    font-size:   0.82rem;
+    color:       #555;
+    align-items: center;
+    flex-wrap:   wrap;
+}
+
+.legend-dot {
+    display:        inline-block;
+    width:          14px;
+    height:         14px;
+    border-radius:  4px;
+    margin-right:   4px;
+    vertical-align: middle;
+}
+
+.legend-dot.present { background: #FFF9E6; border: 1px solid var(--gold);   }
+.legend-dot.late    { background: #FFF5E6; border: 1px solid #FFA500;       }
+.legend-dot.absent  { background: #FFF0F3; border: 1px solid var(--red);    }
+.legend-dot.none    { background: #f3f4f6; border: 1px solid #d1d5db;      }
+
+
+/* ──────────────────────────────────────────────────────────
+   27. SETTINGS MODAL  —  sectioned form panels
+   <div class="settings-section">
+     <div class="settings-section-title">
+     <div class="settings-avatar-row">
+     <div class="settings-form-row">
+       <label> / <input class="settings-input">
+     <div class="settings-toggle-row">
+       <label class="toggle-switch">
+         <input type="checkbox">
+         <span class="toggle-slider">
+   ────────────────────────────────────────────────────────── */
+.settings-section {
+    background:    #fafafa;
+    border:        2.5px solid rgba(255, 215, 0, 0.50);
+    border-radius: 16px;
+    padding:       1.5rem;
+    margin-bottom: 1.25rem;
+    position:      relative;
+    overflow:      hidden;
+    transition:    box-shadow 0.2s;
+}
+
+/* Gold accent bar at top of each section */
+.settings-section::before {
+    content:  '';
+    position: absolute;
+    top:      0;
+    left:     0;
+    width:    100%;
+    height:   4px;
+    background: var(--grad-gold);
+}
+
+.settings-section:last-child { margin-bottom: 0; }
+.settings-section:hover { box-shadow: 0 4px 18px rgba(255, 215, 0, 0.20); }
+
+.settings-section-title {
+    font-family:   'Syne', sans-serif;
+    font-weight:   800;
+    font-size:     1rem;
+    color:         var(--black);
+    margin-bottom: 1.1rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 2px solid rgba(255, 215, 0, 0.40);
+}
+
+.settings-avatar-row {
+    display:       flex;
+    align-items:   center;
+    gap:           1rem;
+    margin-bottom: 1rem;
+}
+
+.settings-form-row {
+    display:        flex;
+    flex-direction: column;
+    gap:            0.3rem;
+    margin-bottom:  0.85rem;
+}
+
+.settings-form-row label {
+    font-size:      0.82rem;
+    font-weight:    700;
+    color:          #555;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.settings-input {
+    padding:       0.65rem 1rem;
+    border:        2px solid rgba(255, 215, 0, 0.60);
+    border-radius: var(--r-sm);
+    font-size:     0.9rem;
+    outline:       none;
+    transition:    border 0.2s;
+    width:         100%;
+    color:         var(--primary);
+    background:    #fff;
+}
+
+.settings-input:focus {
+    border-color: var(--red);
+    box-shadow:   0 0 0 3px rgba(255, 215, 0, 0.15);
+}
+
+/* Dark mode toggle row */
+.settings-toggle-row {
+    display:         flex;
+    align-items:     center;
+    justify-content: space-between;
+    background:      #fff;
+    border:          2px solid rgba(255, 215, 0, 0.50);
+    border-radius:   12px;
+    padding:         0.85rem 1.1rem;
+    font-size:       0.92rem;
+    font-weight:     700;
+    color:           var(--primary);
+    transition:      all 0.2s;
+}
+
+.settings-toggle-row:hover {
+    border-color: var(--gold);
+    box-shadow:   0 3px 10px rgba(255, 215, 0, 0.20);
+}
+
+/* Toggle switch component */
+.toggle-switch {
+    position: relative;
+    display:  inline-block;
+    width:    48px;
+    height:   26px;
+}
+
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+
+.toggle-slider {
+    position:      absolute;
+    cursor:        pointer;
+    inset:         0;
+    background:    #d1d5db;
+    border-radius: 99px;
+    transition:    0.3s;
+}
+
+.toggle-slider::before {
+    content:       '';
+    position:      absolute;
+    height:        20px;
+    width:         20px;
+    left:          3px;
+    top:           3px;
+    background:    #fff;
+    border-radius: 50%;
+    transition:    0.3s;
+    box-shadow:    0 1px 4px rgba(0, 0, 0, 0.20);
+}
+
+.toggle-switch input:checked + .toggle-slider            { background: var(--grad-gold); }
+.toggle-switch input:checked + .toggle-slider::before    { transform: translateX(22px);  }
+
+
+/* ──────────────────────────────────────────────────────────
+   28. TOAST / SNACKBAR SYSTEM
+   <div id="toast-container">
+     <div class="toast toast-success | toast-error | toast-info | toast-warn">
+       <span class="toast-icon">
+       <span class="toast-msg">
+       <button class="toast-close">
+   ────────────────────────────────────────────────────────── */
+#toast-container {
+    position:       fixed;
+    bottom:         1.5rem;
+    right:          1.5rem;
+    z-index:        99999;
+    display:        flex;
+    flex-direction: column;
+    gap:            0.6rem;
+    pointer-events: none;
+}
+
+.toast {
+    display:        flex;
+    align-items:    center;
+    gap:            0.75rem;
+    padding:        0.85rem 1.25rem;
+    border-radius:  14px;
+    font-family:    'DM Sans', sans-serif;
+    font-size:      0.88rem;
+    font-weight:    600;
+    color:          #fff;
+    min-width:      260px;
+    max-width:      380px;
+    box-shadow:     0 8px 32px rgba(0, 0, 0, 0.25);
+    pointer-events: all;
+    animation:      toastIn 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    border:         1.5px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(8px);
+}
+
+.toast.toast-out { animation: toastOut 0.28s ease forwards; }
+
+.toast-success { background: linear-gradient(135deg, #1b5e20dd, #2e7d32dd); }
+.toast-error   { background: linear-gradient(135deg, #8B0000dd, #c62828dd); }
+.toast-info    { background: linear-gradient(135deg, #0d47a1dd, #1565c0dd); }
+.toast-warn    { background: linear-gradient(135deg, #e65100dd, #f57c00dd); }
+
+.toast-icon  { font-size: 1.1rem; flex-shrink: 0; }
+.toast-msg   { flex: 1; line-height: 1.4; }
+
+.toast-close {
+    background:  none;
+    border:      none;
+    color:       rgba(255, 255, 255, 0.70);
+    font-size:   1.1rem;
+    cursor:      pointer;
+    padding:     0;
+    margin-left: 0.25rem;
+    line-height: 1;
+    flex-shrink: 0;
+    transition:  color 0.15s;
+}
+
+.toast-close:hover { color: #fff; }
+
+@keyframes toastIn  {
+    from { opacity: 0; transform: translateX(60px) scale(0.92); }
+    to   { opacity: 1; transform: translateX(0)    scale(1);    }
+}
+
+@keyframes toastOut {
+    from { opacity: 1; transform: translateX(0)    scale(1);    }
+    to   { opacity: 0; transform: translateX(60px) scale(0.92); }
+}
+
+
+/* ──────────────────────────────────────────────────────────
+   29. DARK MODE OVERRIDES
+   Toggled via  body.dark-mode  (checkbox in Settings modal)
+   ────────────────────────────────────────────────────────── */
+body.dark-mode                          { background-color: #111; }
+body.dark-mode::before                  { background: rgba(0, 0, 0, 0.70); }
+
+body.dark-mode .card,
+body.dark-mode .stat-card,
+body.dark-mode .modal-content           { background: #1e1e1e; border-color: rgba(255, 215, 0, 0.40); }
+
+body.dark-mode .settings-section        { background: #252525; border-color: rgba(255, 215, 0, 0.40); }
+
+body.dark-mode .settings-input,
+body.dark-mode .settings-toggle-row     { background: #2a2a2a; color: #f0f0f0; border-color: rgba(255, 215, 0, 0.35); }
+
+body.dark-mode .settings-form-row label,
+body.dark-mode .settings-section-title  { color: #f0f0f0; }
+
+body.dark-mode .data-table              { background: #1e1e1e; }
+body.dark-mode .data-table td           { color: #e0e0e0; border-color: rgba(255, 215, 0, 0.10); }
+body.dark-mode .data-table tbody tr:hover { background: rgba(255, 215, 0, 0.06); }
+
+body.dark-mode .schedule-header,
+body.dark-mode .schedule-time-cell,
+body.dark-mode .schedule-class-cell     { background: #1e1e1e; color: #ccc; }
+body.dark-mode .schedule-class-cell.has-class { background: #2a2200; }
+
+body.dark-mode .stat-label-top          { color: #aaa; }
+body.dark-mode .card-title,
+body.dark-mode .modal-title             { color: #f0f0f0; }
+
+body.dark-mode .filter-select,
+body.dark-mode .search-box input        { background: #2a2a2a; color: #f0f0f0; border-color: rgba(255, 215, 0, 0.40); }
+
+body.dark-mode .faculty-card            { background: #252525; border-color: rgba(255, 215, 0, 0.40); }
+body.dark-mode .faculty-name            { color: #f0f0f0; }
+
+body.dark-mode .notif-dropdown          { background: #1e1e1e; border-color: rgba(255, 215, 0, 0.50); }
+body.dark-mode .notif-item              { border-color: #333; }
+body.dark-mode .notif-item:hover        { background: #2a2a00; }
+body.dark-mode .notif-item.unread       { background: #2a2200; }
+body.dark-mode .notif-text              { color: #ddd; }
+body.dark-mode .notif-footer            { color: #f0f0f0; border-color: rgba(255, 215, 0, 0.40); }
+
+body.dark-mode .page-btn                { background: rgba(255, 215, 0, 0.06); color: #c0a000; }
+body.dark-mode .action-btn              { background: #1e1e1e; color: #c0a000; border-color: #c0a000; }
+
+
+/* ──────────────────────────────────────────────────────────
+   30. ANIMATIONS  (shared keyframes)
+   ────────────────────────────────────────────────────────── */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-24px); }
+    to   { opacity: 1; transform: translateY(0);     }
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0);    }
+}
+
+
+/* ──────────────────────────────────────────────────────────
+   31. RESPONSIVE BREAKPOINTS
+   ────────────────────────────────────────────────────────── */
+
+/* Tablet — stack header, 2-col stats, single card column */
 @media (max-width: 1024px) {
-    .header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-    }
-
-    .stats-grid {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    }
-
-    .grid-2 {
-        grid-template-columns: 1fr;
-    }
-
-    .schedule-grid {
-        font-size: 0.75rem;
-    }
-    
-    .schedule-header,
-    .schedule-time-cell {
-        padding: 0.4rem 0.2rem;
-        font-size: 0.7rem;
-    }
-    
-    .schedule-class-cell {
-        padding: 0.3rem;
-    }
+    .header     { flex-direction: column; align-items: flex-start; gap: 0.85rem; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .grid-2     { grid-template-columns: 1fr; }
 }
 
+/* Mobile — tighter padding, stack controls, smaller text */
 @media (max-width: 768px) {
-    .logo {
-        font-size: 2rem;
-    }
-
-    .controls-bar {
-        flex-direction: column;
-    }
-
-    .search-box {
-        min-width: 100%;
-    }
-
-    .card {
-        padding: 1.5rem;
-    }
-
-    .stat-value {
-        font-size: 2.2rem;
-    }
+    .container    { padding: 1rem; }
+    .header       { padding: 1rem 1.25rem; }
+    .header-right { flex-wrap: wrap; }
+    .stats-grid   { grid-template-columns: repeat(2, 1fr); }
+    .controls-bar { flex-direction: column; }
+    .card         { padding: 1.25rem; }
+    .stat-value   { font-size: 2rem; }
 }
-
- /* ── Wide modal ───────────────────────────────── */
-        .modal-wide { max-width: 720px; width: 95%; }
-        .modal-body-scroll { padding: 1.25rem 1.5rem; max-height: 70vh; overflow-y: auto; }
-
-        /* ── Attendance History tabs ──────────────────── */
-        .ah-tabs { display: flex; gap: 0.5rem; padding: 1rem 1.5rem 0; flex-wrap: wrap; border-bottom: 1px solid #e5e7eb; }
-        .ah-tab { background: none; border: none; padding: 0.5rem 1rem; font-size: 0.88rem; font-weight: 600; cursor: pointer; border-radius: 8px 8px 0 0; color: #666; transition: all .2s; }
-        .ah-tab:hover { background: #f3f4f6; }
-        .ah-tab.active { background: #8b5cf6; color: #fff; }
-        .ah-panel { padding-top: 0.5rem; }
-
-        /* ── Calendar ─────────────────────────────────── */
-        .ah-calendar-header { display: flex; align-items: center; justify-content: center; gap: 1.5rem; margin: 1rem 0; font-weight: 700; font-size: 1rem; }
-        .ah-calendar-header button { background: #f3f4f6; border: none; border-radius: 8px; padding: 0.3rem 0.75rem; cursor: pointer; font-size: 1.1rem; }
-        .ah-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-        .cal-header { text-align: center; font-size: 0.75rem; font-weight: 700; color: #888; padding: 4px 0; }
-        .cal-day { text-align: center; padding: 8px 4px; border-radius: 8px; font-size: 0.85rem; font-weight: 500; }
-        .cal-day.empty { background: transparent; }
-        .cal-day.present { background: #dcfce7; color: #166534; }
-        .cal-day.late    { background: #fef9c3; color: #854d0e; }
-        .cal-day.absent  { background: #fee2e2; color: #991b1b; }
-        .ah-legend { display: flex; gap: 1.25rem; margin-top: 1rem; font-size: 0.82rem; color: #555; align-items: center; flex-wrap: wrap; }
-        .legend-dot { display: inline-block; width: 14px; height: 14px; border-radius: 4px; margin-right: 4px; vertical-align: middle; }
-        .legend-dot.present { background: #dcfce7; border: 1px solid #22c55e; }
-        .legend-dot.late    { background: #fef9c3; border: 1px solid #f59e0b; }
-        .legend-dot.absent  { background: #fee2e2; border: 1px solid #ef4444; }
-        .legend-dot.none    { background: #f3f4f6; border: 1px solid #d1d5db; }
-
-        /* ── Per-Subject Breakdown ────────────────────── */
-        .ah-breakdown-grid { display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem; }
-        .ah-subject-card { background: #f9fafb; border-radius: 12px; padding: 1rem 1.25rem; }
-        .ah-subject-name { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.6rem; color: #1f2937; }
-        .ah-subject-bar-wrap { background: #e5e7eb; border-radius: 99px; height: 10px; margin-bottom: 0.5rem; overflow: hidden; }
-        .ah-subject-bar { height: 100%; border-radius: 99px; transition: width .6s ease; }
-        .ah-subject-stats { font-size: 0.8rem; color: #555; }
-
-        /* ── Download ─────────────────────────────────── */
-        .ah-download-section { padding: 1rem 0; }
-        .ah-download-options { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem; }
-        .ah-download-card { flex: 1; min-width: 160px; background: #f9fafb; border: 2px solid #e5e7eb; border-radius: 14px; padding: 1.5rem 1rem; text-align: center; cursor: pointer; transition: all .2s; }
-        .ah-download-card:hover { border-color: #8b5cf6; background: #faf5ff; transform: translateY(-2px); }
-        .ah-download-icon { font-size: 2rem; margin-bottom: 0.5rem; }
-        .ah-download-label { font-weight: 700; font-size: 0.95rem; color: #1f2937; }
-        .ah-download-desc { font-size: 0.78rem; color: #888; margin-top: 0.25rem; }
-
-        /* ── Contact Faculty ──────────────────────────── */
-        .faculty-list { display: flex; flex-direction: column; gap: 0.75rem; }
-        .faculty-card { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem; background: #f9fafb; border: 2px solid #e5e7eb; border-radius: 14px; text-decoration: none; color: inherit; transition: all .2s; }
-        .faculty-card:hover { border-color: #8b5cf6; background: #faf5ff; transform: translateX(4px); }
-        .faculty-avatar { width: 46px; height: 46px; border-radius: 12px; background: #8b5cf6; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1rem; flex-shrink: 0; }
-        .faculty-info { flex: 1; }
-        .faculty-name { font-weight: 700; font-size: 0.95rem; color: #1f2937; }
-        .faculty-subject { font-size: 0.8rem; color: #8b5cf6; font-weight: 600; margin: 1px 0; }
-        .faculty-email { font-size: 0.78rem; color: #888; }
-        .faculty-arrow { font-size: 1.2rem; color: #8b5cf6; font-weight: 700; }
-
-        /* ── Settings ─────────────────────────────────── */
-        .settings-section { border-bottom: 1px solid #e5e7eb; padding-bottom: 1.5rem; margin-bottom: 1.5rem; }
-        .settings-section:last-child { border-bottom: none; margin-bottom: 0; }
-        .settings-section-title { font-weight: 800; font-size: 0.95rem; margin-bottom: 1rem; color: #1f2937; }
-        .settings-avatar-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
-        .settings-form-row { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.85rem; }
-        .settings-form-row label { font-size: 0.82rem; font-weight: 600; color: #555; }
-        .settings-input { padding: 0.55rem 0.85rem; border: 1.5px solid #e5e7eb; border-radius: 10px; font-size: 0.9rem; outline: none; transition: border .2s; width: 100%; box-sizing: border-box; }
-        .settings-input:focus { border-color: #8b5cf6; }
-        .settings-toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0; border-bottom: 1px solid #f3f4f6; font-size: 0.88rem; color: #374151; }
-        .settings-toggle-row:last-child { border-bottom: none; }
-
-        /* ── Toggle Switch ────────────────────────────── */
-        .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; }
-        .toggle-switch input { opacity: 0; width: 0; height: 0; }
-        .toggle-slider { position: absolute; cursor: pointer; inset: 0; background: #d1d5db; border-radius: 99px; transition: .3s; }
-        .toggle-slider:before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: .3s; }
-        .toggle-switch input:checked + .toggle-slider { background: #8b5cf6; }
-        .toggle-switch input:checked + .toggle-slider:before { transform: translateX(20px); }
-
-        /* ── Dark Mode ────────────────────────────────── */
-        body.dark-mode { background: #0f172a; color: #e2e8f0; }
-        body.dark-mode .card,
-        body.dark-mode .modal-content,
-        body.dark-mode .header { background: #1e293b; border-color: #334155; }
-        body.dark-mode .ah-subject-card,
-        body.dark-mode .faculty-card,
-        body.dark-mode .ah-download-card { background: #1e293b; border-color: #334155; }
-        body.dark-mode .faculty-name,
-        body.dark-mode .ah-subject-name,
-        body.dark-mode .ah-download-label,
-        body.dark-mode .settings-section-title { color: #f1f5f9; }
-        body.dark-mode .settings-input { background: #0f172a; border-color: #334155; color: #e2e8f0; }
-        body.dark-mode .data-table th { background: #1e293b; }
