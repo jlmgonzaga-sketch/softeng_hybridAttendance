@@ -135,8 +135,14 @@ body {
   display: flex; align-items: center; gap: 0.3rem;
 }
 .abtn:active { background: rgba(255,215,0,0.15); }
-.abtn.primary { background: var(--gradient-gold); border-color: var(--gold-dark); }
-.abtn.success { background: var(--gradient-red-gold); color: #fff; border-color: var(--gold); }
+.abtn.primary    { background: var(--gradient-gold); border-color: var(--gold-dark); color: var(--black); }
+.abtn.success    { background: var(--gradient-red-gold); color: #fff; border-color: var(--gold); }
+.refresh-btn     { background: linear-gradient(135deg,#1565c0,#0d47a1); color:#fff; border-color:#0d47a1; }
+.refresh-btn:active { opacity:.85; }
+.export-btn      { background: linear-gradient(135deg,#2e7d32,#1b5e20); color:#fff; border-color:#1b5e20; }
+.export-btn:active { opacity:.85; }
+.generate-btn    { background: var(--gradient-red); color:#fff; border-color:var(--red-dark); white-space:nowrap; }
+.generate-btn:active { opacity:.85; }
 
 /* ── REPORT STRIP ── */
 .report-strip {
@@ -221,31 +227,7 @@ body {
 .page-btn.active { background: var(--gradient-red); border-color: var(--red-dark); color: #fff; }
 .page-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-/* ══════════════════════════════════════════
-   LOG CARDS  (mobile-friendly card layout)
-══════════════════════════════════════════ */
-.log-card {
-  background: #fff; border: 2px solid var(--gold); border-radius: 12px;
-  padding: 0.75rem 0.9rem; margin-bottom: 0.55rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  cursor: pointer; transition: box-shadow 0.2s;
-  position: relative; overflow: hidden;
-}
-.log-card:active { box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
-.log-card::before {
-  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
-}
-.log-card.sev-info::before    { background: #1565c0; }
-.log-card.sev-warning::before { background: #e65100; }
-.log-card.sev-error::before   { background: #c62828; }
-.log-card-top {
-  display: flex; justify-content: space-between; align-items: flex-start;
-  margin-bottom: 0.35rem;
-}
-.log-card-user { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.82rem; color: var(--primary); }
-.log-card-time { font-size: 0.68rem; color: #aaa; font-weight: 600; white-space: nowrap; margin-left: 0.5rem; }
-.log-card-desc { font-size: 0.78rem; color: #444; line-height: 1.4; margin-bottom: 0.4rem; }
-.log-card-meta { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
+/* ── LOG BADGES ── */
 .log-badge {
   display: inline-block; padding: 2px 9px; border-radius: 20px;
   font-size: 0.66rem; font-weight: 800; font-family: 'Syne', sans-serif;
