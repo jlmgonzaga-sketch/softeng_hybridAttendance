@@ -69,7 +69,7 @@ body {
 }
 .profile-info { flex: 1; min-width: 0; }
 .profile-name {
-  font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem;
+  font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.82rem;
   color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .profile-role { font-size: 0.72rem; color: var(--gold); font-weight: 600; margin-top: 1px; }
@@ -160,54 +160,42 @@ body {
 
 /* ── TABLE ── */
 .table-wrap { border: 2px solid var(--gold); border-radius: 11px; overflow-x: auto; overflow-y: visible; }
-.att-table { width: 100%; border-collapse: collapse; background: #fff; min-width: 520px; }
+.att-table { width: 100%; border-collapse: collapse; background: #fff; table-layout: fixed; }
 .att-table thead {
   background: var(--primary); color: var(--gold);
   position: sticky; top: 0; z-index: 2;
 }
 .att-table th {
-  padding: 0.48rem 0.7rem;
-  font-family: 'Syne', sans-serif; font-size: 0.68rem;
+  padding: 0.45rem 0.35rem;
+  font-family: 'Syne', sans-serif; font-size: 0.65rem;
   font-weight: 700; text-align: left; white-space: nowrap;
   border-bottom: 2px solid var(--gold);
 }
 .att-table td {
-  padding: 0.4rem 0.7rem;
+  padding: 0.38rem 0.35rem;
   border-bottom: 1px solid rgba(255,215,0,0.15);
-  font-size: 0.8rem; vertical-align: middle;
+  font-size: 0.75rem; vertical-align: middle;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .att-table tbody tr:hover { background: rgba(255,215,0,0.06); }
 .att-table tbody tr:last-child td { border-bottom: none; }
 
 /* ── STATUS BADGES ── */
 .status-badge {
-  display: inline-flex; align-items: center; gap: 0.25rem;
-  padding: 0.2rem 0.65rem; border-radius: 20px;
-  font-size: 0.72rem; font-weight: 700;
-}
-.status-badge::before {
-  content: ''; width: 6px; height: 6px; border-radius: 50%;
-  background: currentColor; opacity: 0.6;
+  display: inline-block;
+  padding: 0.15rem 0.45rem; border-radius: 20px;
+  font-size: 0.65rem; font-weight: 700; white-space: nowrap;
 }
 .status-present  { background: #e8f5e9; color: #2e7d32; }
 .status-absent   { background: #ffebee; color: #c62828; }
 .status-late     { background: #fff3e0; color: #e65100; }
 .status-unmarked { background: #f0f0f0; color: #999; }
 
-/* ── TIME IN PILL ── */
-.timein-pill {
-  display: inline-block; padding: 2px 7px; border-radius: 7px;
-  font-size: 0.72rem; font-weight: 600; background: #f5f5f5; color: #555;
-}
-.timein-pill.on-time { background: #e8f5e9; color: #2e7d32; }
-.timein-pill.late    { background: #fff3e0; color: #e65100; }
-.timein-pill.absent  { background: #ffebee; color: #c62828; }
-
 /* ── ACTION BUTTONS (table) ── */
 .action-btn {
-  padding: 0.22rem 0.6rem; border: 1.5px solid; border-radius: 7px;
-  font-size: 0.72rem; font-weight: 700; cursor: pointer;
-  background: #fff; margin-right: 0.3rem;
+  padding: 0.18rem 0.5rem; border: 1.5px solid; border-radius: 6px;
+  font-size: 0.68rem; font-weight: 700; cursor: pointer;
+  background: #fff;
   font-family: 'DM Sans', sans-serif;
 }
 .action-btn.view { border-color: var(--gold); color: var(--gold-dark); }
