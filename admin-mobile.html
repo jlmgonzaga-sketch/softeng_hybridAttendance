@@ -88,6 +88,7 @@
     </div>
     <div class="table-wrap">
       <table class="att-table">
+        <colgroup><col class="col-id"><col class="col-name"><col class="col-sec"><col class="col-status"><col class="col-act"></colgroup>
         <thead><tr><th>ID</th><th>Last Name</th><th>Sec</th><th>Status</th><th></th></tr></thead>
         <tbody id="attendanceTableBody"></tbody>
       </table>
@@ -103,9 +104,7 @@
 <div class="page" id="page-logs">
   <div class="section">
     <div class="section-hdr">
-      <div class="section-title" style="display:flex;align-items:center;gap:.5rem;">
-        <span class="live-dot-sm"></span>System Logs
-      </div>
+      <div class="section-title">System Logs</div>
       <div style="display:flex;gap:.4rem;">
         <button class="abtn refresh-btn" onclick="refreshLogs()">Refresh</button>
         <button class="abtn export-btn" onclick="exportLogs()">Export</button>
@@ -144,6 +143,7 @@
 
     <div class="table-wrap">
       <table class="att-table">
+        <colgroup><col style="width:28%"><col style="width:24%"><col style="width:20%"><col style="width:10%"><col style="width:18%"></colgroup>
         <thead><tr><th>User</th><th>Action</th><th>Role</th><th>Sev</th><th></th></tr></thead>
         <tbody id="logsTableBody"></tbody>
       </table>
