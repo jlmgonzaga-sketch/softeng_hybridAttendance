@@ -287,7 +287,7 @@ function buildRows() {
     subjects.forEach(subj => {
         sections.forEach(sec => {
             SSCR_STUDENTS[sec].forEach(s => {
-                const rec    = attendanceDB[subj][sec][s.id];
+                const rec    = (attendanceDB[subj] && attendanceDB[subj][sec] && attendanceDB[subj][sec][s.id]) || { status: '', timeIn: '' };
                 const status = rec.status || '';
                 let timeIn   = '';
                 if      (status === 'Absent')                        timeIn = '—';
@@ -621,4 +621,4 @@ window.addEventListener('click', e => {
 window.addEventListener('DOMContentLoaded', () => {
     seedDemo();
     renderAttendanceTable();
-});;
+});
