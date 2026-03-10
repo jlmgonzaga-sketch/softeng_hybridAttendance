@@ -27,25 +27,10 @@
 <header class="top-bar">
   <img src="sscrmnlofficiallogo.png" alt="SSC-R" class="top-logo">
   <div class="top-right">
-    <div class="notif-wrapper" id="notifWrapper">
-      <button class="tb-btn" onclick="toggleNotifications(event)" id="notifBtn">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        <span class="notif-badge" id="notificationCount">3</span>
-      </button>
-    </div>
     <div class="avatar-sm" id="topAvatar">JG</div>
   </div>
 </header>
 
-<!-- Notification Dropdown (outside top-bar to avoid stacking context) -->
-<div class="notif-dropdown" id="notifDropdown">
-  <div class="nd-hdr">
-    <span class="nd-title">Notifications</span>
-    <button class="nd-mark" onclick="markAllRead()">Mark all read</button>
-  </div>
-  <div class="nd-list" id="notifList"></div>
-  <div class="nd-footer" onclick="closeNotifications()">View all notifications</div>
-</div>
 
 <!-- ══════════════════════════════════════════
      PAGE: HOME / RECORDS
