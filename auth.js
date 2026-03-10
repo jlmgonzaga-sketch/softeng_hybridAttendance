@@ -13,7 +13,7 @@
 //    ✅  Auth guard      — redirects to login.html if no session
 //    ✅  Profile inject  — fills every hardcoded name/avatar from session
 //    ✅  Stat fix        — counts unique students, not subject×student rows
-//    ✅  Absence alerts  — banner when any student hits ≥3 absences
+
 //    ✅  LOGS icon fix   — replaces plain "LOGS" text with SVG icon
 //    ✅  Print letterhead— injects school header before every print
 // ═══════════════════════════════════════════════════════════════════
@@ -287,90 +287,6 @@ function updateStatCardsFixed() {
 
 
 // ─────────────────────────────────────────────────────────────────
-//  ABSENCE THRESHOLD ALERTS
-//  Scans all students × subjects and shows a dismissible banner
-//  listing every student at or above SSCR_CONFIG.absenceAlertLimit.
-//  Uses attendanceDB which is populated by seedDemo() or real scans.
-// ─────────────────────────────────────────────────────────────────
-
-function checkAbsenceAlerts() {
-    if (typeof attendanceDB === 'undefined' || typeof SSCR_SUBJECTS === 'undefined') return;
-
-    const limit    = (typeof SSCR_CONFIG !== 'undefined') ? SSCR_CONFIG.absenceAlertLimit : 3;
-    const flagged  = [];
-
-    SSCR_SECTIONS.forEach(sec => {
-        SSCR_STUDENTS[sec].forEach(student => {
-            SSCR_SUBJECTS.forEach(subj => {
-                // Count absences for this student in this subject
-                // In a real multi-day system you'd count across dates;
-                // here we count any 'Absent' entry in attendanceDB as a flag
-                const rec = attendanceDB[subj]?.[sec]?.[student.id];
-                if (rec && rec.status === 'Absent') {
-                    flagged.push({ name: student.name, id: student.id, subject: subj, section: sec });
-                }
-            });
-        });
-    });
-
-    if (flagged.length === 0) return;
-
-    // Build alert banner
-    const banner = document.createElement('div');
-    banner.id    = 'absenceAlertBanner';
-    banner.style.cssText = [
-        'position:fixed', 'bottom:70px', 'left:0', 'right:0', 'z-index:700',
-        'margin:0 0.75rem', 'background:linear-gradient(135deg,#8B0000,#DC143C)',
-        'color:#fff', 'border-radius:14px', 'border:2px solid #FFD700',
-        'padding:0.75rem 1rem', 'box-shadow:0 8px 28px rgba(0,0,0,0.35)',
-        'font-family:DM Sans,sans-serif', 'font-size:0.8rem',
-        'animation:slideUp 0.3s ease',
-    ].join(';');
-
-    // Group by student — count absences per student across all subjects
-    const byStudent = {};
-    flagged.forEach(f => {
-        const key = f.id;
-        if (!byStudent[key]) byStudent[key] = { name: f.name, id: f.id, subjects: [] };
-        byStudent[key].subjects.push(f.subject);
-    });
-
-    const rows = Object.values(byStudent).slice(0, 5).map(s =>
-        `<span style="display:inline-block;background:rgba(255,255,255,0.15);
-         border-radius:8px;padding:2px 8px;margin:2px 3px 2px 0;font-size:0.72rem;">
-         ⚠ ${s.name.split(',')[0]} — ${s.subjects.join(', ')}
-         </span>`
-    ).join('');
-
-    const more = Object.values(byStudent).length > 5
-        ? `<span style="opacity:0.7;font-size:0.72rem;"> +${Object.values(byStudent).length - 5} more</span>` : '';
-
-    banner.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.5rem;">
-            <div>
-                <div style="font-family:Syne,sans-serif;font-weight:700;font-size:0.82rem;
-                     color:#FFD700;margin-bottom:0.3rem;">
-                    ⚠ Absence Alert — ${Object.values(byStudent).length} student(s) flagged
-                </div>
-                <div style="line-height:1.8;">${rows}${more}</div>
-            </div>
-            <button onclick="document.getElementById('absenceAlertBanner').remove()"
-                style="background:none;border:1.5px solid rgba(255,215,0,0.5);color:#FFD700;
-                       border-radius:8px;padding:0.25rem 0.6rem;cursor:pointer;
-                       font-family:Syne,sans-serif;font-weight:700;font-size:0.72rem;
-                       flex-shrink:0;margin-top:2px;">
-                Dismiss
-            </button>
-        </div>`;
-
-    document.body.appendChild(banner);
-
-    // Auto-dismiss after 12 seconds
-    setTimeout(() => { if (banner.parentNode) banner.remove(); }, 12000);
-}
-
-
-// ─────────────────────────────────────────────────────────────────
 //  LOGS BUTTON ICON FIX  (admin-mobile.html)
 //  Replaces the plain text "LOGS" button in the top bar with a
 //  proper SVG icon to match the rest of the icon-based mobile UI.
@@ -459,10 +375,9 @@ document.addEventListener('DOMContentLoaded', () => {
     fixLogsButton();
     injectPrintHeader();
 
-    // Delay stat fix + absence alerts until after the role JS has run
+    // Delay stat fix until after the role JS has run
     // (role JS calls seedDemo() which populates attendanceDB)
     setTimeout(() => {
         updateStatCardsFixed();
-        checkAbsenceAlerts();
     }, 150);
 });
