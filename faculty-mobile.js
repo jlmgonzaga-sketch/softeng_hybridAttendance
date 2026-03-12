@@ -79,6 +79,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
     renderNotifications();
     loadTodayReports();
+
+    // Today label
+    const lbl = document.getElementById("todayDateLabel");
+    if (lbl) lbl.textContent = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+    // Total students stat
+    if (typeof getAllStudents === "function") {
+        const el = document.getElementById("statTotal");
+        if (el) el.textContent = getAllStudents().length;
+    }
 });
 
 function _loadUserProfile(user) {
@@ -221,6 +231,7 @@ function loadTodayReports() {
             _allReports = [];
             snap.forEach(doc => _allReports.push(doc.data()));
             refreshScanPreview();
+            _updateStatsFromReports();
         })
         .catch(function (err) {
             console.warn('[Reports] Firestore fetch failed, using in-memory data.', err);
@@ -241,6 +252,13 @@ function loadTodayReports() {
             }
             refreshScanPreview();
         });
+}
+
+function _updateStatsFromReports() {
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    set('statPresent', _allReports.filter(r => (r.status||'').toLowerCase() === 'present').length);
+    set('statLate',    _allReports.filter(r => (r.status||'').toLowerCase() === 'late').length);
+    set('statAbsent',  _allReports.filter(r => (r.status||'').toLowerCase() === 'absent').length);
 }
 
 function refreshScanPreview() {
