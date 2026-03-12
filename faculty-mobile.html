@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>SSC-R Faculty — Mobile</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+
+<!-- Firebase compat SDKs (must load before firebase-config.js) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<!-- QR Code library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<script src="firebase-config.js"></script>
 <script src="students-data.js"></script>
 <script src="faculty-scans.js"></script>
 <link rel="stylesheet" href="faculty-mobile.css">
@@ -33,11 +43,11 @@
         <span class="notif-badge" id="notificationCount">3</span>
       </button>
     </div>
-    <div class="avatar-sm">AB</div>
+    <div class="avatar-sm" id="topAvatar">AB</div>
   </div>
 </header>
 
-<!-- Notification dropdown rendered OUTSIDE top-bar to avoid sticky stacking context -->
+<!-- Notification dropdown -->
 <div class="notif-dropdown" id="notifDropdown">
   <div class="nd-hdr">
     <span class="nd-title">Notifications</span>
@@ -52,13 +62,13 @@
   <div class="profile-strip" onclick="goPage('settings')" title="Edit Profile" style="cursor:pointer;">
     <div class="avatar-lg" id="homeAvatar">AB</div>
     <div class="profile-info">
-      <div class="profile-name" id="homeName">Agnes Bernal</div>
-      <div class="profile-role" id="homeRole">Software Engineering</div>
+      <div class="profile-name" id="homeName">Faculty</div>
+      <div class="profile-role" id="homeRole">Loading…</div>
     </div>
     <button class="btn-logout" onclick="event.stopPropagation();logout()">Logout</button>
   </div>
 
-  <!-- Classes — single card, one row -->
+  <!-- Classes -->
   <div class="section">
     <div class="classes-card">
       <div class="classes-card-hdr">
@@ -104,7 +114,7 @@
       <div class="search-row">
         <input type="text" id="scanSearch" placeholder="Search by name or ID…" oninput="filterScanSearch()">
       </div>
-      <div class="scan-label" id="scanPreviewLabel">Showing all · Feb 2026</div>
+      <div class="scan-label" id="scanPreviewLabel">Showing all · Today</div>
       <div class="scan-table-wrap">
         <table class="scan-table">
           <thead>
@@ -115,12 +125,11 @@
             </tr>
           </thead>
           <tbody id="scanPreviewBody">
-            <tr><td colspan="3" style="text-align:center;color:#bbb;font-style:italic;padding:1.2rem;">Loading...</td></tr>
+            <tr><td colspan="3" style="text-align:center;color:#bbb;font-style:italic;padding:1.2rem;">Loading…</td></tr>
           </tbody>
         </table>
       </div>
       <div class="scan-count">Showing <strong id="scanShownCount">0</strong> of <strong id="scanTotalCount">0</strong> records</div>
-      <!-- Report Pagination -->
       <div class="pagination-wrap" id="reportPagination"></div>
     </div>
   </div>
@@ -193,7 +202,7 @@
   <div class="spacer"></div>
 </div>
 
-<!-- PAGE: STUDENT LIST (renamed from Roster) -->
+<!-- PAGE: STUDENT LIST -->
 <div class="page" id="page-roster">
   <div class="section">
     <div class="roster-hdr-card">
@@ -223,7 +232,6 @@
         <tbody id="rosterTableBody"></tbody>
       </table>
     </div>
-    <!-- Roster Pagination -->
     <div class="pagination-wrap" id="rosterPagination"></div>
   </div>
   <div class="spacer"></div>
@@ -235,16 +243,16 @@
     <div class="section-hdr"><div class="section-title">Settings</div></div>
     <div class="settings-section">
       <div class="settings-section-title">Faculty Profile</div>
-      <div class="settings-form-row"><label>Full Name</label><input class="settings-input" value="Agnes Bernal"></div>
-      <div class="settings-form-row"><label>Subject</label><input class="settings-input" value="Software Engineering" readonly style="background:#f5f5f5"></div>
-      <div class="settings-form-row"><label>Email</label><input class="settings-input" value="agnes.bernal@sscr.edu.ph" type="email"></div>
+      <div class="settings-form-row"><label>Full Name</label><input class="settings-input" id="settingsName" value="Faculty"></div>
+      <div class="settings-form-row"><label>Subject</label><input class="settings-input" id="settingsTitle" value="—" readonly style="background:#f5f5f5"></div>
+      <div class="settings-form-row"><label>Email</label><input class="settings-input" id="settingsEmail" value="—" type="email" readonly style="background:#f5f5f5"></div>
       <button class="btn btn-primary btn-full" style="margin-top:.5rem" onclick="saveProfile()">Save Changes</button>
     </div>
     <div class="settings-section">
       <div class="settings-section-title">Security</div>
-      <div class="settings-form-row"><label>Current Password</label><input class="settings-input" type="password" placeholder="••••••••"></div>
-      <div class="settings-form-row"><label>New Password</label><input class="settings-input" type="password" placeholder="••••••••"></div>
-      <button class="btn btn-primary btn-full" style="margin-top:.5rem" onclick="showToast('Password updated successfully!','success')">Update Password</button>
+      <div class="settings-form-row"><label>Current Password</label><input class="settings-input" id="currentPw" type="password" placeholder="••••••••"></div>
+      <div class="settings-form-row"><label>New Password</label><input class="settings-input" id="newPw" type="password" placeholder="••••••••"></div>
+      <button class="btn btn-primary btn-full" style="margin-top:.5rem" onclick="changePassword()">Update Password</button>
     </div>
     <button class="btn btn-danger btn-full" style="margin-top:.5rem" onclick="logout()">Logout</button>
   </div>
@@ -261,7 +269,6 @@
     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
     <span class="nav-label">Schedule</span>
   </button>
-  <!-- nav label changed from Roster to Student List -->
   <button class="nav-btn" id="nav-roster" onclick="goPage('roster');loadRoster()">
     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
     <span class="nav-label">Student List</span>
@@ -272,7 +279,7 @@
   </button>
 </nav>
 
-<!-- MODAL: Class (QR + Students) -->
+<!-- MODAL: Class (QR + Students) — Firebase-powered -->
 <div id="classModal" class="modal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -281,16 +288,38 @@
       <button class="modal-close" onclick="closeModal('classModal')">×</button>
     </div>
     <div class="modal-scroll">
+
+      <!-- QR / Session Area -->
       <div style="text-align:center;margin-bottom:1rem;">
-        <img id="classQRCode" src="" alt="QR Code" class="qr-img" onclick="enlargeQR()">
-        <div style="font-size:.72rem;color:#888;margin-top:.3rem;">Tap to enlarge</div>
+        <!-- Pre-session placeholder -->
+        <div id="qrPlaceholder" style="width:180px;height:180px;margin:0 auto 0.75rem;border:3px dashed var(--gold);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fffde7;gap:0.4rem;">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#DAA520" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3z"/><path d="M17 17h4v4h-4z"/><path d="M14 17v4"/></svg>
+          <span style="font-size:0.7rem;color:#aaa;font-weight:600;">Start session to generate QR</span>
+        </div>
+        <!-- Live QR rendered by QRCode.js -->
+        <div id="firebaseQRDiv" style="display:none;width:180px;height:180px;margin:0 auto;" onclick="enlargeQR()"></div>
+        <div id="qrClickHint" style="display:none;font-size:.72rem;color:#888;margin-top:.3rem;">Tap to enlarge</div>
       </div>
+
+      <!-- Session controls -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;margin-bottom:1rem;">
+        <button id="fbStartBtn" class="btn btn-primary btn-full" onclick="startFbSession()" style="max-width:260px;">
+          ▶ Start Session
+        </button>
+        <div id="fbCountdown" style="display:none;text-align:center;">
+          <div style="font-size:0.75rem;color:#888;font-weight:600;margin-bottom:2px;">Session ends in</div>
+          <div id="fbCountdownTime" style="font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;color:var(--red-dark);letter-spacing:0.05em;">60:00</div>
+          <button class="btn btn-danger" style="margin-top:0.4rem;font-size:0.75rem;padding:0.4rem 1rem;" onclick="endSession()">End Session</button>
+        </div>
+      </div>
+
       <div class="session-info">
         <p><strong>Class:</strong> <span id="sessionClass"></span></p>
         <p><strong>Section:</strong> <span id="sessionSection"></span></p>
         <p><strong>Date:</strong> <span id="sessionDate"></span></p>
         <p><strong>Time:</strong> <span id="sessionTime"></span></p>
       </div>
+
       <div class="sec-tabs" style="margin-top:.85rem;">
         <button class="sec-tab active" id="tab-SecA" onclick="switchSection('Sec A')">Sec A <span id="count-SecA"></span></button>
         <button class="sec-tab" id="tab-SecB" onclick="switchSection('Sec B')">Sec B <span id="count-SecB"></span></button>
@@ -321,7 +350,7 @@
       <button class="modal-close" onclick="closeModal('qrEnlargedModal')">×</button>
     </div>
     <div class="modal-body" style="text-align:center;padding:1.5rem;">
-      <img id="enlargedQRImage" src="" alt="QR Code" style="max-width:100%;border:3px solid var(--gold);border-radius:12px;">
+      <div id="enlargedQRDiv" style="display:inline-block;border:3px solid var(--gold);border-radius:12px;padding:8px;background:#fff;"></div>
     </div>
   </div>
 </div>
@@ -368,34 +397,22 @@
         <div class="afs-row">
           <label>Subjects Enrolled</label>
           <div class="subj-checks" id="newStuSubjects">
-            <label class="subj-check-label" onclick="toggleSubjCheck(this)">
-              <input type="checkbox" value="Math"> Math
-            </label>
-            <label class="subj-check-label" onclick="toggleSubjCheck(this)">
-              <input type="checkbox" value="English"> English
-            </label>
-            <label class="subj-check-label" onclick="toggleSubjCheck(this)">
-              <input type="checkbox" value="Science"> Science
-            </label>
-            <label class="subj-check-label" onclick="toggleSubjCheck(this)">
-              <input type="checkbox" value="Filipino"> Filipino
-            </label>
+            <label class="subj-check-label" onclick="toggleSubjCheck(this)"><input type="checkbox" value="Math"> Math</label>
+            <label class="subj-check-label" onclick="toggleSubjCheck(this)"><input type="checkbox" value="English"> English</label>
+            <label class="subj-check-label" onclick="toggleSubjCheck(this)"><input type="checkbox" value="Science"> Science</label>
+            <label class="subj-check-label" onclick="toggleSubjCheck(this)"><input type="checkbox" value="Filipino"> Filipino</label>
           </div>
         </div>
         <div style="display:flex;gap:0.6rem;margin-top:1rem;">
-          <button class="btn btn-primary btn-full" onclick="submitAddStudent()">
-            ✓ &nbsp;Add Student
-          </button>
-          <button class="btn btn-secondary" style="min-width:90px;justify-content:center;" onclick="closeModal('addStudentModal')">
-            Cancel
-          </button>
+          <button class="btn btn-primary btn-full" onclick="submitAddStudent()">✓ &nbsp;Add Student</button>
+          <button class="btn btn-secondary" style="min-width:90px;justify-content:center;" onclick="closeModal('addStudentModal')">Cancel</button>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- MODAL: Student Details (view from Student List) -->
+<!-- MODAL: Student Details -->
 <div id="studentDetailModal" class="modal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -407,9 +424,9 @@
   </div>
 </div>
 
-<script src="auth.js"></script>
-<script src="students-data.js"></script>
-<script src="faculty-mobile.js"></script>
 <div id="toast-container"></div>
+
+<script src="auth.js"></script>
+<script src="faculty-mobile.js"></script>
 </body>
 </html>
