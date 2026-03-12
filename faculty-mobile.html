@@ -68,12 +68,33 @@
     <button class="btn-logout" onclick="event.stopPropagation();logout()">Logout</button>
   </div>
 
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div class="stat-card sc-total">
+      <span class="stat-label-top">Students</span>
+      <span class="stat-value" id="statTotal">—</span>
+    </div>
+    <div class="stat-card sc-present">
+      <span class="stat-label-top">Present</span>
+      <span class="stat-value" id="statPresent">—</span>
+    </div>
+    <div class="stat-card sc-late">
+      <span class="stat-label-top">Late</span>
+      <span class="stat-value" id="statLate">—</span>
+    </div>
+    <div class="stat-card sc-absent">
+      <span class="stat-label-top">Absent</span>
+      <span class="stat-value" id="statAbsent">—</span>
+    </div>
+  </div>
+
   <!-- Classes -->
   <div class="section">
+    <div class="section-hdr">
+      <span class="section-title">Classes</span>
+      <span class="att-count-label" id="todayDateLabel"></span>
+    </div>
     <div class="classes-card">
-      <div class="classes-card-hdr">
-        <span class="classes-card-title">Classes</span>
-      </div>
       <div class="class-pill-row">
         <button class="class-pill" onclick="openClassModal('Math')">Math</button>
         <button class="class-pill" onclick="openClassModal('English')">English</button>
@@ -85,11 +106,11 @@
 
   <!-- Reports -->
   <div class="section" style="margin-top:.75rem;">
+    <div class="section-hdr">
+      <span class="section-title">Reports</span>
+      <button class="btn-dl" onclick="downloadReport()">Download</button>
+    </div>
     <div class="card">
-      <div class="card-hdr">
-        <div class="card-title">Reports</div>
-        <button class="btn-dl" onclick="downloadReport()">Download</button>
-      </div>
       <div class="filter-row">
         <select class="fsel" id="rptType" onchange="refreshScanPreview()">
           <option value="">All</option>
