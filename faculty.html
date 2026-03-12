@@ -296,61 +296,207 @@
 
         <!-- MODAL: Class Details (QR + Student List) -->
         <div id="classModal" class="modal">
-            <div class="modal-content modal-large">
-                <div class="modal-header">
-                    <div class="modal-title" id="classModalTitle">Class Details</div>
-                    <button class="modal-close" onclick="closeModal('classModal')">×</button>
+            <div class="modal-content modal-large" style="max-width:920px;width:92vw;border-radius:16px;overflow:hidden;margin:2rem auto;">
+
+                <!-- Header -->
+                <div class="modal-header" style="background:linear-gradient(135deg,#1a1a1a,#8B0000);padding:1.25rem 1.75rem;">
+                    <div class="modal-title" id="classModalTitle" style="color:var(--gold);font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;">Class Details</div>
+                    <button class="modal-close" onclick="closeModal('classModal')" style="color:var(--gold);font-size:1.5rem;background:none;border:none;cursor:pointer;">×</button>
                 </div>
-                <div id="classModalBody">
-                    <div class="class-modal-grid">
-                        <div class="qr-section">
-                            <h3 style="margin-bottom:1rem;color:var(--black);">Attendance QR Code</h3>
-                            <div class="qr-container" onclick="enlargeQR()">
-                                <img id="classQRCode" src="" alt="QR Code" class="qr-image">
-                                <p style="margin-top:0.5rem;font-size:0.85rem;color:#666;">Click to enlarge</p>
+
+                <div id="classModalBody" style="padding:1.75rem;">
+                    <style>
+                        /* Section tabs override — must beat faculty.css specificity */
+                        #classModal .cm-tab {
+                            flex:1; padding:0.6rem 0.5rem; border-radius:10px;
+                            font-family:'Syne',sans-serif; font-weight:700; font-size:0.82rem;
+                            cursor:pointer; transition:all 0.2s;
+                            border:2px solid #e8e8e8 !important;
+                            background:#f5f5f5 !important;
+                            color:#888 !important;
+                            box-shadow:none !important;
+                        }
+                        #classModal .cm-tab.active {
+                            background:linear-gradient(135deg,#FFD700,#FFA500) !important;
+                            color:#1a1a1a !important;
+                            border-color:#DAA520 !important;
+                            box-shadow:0 4px 12px rgba(255,215,0,0.4) !important;
+                        }
+                        #classModal .cm-tab .tab-count {
+                            display:inline-block; background:rgba(0,0,0,0.12);
+                            border-radius:20px; padding:1px 7px; font-size:0.68rem; margin-left:4px;
+                        }
+                        #classModal .cm-tab.active .tab-count {
+                            background:rgba(0,0,0,0.15);
+                        }
+                        /* Pagination styling */
+                        #studentPaginationWrap { display:flex; gap:0.35rem; align-items:center; flex-wrap:wrap; }
+                        #studentPaginationWrap .page-btn {
+                            min-width:34px; height:34px; border-radius:8px;
+                            border:1.5px solid #e8e8e8 !important;
+                            background:#fff !important; color:#555 !important;
+                            font-family:'Syne',sans-serif; font-weight:700; font-size:0.82rem;
+                            cursor:pointer; display:inline-flex; align-items:center; justify-content:center;
+                            transition:all 0.18s;
+                        }
+                        #studentPaginationWrap .page-btn:hover {
+                            border-color:var(--gold) !important;
+                            color:var(--black) !important;
+                        }
+                        #studentPaginationWrap .page-btn.active {
+                            background:var(--grad-red) !important;
+                            border-color:var(--red-dark) !important;
+                            color:#fff !important;
+                            box-shadow:0 3px 10px rgba(220,20,60,0.35);
+                        }
+                        /* Row striping inside modal */
+                        #classModal .data-table tbody tr:nth-child(even) {
+                            background: rgba(255,215,0,0.04);
+                        }
+                        #classModal .data-table tbody tr:nth-child(odd) {
+                            background: #fff;
+                        }
+                        #classModal .data-table tbody tr:hover {
+                            background: rgba(255,215,0,0.12) !important;
+                        }
+                        #classModal .data-table td {
+                            border-bottom: 1px solid rgba(255,215,0,0.2) !important;
+                            padding: 0.6rem 0.85rem !important;
+                            vertical-align: middle;
+                        }
+                        #classModal .data-table th {
+                            padding: 0.65rem 0.85rem !important;
+                        }
+                        /* Name column wraps cleanly */
+                        #classModal .data-table td:nth-child(3) {
+                            min-width: 130px;
+                            line-height: 1.35;
+                            font-weight: 600;
+                            color: #1a1a1a;
+                        }
+                        /* Stat cards equal height */
+                        #classModal .stat-card {
+                            display:flex; flex-direction:column;
+                            align-items:center; justify-content:center;
+                        }
+                    </style>
+
+                    <div style="display:grid;grid-template-columns:250px 1fr;gap:1.75rem;align-items:start;">
+
+                        <!-- LEFT: QR + Session Info -->
+                        <div style="display:flex;flex-direction:column;gap:1rem;">
+                            <!-- QR Code box -->
+                            <div style="background:#fff;border:3px solid var(--gold);border-radius:14px;padding:1rem;text-align:center;box-shadow:0 4px 20px rgba(255,215,0,0.2);" id="qrBoxWrapper">
+                                <div style="display:flex;justify-content:center;align-items:center;min-height:180px;" id="qrBoxInner">
+                                    <!-- Placeholder before session starts -->
+                                    <div id="qrPlaceholder" style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;">
+                                        <div style="width:80px;height:80px;border:3px dashed #e0e0e0;border-radius:12px;display:flex;align-items:center;justify-content:center;">
+                                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3M17 17h3v3M14 20h3"/></svg>
+                                        </div>
+                                        <span style="font-size:0.72rem;color:#ccc;font-weight:600;">Start session to generate QR</span>
+                                    </div>
+                                    <!-- Real QR injected here after session starts -->
+                                    <div id="firebaseQRDiv" style="display:none;"></div>
+                                    <img id="classQRCode" src="" alt="" style="display:none;">
+                                </div>
+                                <p id="qrClickHint" style="margin-top:0.4rem;font-size:0.7rem;color:#bbb;display:none;">Click to enlarge</p>
                             </div>
-                            <div style="margin-top:1rem;padding:1rem;background:#f8f9fa;border-radius:10px;">
-                                <p style="font-weight:600;margin-bottom:0.5rem;">Session Info:</p>
-                                <p style="font-size:0.9rem;margin-bottom:0.3rem;"><strong>Class:</strong> <span id="sessionClass"></span></p>
-                                <p style="font-size:0.9rem;margin-bottom:0.3rem;"><strong>Section:</strong> <span id="sessionSection"></span></p>
-                                <p style="font-size:0.9rem;margin-bottom:0.3rem;"><strong>Date:</strong> <span id="sessionDate"></span></p>
-                                <p style="font-size:0.9rem;"><strong>Time:</strong> <span id="sessionTime"></span></p>
+
+                            <!-- Session Info box -->
+                            <div style="background:#fffbf0;border:1.5px solid var(--gold);border-radius:12px;padding:1rem;">
+                                <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.7rem;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.65rem;">Session Info</div>
+                                <div style="display:flex;flex-direction:column;gap:0.3rem;">
+                                    <div style="display:flex;justify-content:space-between;font-size:0.82rem;padding-bottom:0.3rem;border-bottom:1px solid #f0e8c8;">
+                                        <span style="color:#888;font-weight:600;">Class</span>
+                                        <span id="sessionClass" style="font-weight:700;color:#1a1a1a;"></span>
+                                    </div>
+                                    <div style="display:flex;justify-content:space-between;font-size:0.82rem;padding-bottom:0.3rem;border-bottom:1px solid #f0e8c8;">
+                                        <span style="color:#888;font-weight:600;">Section</span>
+                                        <span id="sessionSection" style="font-weight:700;color:#1a1a1a;"></span>
+                                    </div>
+                                    <div style="display:flex;justify-content:space-between;font-size:0.82rem;padding-bottom:0.3rem;border-bottom:1px solid #f0e8c8;">
+                                        <span style="color:#888;font-weight:600;">Date</span>
+                                        <span id="sessionDate" style="font-weight:700;color:#1a1a1a;font-size:0.75rem;"></span>
+                                    </div>
+                                    <div style="display:flex;justify-content:space-between;font-size:0.82rem;">
+                                        <span style="color:#888;font-weight:600;">Time</span>
+                                        <span id="sessionTime" style="font-weight:700;color:#1a1a1a;"></span>
+                                    </div>
+                                </div>
+                                <!-- Start Session Button -->
+                                <button id="fbStartBtn" onclick="window.startFbSession()"
+                                    style="margin-top:0.85rem;width:100%;padding:0.7rem;background:linear-gradient(135deg,#FFD700,#FFA500);color:#1a1a1a;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:0.88rem;cursor:pointer;box-shadow:0 4px 12px rgba(255,215,0,0.35);transition:all 0.2s;">
+                                    Start Session
+                                </button>
+                                <!-- Countdown (shown after session starts) -->
+                                <div id="fbCountdown" style="display:none;margin-top:0.75rem;padding:0.6rem 0.85rem;background:linear-gradient(135deg,#1a1a1a,#2d2d2d);border-radius:10px;">
+                                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                                        <div style="display:flex;align-items:center;gap:0.45rem;">
+                                            <div style="width:8px;height:8px;background:#4caf50;border-radius:50%;animation:fbPulse 1.5s infinite;"></div>
+                                            <span style="color:#fff;font-size:0.72rem;font-weight:700;">Session Active</span>
+                                        </div>
+                                        <span id="fbCountdownTime" style="font-family:'Syne',sans-serif;font-weight:800;color:#FFD700;font-size:0.95rem;">60:00</span>
+                                        <button onclick="window.endSession()" style="padding:3px 10px;background:#ffebee;color:#c62828;border:1.5px solid #ef9a9a;border-radius:8px;font-size:0.72rem;font-weight:700;cursor:pointer;">End</button>
+                                    </div>
+                                </div>
+                                <style>@keyframes fbPulse{0%,100%{opacity:1;}50%{opacity:0.3;}}</style>
                             </div>
                         </div>
-                        <div class="student-list-section">
-                            <div style="margin-bottom:1rem;">
-                                <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:var(--black);margin-bottom:0.75rem;letter-spacing:0.01em;">Students</div>
-                                <div class="section-tabs-bar">
-                                    <button class="section-tab active" id="tab-SecA" onclick="switchSection('Sec A')">
-                                        Sec A
-                                        <span class="tab-count" id="count-SecA"></span>
-                                    </button>
-                                    <button class="section-tab" id="tab-SecB" onclick="switchSection('Sec B')">
-                                        Sec B
-                                        <span class="tab-count" id="count-SecB"></span>
-                                    </button>
-                                    <button class="section-tab" id="tab-SecC" onclick="switchSection('Sec C')">
-                                        Sec C
-                                        <span class="tab-count" id="count-SecC"></span>
-                                    </button>
+
+                        <!-- RIGHT: Student List -->
+                        <div style="display:flex;flex-direction:column;gap:0.85rem;">
+
+                            <!-- Section Tabs -->
+                            <div style="display:flex;gap:0.5rem;">
+                                <button class="cm-tab active" id="tab-SecA" onclick="switchSection('Sec A')">
+                                    Section A <span class="tab-count" id="count-SecA"></span>
+                                </button>
+                                <button class="cm-tab" id="tab-SecB" onclick="switchSection('Sec B')">
+                                    Section B <span class="tab-count" id="count-SecB"></span>
+                                </button>
+                                <button class="cm-tab" id="tab-SecC" onclick="switchSection('Sec C')">
+                                    Section C <span class="tab-count" id="count-SecC"></span>
+                                </button>
+                            </div>
+
+                            <!-- Attendance Summary -->
+                            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem;">
+                                <div style="background:#fafafa;border:1.5px solid #e8e8e8;border-radius:10px;padding:0.65rem;text-align:center;">
+                                    <div style="font-size:1.2rem;font-weight:800;color:#1a1a1a;" id="totalStudents">0</div>
+                                    <div style="font-size:0.65rem;color:#aaa;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Total</div>
+                                </div>
+                                <div style="background:#e8f5e9;border:1.5px solid #66bb6a;border-radius:10px;padding:0.65rem;text-align:center;">
+                                    <div style="font-size:1.2rem;font-weight:800;color:#2e7d32;" id="presentCount">0</div>
+                                    <div style="font-size:0.65rem;color:#2e7d32;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Present</div>
+                                </div>
+                                <div style="background:#ffebee;border:1.5px solid #ef9a9a;border-radius:10px;padding:0.65rem;text-align:center;">
+                                    <div style="font-size:1.2rem;font-weight:800;color:#c62828;" id="absentCount">0</div>
+                                    <div style="font-size:0.65rem;color:#c62828;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Absent</div>
+                                </div>
+                                <div style="background:#fff3e0;border:1.5px solid #FFA500;border-radius:10px;padding:0.65rem;text-align:center;">
+                                    <div style="font-size:1.2rem;font-weight:800;color:#e65100;" id="lateCount">0</div>
+                                    <div style="font-size:0.65rem;color:#e65100;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Late</div>
                                 </div>
                             </div>
-                            <div class="attendance-summary">
-                                <div class="summary-item"><span class="summary-label">Total:</span><span class="summary-value" id="totalStudents">0</span></div>
-                                <div class="summary-item present"><span class="summary-label">Present:</span><span class="summary-value" id="presentCount">0</span></div>
-                                <div class="summary-item absent"><span class="summary-label">Absent:</span><span class="summary-value" id="absentCount">0</span></div>
-                                <div class="summary-item late"><span class="summary-label">Late:</span><span class="summary-value" id="lateCount">0</span></div>
-                            </div>
-                            <div class="table-container" style="max-height:340px;overflow-y:auto;">
-                                <table class="data-table">
+
+                            <!-- Student Table -->
+                            <div class="table-container" style="border-radius:12px;overflow:hidden;max-height:340px;overflow-y:auto;">
+                                <table class="data-table" style="width:100%;">
                                     <thead>
-                                        <tr><th>#</th><th>Student ID</th><th>Name</th><th>Time In</th><th>Status</th></tr>
+                                        <tr>
+                                            <th style="width:40px;">#</th>
+                                            <th>Student ID</th>
+                                            <th>Name</th>
+                                            <th>Time In</th>
+                                            <th>Status</th>
+                                        </tr>
                                     </thead>
                                     <tbody id="studentListBody"></tbody>
                                 </table>
                             </div>
-                            <div class="pagination" id="studentPaginationWrap" style="margin-top:0.85rem;"></div>
+                            <div class="pagination" id="studentPaginationWrap"></div>
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -505,6 +651,7 @@
 <script src="students-data.js"></script>
     <script src="faculty-scans.js"></script>
     <script src="faculty.js"></script>
+    <script type="module" src="faculty-firebase.js"></script>
 
     <!-- Pagination for student list modal -->
     <script>
