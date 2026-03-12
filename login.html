@@ -38,256 +38,302 @@
             box-shadow: 0 24px 60px rgba(0,0,0,0.25);
             animation: fadeUp 0.5s ease;
         }
-        @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
-        .logo-area { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; margin-bottom: 1.25rem; }
-        .logo-area img { height: 72px; width: auto; object-fit: contain; }
-        .school-name { font-size: 0.82rem; color: var(--gray); text-align: center; font-weight: 500; }
-        .tab-row { display: flex; background: #f5f5f5; border-radius: 12px; padding: 4px; margin-bottom: 1.5rem; border: 1.5px solid #e8e8e8; }
-        .tab-btn { flex: 1; padding: 0.6rem; border: none; border-radius: 9px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.9rem; cursor: pointer; background: none; color: var(--gray); transition: all 0.2s ease; }
-        .tab-btn.active { background: var(--gold-btn); color: var(--white); box-shadow: 0 3px 10px rgba(245,168,0,0.4); }
-        .form-group { margin-bottom: 1.1rem; }
-        .form-label { display: block; font-weight: 700; font-size: 0.9rem; color: var(--black); margin-bottom: 0.4rem; }
-        .input-wrap { position: relative; }
-        .form-input { width: 100%; padding: 0.85rem 1rem; border: 2px solid #e8e8e8; border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--black); background: #fff; outline: none; transition: border-color 0.2s; }
-        .form-input::placeholder { color: #bbb; }
-        .form-input:focus { border-color: var(--gold); }
-        .form-input.has-btn { padding-right: 5rem; }
-        .show-btn { position: absolute; right: 0.9rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.75rem; color: var(--gold-dark); letter-spacing: 0.5px; }
-        .remember-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.25rem; }
-        .remember-row input[type="checkbox"] { width:17px; height:17px; accent-color: var(--gold-btn); cursor:pointer; }
-        .remember-row label { font-size: 0.88rem; font-weight: 600; color: var(--black); cursor: pointer; }
-        .btn-login { width: 100%; padding: 0.9rem; background: var(--gold-btn); color: var(--white); border: none; border-radius: 14px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; cursor: pointer; box-shadow: 0 6px 20px rgba(245,168,0,0.4); transition: all 0.2s ease; }
-        .btn-login:hover  { background: #e09800; }
-        .btn-login:active { transform: scale(0.98); }
-        .links-row { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; margin-top: 1rem; }
-        .text-link { background: none; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600; color: var(--gold-dark); text-decoration: underline; text-underline-offset: 2px; }
-        .error-msg { display: none; margin-top: 0.75rem; padding: 0.6rem 0.9rem; background: #fff0f0; border: 1.5px solid var(--red); border-radius: 10px; color: #8B0000; font-size: 0.82rem; font-weight: 600; text-align: center; }
-        .demo-panel { display: none; margin-top: 1rem; border-top: 1.5px solid #f0f0f0; padding-top: 0.85rem; }
-        .demo-label { font-size: 0.7rem; font-weight: 700; color: #bbb; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
-        .demo-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.75rem; border: 1.5px solid #f0e080; border-radius: 9px; background: #fffbf0; cursor: pointer; margin-bottom: 0.35rem; transition: background 0.15s; }
-        .demo-item:last-child { margin-bottom: 0; }
-        .demo-item:hover  { background: #fff3cc; }
-        .demo-item:active { background: #ffe680; }
-        .demo-role { font-size: 0.82rem; font-weight: 700; color: var(--black); }
-        .demo-id   { font-size: 0.72rem; color: var(--gold-dark); font-weight: 700; }
-        .step { display: none; }
-        .step.active { display: block; }
-
-        /* ── CHOICE STEP ── */
-        .choice-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.15rem; text-align: center; margin-bottom: 0.25rem; color: var(--black); }
-        .choice-sub   { font-size: 0.82rem; color: var(--gray); text-align: center; margin-bottom: 1.75rem; }
-        .choice-grid  { display: flex; gap: 1rem; }
-        .choice-box {
-            flex: 1; border: 2.5px solid var(--gold); border-radius: 18px;
-            padding: 1.75rem 1rem 1.5rem; text-align: center; cursor: pointer;
-            background: #fffbf0; transition: all 0.2s;
-            display: flex; flex-direction: column; align-items: center; gap: 0.65rem;
+        @keyframes fadeUp {
+            from { opacity:0; transform:translateY(24px); }
+            to   { opacity:1; transform:translateY(0); }
         }
-        .choice-box:hover  { background: #fff3cc; border-color: var(--gold-btn); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(245,168,0,0.25); }
-        .choice-box:active { transform: scale(0.97); }
-        .choice-icon {
-            width: 54px; height: 54px; border-radius: 16px;
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            display: flex; align-items: center; justify-content: center;
-            color: var(--black); font-size: 1.5rem;
-            box-shadow: 0 4px 12px rgba(255,165,0,0.35);
+        .logo-area { display:flex; flex-direction:column; align-items:center; gap:0.5rem; margin-bottom:1.25rem; }
+        .logo-area img { height:72px; width:auto; object-fit:contain; }
+        .school-name { font-size:0.82rem; color:var(--gray); text-align:center; font-weight:500; }
+        .form-group { margin-bottom:1.1rem; }
+        .form-label { display:block; font-weight:700; font-size:0.9rem; color:var(--black); margin-bottom:0.4rem; }
+        .input-wrap { position:relative; }
+        .form-input {
+            width:100%; padding:0.85rem 1rem;
+            border:2px solid #e8e8e8; border-radius:12px;
+            font-family:'DM Sans',sans-serif; font-size:0.95rem;
+            color:var(--black); background:#fff; outline:none;
+            transition:border-color 0.2s;
         }
-        .choice-box-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1rem; color: var(--black); }
-        .choice-box-sub   { font-size: 0.72rem; color: var(--gray); line-height: 1.4; }
-        .btn-back { width: 100%; padding: 0.75rem; background: none; border: 2px solid #e0e0e0; border-radius: 12px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.88rem; color: var(--gray); cursor: pointer; margin-top: 1rem; transition: all 0.2s; }
-        .btn-back:hover { border-color: var(--gold); color: var(--black); }
+        .form-input::placeholder { color:#bbb; }
+        .form-input:focus { border-color:var(--gold); }
+        .form-input.has-btn { padding-right:5rem; }
+        .show-btn {
+            position:absolute; right:0.9rem; top:50%; transform:translateY(-50%);
+            background:none; border:none; cursor:pointer;
+            font-family:'Syne',sans-serif; font-weight:700;
+            font-size:0.75rem; color:var(--gold-dark); letter-spacing:0.5px;
+        }
+        .remember-row { display:flex; align-items:center; gap:0.5rem; margin-bottom:1.25rem; }
+        .remember-row input[type="checkbox"] { width:17px; height:17px; accent-color:var(--gold-btn); cursor:pointer; }
+        .remember-row label { font-size:0.88rem; font-weight:600; color:var(--black); cursor:pointer; }
+        .btn-login {
+            width:100%; padding:0.9rem;
+            background:var(--gold-btn); color:var(--white);
+            border:none; border-radius:14px;
+            font-family:'Syne',sans-serif; font-weight:700; font-size:1rem;
+            cursor:pointer; box-shadow:0 6px 20px rgba(245,168,0,0.4);
+            transition:all 0.2s ease;
+            display:flex; align-items:center; justify-content:center; gap:0.5rem;
+        }
+        .btn-login:hover  { background:#e09800; }
+        .btn-login:active { transform:scale(0.98); }
+        .btn-login:disabled { background:#ccc; box-shadow:none; cursor:not-allowed; }
+        .spinner {
+            width:18px; height:18px;
+            border:2.5px solid rgba(255,255,255,0.4);
+            border-top-color:#fff; border-radius:50%;
+            animation:spin 0.7s linear infinite; display:none;
+        }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        .links-row { display:flex; flex-direction:column; align-items:center; gap:0.4rem; margin-top:1rem; }
+        .text-link {
+            background:none; border:none; cursor:pointer;
+            font-family:'DM Sans',sans-serif; font-size:0.82rem;
+            font-weight:600; color:var(--gold-dark);
+            text-decoration:underline; text-underline-offset:2px;
+        }
+        .error-msg {
+            display:none; margin-top:0.75rem; padding:0.6rem 0.9rem;
+            background:#fff0f0; border:1.5px solid var(--red);
+            border-radius:10px; color:#8B0000;
+            font-size:0.82rem; font-weight:600; text-align:center;
+        }
+        .demo-panel { display:none; margin-top:1rem; border-top:1.5px solid #f0f0f0; padding-top:0.85rem; }
+        .demo-label { font-size:0.7rem; font-weight:700; color:#bbb; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.5rem; }
+        .demo-item {
+            display:flex; justify-content:space-between; align-items:center;
+            padding:0.5rem 0.75rem; border:1.5px solid #f0e080;
+            border-radius:9px; background:#fffbf0; cursor:pointer;
+            margin-bottom:0.35rem; transition:background 0.15s;
+        }
+        .demo-item:hover { background:#fff3cc; }
+        .demo-role { font-size:0.82rem; font-weight:700; color:var(--black); }
+        .demo-id   { font-size:0.72rem; color:var(--gold-dark); font-weight:700; }
+        .info-note {
+            margin-top:0.75rem; padding:0.6rem 0.9rem;
+            background:#f0f8ff; border:1.5px solid #90caf9;
+            border-radius:10px; color:#1565c0;
+            font-size:0.78rem; font-weight:500; text-align:center;
+        }
     </style>
-    <!-- PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#8B0000">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="sscrmnlofficiallogo.png">
-    <script>
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sscr_attendance/sw.js');
-      }
-    </script>
 </head>
 <body>
+
 <div class="card">
-
-    <!-- ══ STEP 1: LOGIN ══ -->
-    <div class="step active" id="step-login">
-        <div class="logo-area">
-            <img src="sscrmnlofficiallogo.png" alt="SSC-R">
-            <span class="school-name">San Sebastian College-Recoletos Manila</span>
-        </div>
-        <div class="tab-row">
-            <button class="tab-btn active" id="tabLogin"  onclick="switchTab('login')">Log In</button>
-            <button class="tab-btn"        id="tabSignup" onclick="switchTab('signup')">Sign Up</button>
-        </div>
-        <form id="login-form">
-            <div class="form-group">
-                <label class="form-label">School Username</label>
-                <input type="text" id="username" class="form-input" placeholder="e.g. S2026-0031" required autocomplete="username">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Password</label>
-                <div class="input-wrap">
-                    <input type="password" id="password" class="form-input has-btn" placeholder="Enter your password" required autocomplete="current-password">
-                    <button type="button" class="show-btn" id="showBtn" onclick="togglePassword()">SHOW</button>
-                </div>
-            </div>
-            <div class="remember-row">
-                <input type="checkbox" id="rememberMe">
-                <label for="rememberMe">Remember me</label>
-            </div>
-            <button type="submit" class="btn-login">Log In</button>
-            <div class="error-msg" id="errorMsg"></div>
-        </form>
-        <div class="links-row">
-            <button class="text-link" onclick="forgotPassword()">Forgot Password?</button>
-            <button class="text-link" id="demoToggleBtn" onclick="toggleDemo()">Show demo credentials</button>
-        </div>
-        <div class="demo-panel" id="demoPanel">
-            <div class="demo-label">Click any row to fill</div>
-            <div class="demo-item" onclick="fillCredentials('A001','admin2026')">
-                <span class="demo-role">Admin</span><span class="demo-id">A001 / admin2026</span>
-            </div>
-            <div class="demo-item" onclick="fillCredentials('F001','faculty2026')">
-                <span class="demo-role">Faculty — Agnes Bernal</span><span class="demo-id">F001 / faculty2026</span>
-            </div>
-            <div class="demo-item" onclick="fillCredentials('F002','faculty2026')">
-                <span class="demo-role">Faculty — Rheymard Doneza</span><span class="demo-id">F002 / faculty2026</span>
-            </div>
-            <div class="demo-item" onclick="fillCredentials('S2026-0031','student2026')">
-                <span class="demo-role">Student — Mel Malacas</span><span class="demo-id">S2026-0031 / student2026</span>
-            </div>
-        </div>
+    <div class="logo-area">
+        <img src="sscrmnlofficiallogo.png" alt="SSC-R">
+        <span class="school-name">San Sebastian College-Recoletos Manila</span>
     </div>
 
-    <!-- ══ STEP 2: STUDENT CHOICE ══ -->
-    <div class="step" id="step-choice">
-        <div class="logo-area" style="margin-bottom:1.25rem;">
-            <img src="sscrmnlofficiallogo.png" alt="SSC-R">
+    <form id="login-form">
+        <div class="form-group">
+            <label class="form-label">School Email</label>
+            <input type="email" id="emailInput" class="form-input"
+                   placeholder="e.g. mlmalacas@sscr.edu.ph" required autocomplete="email">
         </div>
-        <div class="choice-title">Welcome back!</div>
-        <div class="choice-sub" id="choiceSubtitle">What would you like to do?</div>
-        <div class="choice-grid">
-            <div class="choice-box" onclick="goDashboard()">
-                <div class="choice-icon">
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                </div>
-                <div class="choice-box-title">Dashboard</div>
-                <div class="choice-box-sub">View attendance &amp; schedule</div>
-            </div>
-            <div class="choice-box" onclick="openScanner()">
-                <div class="choice-icon">
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 7 23 1 17 1"/><line x1="23" y1="1" x2="14" y2="10"/><polyline points="1 17 1 23 7 23"/><line x1="1" y1="23" x2="10" y2="14"/></svg>
-                </div>
-                <div class="choice-box-title">Scan QR</div>
-                <div class="choice-box-sub">Mark your attendance now</div>
+        <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="input-wrap">
+                <input type="password" id="passwordInput" class="form-input has-btn"
+                       placeholder="Enter your password" required autocomplete="current-password">
+                <button type="button" class="show-btn" id="showBtn" onclick="togglePassword()">SHOW</button>
             </div>
         </div>
-        <button class="btn-back" onclick="showStep('step-login')">← Back</button>
+
+        <div class="remember-row">
+            <input type="checkbox" id="rememberMe">
+            <label for="rememberMe">Remember me</label>
+        </div>
+
+        <button type="submit" class="btn-login" id="loginBtn">
+            <span class="spinner" id="spinner"></span>
+            <span id="btnText">Log In</span>
+        </button>
+        <div class="error-msg" id="errorMsg"></div>
+    </form>
+
+    <div class="links-row">
+        <button class="text-link" onclick="forgotPassword()">Forgot Password?</button>
+        <button class="text-link" id="demoToggleBtn" onclick="toggleDemo()">Show demo credentials</button>
     </div>
 
+    <div class="demo-panel" id="demoPanel">
+        <div class="demo-label">Click any row to fill</div>
+        <div class="demo-item" onclick="fillCredentials('jgonzaga@sscr.edu.ph','admin2026')">
+            <span class="demo-role">Admin — Julliana Gonzaga</span>
+            <span class="demo-id">jgonzaga@sscr.edu.ph</span>
+        </div>
+        <div class="demo-item" onclick="fillCredentials('abernal@sscr.edu.ph','faculty2026')">
+            <span class="demo-role">Faculty — Agnes Bernal</span>
+            <span class="demo-id">abernal@sscr.edu.ph</span>
+        </div>
+        <div class="demo-item" onclick="fillCredentials('rdoneza@sscr.edu.ph','faculty2026')">
+            <span class="demo-role">Faculty — Rheymard Doneza</span>
+            <span class="demo-id">rdoneza@sscr.edu.ph</span>
+        </div>
+        <div class="demo-item" onclick="fillCredentials('gsoriano@sscr.edu.ph','faculty2026')">
+            <span class="demo-role">Faculty — Gary Soriano</span>
+            <span class="demo-id">gsoriano@sscr.edu.ph</span>
+        </div>
+        <div class="demo-item" onclick="fillCredentials('gcarpio@sscr.edu.ph','faculty2026')">
+            <span class="demo-role">Faculty — Gerome Carpio</span>
+            <span class="demo-id">gcarpio@sscr.edu.ph</span>
+        </div>
+        <div class="demo-item" onclick="fillCredentials('mlmalacas@sscr.edu.ph','student2026')">
+            <span class="demo-role">Student — Mel Malacas</span>
+            <span class="demo-id">mlmalacas@sscr.edu.ph</span>
+        </div>
+        <div class="demo-item" onclick="fillCredentials('jrtulabing@sscr.edu.ph','student2026')">
+            <span class="demo-role">Student — Jhon Raven Tulabing</span>
+            <span class="demo-id">jrtulabing@sscr.edu.ph</span>
+        </div>
+        <div class="demo-item" onclick="fillCredentials('icespiritu@sscr.edu.ph','student2026')">
+            <span class="demo-role">Student — Iubilaeum Espiritu</span>
+            <span class="demo-id">icespiritu@sscr.edu.ph</span>
+        </div>
+        <div class="info-note">
+            ℹ️ Login now uses your full school email address
+        </div>
+    </div>
 </div>
 
-<script src="auth.js"></script>
-<script>
-    window.addEventListener('DOMContentLoaded', () => {
-        const saved = localStorage.getItem('sscr_remember');
-        if (saved) {
-            document.getElementById('username').value = saved;
-            document.getElementById('rememberMe').checked = true;
-        }
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('step') === 'choice') showStep('step-choice');
-    });
+<script type="module">
+    import { initializeApp }                       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc }           from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    function switchTab(tab) {
-        document.getElementById('tabLogin').classList.toggle('active',  tab === 'login');
-        document.getElementById('tabSignup').classList.toggle('active', tab === 'signup');
-        if (tab === 'signup') {
-            alert('Sign Up is not available yet.\nContact your administrator to create an account.');
-            document.getElementById('tabLogin').classList.add('active');
-            document.getElementById('tabSignup').classList.remove('active');
-        }
+    const firebaseConfig = {
+        apiKey:            "AIzaSyCG2S8sm0WOOKKyrXsXCkgSzLIFy8jEC2E",
+        authDomain:        "sscr-attendance-6bb23.firebaseapp.com",
+        projectId:         "sscr-attendance-6bb23",
+        storageBucket:     "sscr-attendance-6bb23.firebasestorage.app",
+        messagingSenderId: "608259669011",
+        appId:             "1:608259669011:web:4620cf50705c897ca553e6"
+    };
+
+    const app  = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db   = getFirestore(app);
+
+    // Restore remembered email
+    const saved = localStorage.getItem("sscr_remember");
+    if (saved) {
+        document.getElementById("emailInput").value   = saved;
+        document.getElementById("rememberMe").checked = true;
     }
 
-    function isMobileDevice() {
-        return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || window.innerWidth <= 768;
-    }
-
-    function redirectAfterLogin(role) {
-        const mobile = isMobileDevice();
+    // Redirect by role — desktop only
+    function redirectByRole(role) {
         const routes = {
-            admin:   mobile ? 'admin-mobile.html'   : 'admin.html',
-            faculty: mobile ? 'faculty-mobile.html' : 'faculty.html',
-            student: mobile ? 'student-mobile.html' : 'student.html',
+            admin:   "admin.html",
+            faculty: "faculty.html",
+            student: "student.html",
         };
-        window.location.href = routes[role];
+        window.location.href = routes[role] || "login.html";
     }
 
-    document.getElementById('login-form').addEventListener('submit', function(e) {
+    // Login submit
+    document.getElementById("login-form").addEventListener("submit", async function(e) {
         e.preventDefault();
-        const username = document.getElementById('username').value.trim();
-        const password = document.getElementById('password').value;
-        const remember = document.getElementById('rememberMe').checked;
 
-        const user = validateLogin(username, password);
-        if (!user) { showError('Invalid username or password. Please try again.'); return; }
+        const email    = document.getElementById("emailInput").value.trim();
+        const password = document.getElementById("passwordInput").value;
+        const remember = document.getElementById("rememberMe").checked;
 
-        if (remember) localStorage.setItem('sscr_remember', username);
-        else          localStorage.removeItem('sscr_remember');
+        setLoading(true);
 
-        saveSession(username, user);
-        redirectAfterLogin(user.role);
+        try {
+            // 1. Firebase Auth sign in
+            const credential = await signInWithEmailAndPassword(auth, email, password);
+            const uid        = credential.user.uid;
+
+            // 2. Get Firestore profile
+            const profileSnap = await getDoc(doc(db, "users", uid));
+            if (!profileSnap.exists()) {
+                throw new Error("User profile not found. Contact your administrator.");
+            }
+
+            const profile  = profileSnap.data();
+            const initials = profile.name.split(" ").filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join("");
+
+            // 3. Save to sessionStorage
+            sessionStorage.setItem("sscr_uid",      uid);
+            sessionStorage.setItem("sscr_role",     profile.role);
+            sessionStorage.setItem("sscr_name",     profile.name);
+            sessionStorage.setItem("sscr_initials", initials);
+            sessionStorage.setItem("sscr_email",    profile.email || email);
+            sessionStorage.setItem("sscr_title",    profile.title || profile.role);
+            sessionStorage.setItem("sscr_section",  profile.section  || "");
+            sessionStorage.setItem("sscr_subjects", JSON.stringify(profile.subjects || []));
+            if (profile.studentId) sessionStorage.setItem("sscr_studentId", profile.studentId);
+
+            // 4. Remember me
+            if (remember) localStorage.setItem("sscr_remember", email);
+            else          localStorage.removeItem("sscr_remember");
+
+            // 5. Redirect to dashboard
+            redirectByRole(profile.role);
+
+        } catch (err) {
+            setLoading(false);
+            const msg = err.code === "auth/user-not-found"     ? "No account found with this email."
+                      : err.code === "auth/wrong-password"     ? "Incorrect password. Please try again."
+                      : err.code === "auth/invalid-credential" ? "Incorrect email or password."
+                      : err.code === "auth/invalid-email"      ? "Please enter a valid school email."
+                      : err.code === "auth/too-many-requests"  ? "Too many attempts. Try again later."
+                      : err.message || "Login failed. Please try again.";
+            showError(msg);
+        }
     });
+</script>
+
+<script>
+    function setLoading(on) {
+        document.getElementById("spinner").style.display = on ? "block" : "none";
+        document.getElementById("btnText").textContent   = on ? "Logging in…" : "Log In";
+        document.getElementById("loginBtn").disabled     = on;
+    }
 
     function togglePassword() {
-        const input = document.getElementById('password');
-        const btn   = document.getElementById('showBtn');
-        const show  = input.type === 'password';
-        input.type      = show ? 'text'     : 'password';
-        btn.textContent = show ? 'HIDE'     : 'SHOW';
+        const input = document.getElementById("passwordInput");
+        const btn   = document.getElementById("showBtn");
+        const show  = input.type === "password";
+        input.type      = show ? "text"  : "password";
+        btn.textContent = show ? "HIDE"  : "SHOW";
     }
 
-    function fillCredentials(username, password) {
-        document.getElementById('username').value = username;
-        document.getElementById('password').value = password;
-        document.getElementById('demoPanel').style.display   = 'none';
-        document.getElementById('demoToggleBtn').textContent = 'Show demo credentials';
+    function fillCredentials(email, password) {
+        document.getElementById("emailInput").value    = email;
+        document.getElementById("passwordInput").value = password;
+        document.getElementById("demoPanel").style.display   = "none";
+        document.getElementById("demoToggleBtn").textContent = "Show demo credentials";
     }
 
     function toggleDemo() {
-        const panel  = document.getElementById('demoPanel');
-        const btn    = document.getElementById('demoToggleBtn');
-        const isOpen = panel.style.display === 'block';
-        panel.style.display = isOpen ? 'none'  : 'block';
-        btn.textContent     = isOpen ? 'Show demo credentials' : 'Hide demo credentials';
+        const panel  = document.getElementById("demoPanel");
+        const btn    = document.getElementById("demoToggleBtn");
+        const isOpen = panel.style.display === "block";
+        panel.style.display = isOpen ? "none"  : "block";
+        btn.textContent     = isOpen ? "Show demo credentials" : "Hide demo credentials";
     }
 
     function showError(msg) {
-        const el = document.getElementById('errorMsg');
+        const el = document.getElementById("errorMsg");
         el.textContent   = msg;
-        el.style.display = 'block';
-        setTimeout(() => { el.style.display = 'none'; }, 4000);
-    }
-
-    function showStep(id) {
-        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
+        el.style.display = "block";
+        setTimeout(() => { el.style.display = "none"; }, 5000);
     }
 
     function forgotPassword() {
-        alert('Please contact your system administrator\nto reset your password.');
-    }
-
-    function openScanner() {
-        window.location.href = 'student-mobile.html?scan=1';
-    }
-
-    function goDashboard() {
-        redirectAfterLogin('student');
+        alert("Please contact your system administrator\nto reset your password.");
     }
 </script>
+
 </body>
 </html>
