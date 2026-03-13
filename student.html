@@ -3,6 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+      // ✅ Mobile redirect — runs before page renders, no flash of desktop UI
+      (function() {
+        var isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth <= 768;
+        if (isMobile) { window.location.replace('student-mobile.html'); }
+      })();
+    </script>
     <title>SSC-R Student Dashboard - Attendance System</title>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="student.css">
@@ -112,6 +119,17 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="sscrmnlofficiallogo.png">
     <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sscr_attendance/sw.js');}</script>
+
+    <!-- Firebase (must load before firebase-config.js) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <!-- EmailJS -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <!-- App config & data -->
+    <script src="firebase-config.js"></script>
+    <script src="students-data.js"></script>
+    <script src="emailjs-service.js"></script>
 </head>
 <body>
 <div class="container">
@@ -350,36 +368,36 @@
         </div>
         <div class="modal-body-scroll">
             <div class="faculty-list">
-                <a class="faculty-card" href="mailto:gsoriano@sscr.edu.ph">
+                <a class="faculty-card" href="/cdn-cgi/l/email-protection#84e3f7ebf6ede5eaebc4f7f7e7f6aae1e0f1aaf4ec">
                     <div class="faculty-avatar">GS</div>
                     <div class="faculty-info">
                         <div class="faculty-name">Gary Soriano</div>
                         <div class="faculty-subject">English</div>
-                        <div class="faculty-email">gsoriano@sscr.edu.ph</div>
+                        <div class="faculty-email"><span class="__cf_email__" data-cfemail="e582968a978c848b8aa596968697cb808190cb958d">[email&#160;protected]</span></div>
                     </div>
                 </a>
-                <a class="faculty-card" href="mailto:rdoneza@sscr.edu.ph">
+                <a class="faculty-card" href="/cdn-cgi/l/email-protection#aad8cec5c4cfd0cbead9d9c9d884cfcedf84dac2">
                     <div class="faculty-avatar">RD</div>
                     <div class="faculty-info">
                         <div class="faculty-name">Rheymard Doneza</div>
                         <div class="faculty-subject">Mathematics</div>
-                        <div class="faculty-email">rdoneza@sscr.edu.ph</div>
+                        <div class="faculty-email"><span class="__cf_email__" data-cfemail="2052444f4e455a4160535343520e4544550e5048">[email&#160;protected]</span></div>
                     </div>
                 </a>
-                <a class="faculty-card" href="mailto:abernal@sscr.edu.ph">
+                <a class="faculty-card" href="/cdn-cgi/l/email-protection#7e1f1c1b0c101f123e0d0d1d0c501b1a0b500e16">
                     <div class="faculty-avatar">AB</div>
                     <div class="faculty-info">
                         <div class="faculty-name">Agnes Bernal</div>
                         <div class="faculty-subject">Science</div>
-                        <div class="faculty-email">abernal@sscr.edu.ph</div>
+                        <div class="faculty-email"><span class="__cf_email__" data-cfemail="0c6d6e697e626d604c7f7f6f7e22696879227c64">[email&#160;protected]</span></div>
                     </div>
                 </a>
-                <a class="faculty-card" href="mailto:gcarpio@sscr.edu.ph">
+                <a class="faculty-card" href="/cdn-cgi/l/email-protection#3c5b5f5d4e4c55537c4f4f5f4e12595849124c54">
                     <div class="faculty-avatar">GC</div>
                     <div class="faculty-info">
                         <div class="faculty-name">Gerome Carpio</div>
                         <div class="faculty-subject">Filipino</div>
-                        <div class="faculty-email">gcarpio@sscr.edu.ph</div>
+                        <div class="faculty-email"><span class="__cf_email__" data-cfemail="214642405351484e61525242530f4445540f5149">[email&#160;protected]</span></div>
                     </div>
                 </a>
             </div>
@@ -466,17 +484,7 @@
                 </div>
                 <div class="settings-form-row">
                     <label>Full Name</label>
-                    <input type="text" class="settings-input" value="Mel Reynald Malacas" id="settingsName">
-                </div>
-                <div class="settings-form-row">
-                    <label>Section</label>
-                    <input type="text" class="settings-input" value="Grade 7 - Section B" id="settingsSection">
-                </div>
-                <button class="btn btn-primary" style="margin-top:0.75rem;" onclick="saveProfile()">Save Changes</button>
-            </div>
-            <div class="settings-section">
-                <div class="settings-section-title">Change Password</div>
-                <div class="settings-form-row">
+                    <input type="text" class="settings-input" value="Mel Reynald Malaca             <div class="settings-form-row">
                     <label>Current Password</label>
                     <input type="password" class="settings-input" placeholder="Enter current password" id="currentPass">
                 </div>
@@ -511,6 +519,7 @@
 <div id="toast-container"></div>
 
 <script src="student.js"></script>
+<script src="student-firebase.js"></script>
 <script>
 // ── Toast system ──────────────────────────────────────────
 (function(){
