@@ -3,6 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+      // ✅ Mobile redirect — runs before page renders, no flash of desktop UI
+      (function() {
+        var isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth <= 768;
+        if (isMobile) { window.location.replace('faculty-mobile.html'); }
+      })();
+    </script>
     <title>SSC-R Faculty Dashboard - Attendance System</title>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="faculty.css">
@@ -71,36 +78,6 @@
             </div>
         </div>
 
-        <!-- MODAL: Edit Profile -->
-        <div id="profileModal" class="modal">
-            <div class="modal-content" style="max-width:420px;">
-                <div class="modal-header">
-                    <div class="modal-title">Edit Profile</div>
-                    <button class="modal-close" onclick="closeModal('profileModal')">×</button>
-                </div>
-                <div style="padding-top:0.5rem;">
-                    <div style="display:flex;justify-content:center;margin-bottom:1.5rem;">
-                        <div id="profileAvatarPreview" style="width:70px;height:70px;border-radius:50%;background:var(--grad-gold);color:var(--black);font-weight:800;font-size:1.4rem;display:flex;align-items:center;justify-content:center;border:3px solid var(--gold-dark);box-shadow:0 4px 16px rgba(255,215,0,0.4);">AB</div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Full Name</label>
-                        <input type="text" id="profileName" class="form-input" value="Agnes Bernal" oninput="updateAvatarPreview()">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Department / Subject Area</label>
-                        <input type="text" id="profileRole" class="form-input" value="Software Engineering">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Email</label>
-                        <input type="email" id="profileEmail" class="form-input" value="agnes.bernal@sscr.edu.ph">
-                    </div>
-                    <div style="display:flex;gap:0.75rem;margin-top:1.25rem;">
-                        <button class="btn btn-success" style="flex:1;" onclick="saveProfile()">Save Changes</button>
-                        <button class="btn btn-secondary" style="flex:1;" onclick="closeModal('profileModal')">Cancel</button>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- Classes -->
         <div class="card">
@@ -294,6 +271,44 @@
             </div>
         </div>
 
+
+
+
+
+
+
+    </div><!-- /container -->
+
+        <!-- MODAL: Edit Profile -->
+        <div id="profileModal" class="modal">
+            <div class="modal-content" style="max-width:420px;">
+                <div class="modal-header">
+                    <div class="modal-title">Edit Profile</div>
+                    <button class="modal-close" onclick="closeModal('profileModal')">×</button>
+                </div>
+                <div style="padding-top:0.5rem;">
+                    <div style="display:flex;justify-content:center;margin-bottom:1.5rem;">
+                        <div id="profileAvatarPreview" style="width:70px;height:70px;border-radius:50%;background:var(--grad-gold);color:var(--black);font-weight:800;font-size:1.4rem;display:flex;align-items:center;justify-content:center;border:3px solid var(--gold-dark);box-shadow:0 4px 16px rgba(255,215,0,0.4);">AB</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" id="profileName" class="form-input" value="Agnes Bernal" oninput="updateAvatarPreview()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Department / Subject Area</label>
+                        <input type="text" id="profileRole" class="form-input" value="Software Engineering">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="profileEmail" class="form-input" value="agnes.bernal@sscr.edu.ph">
+                    </div>
+                    <div style="display:flex;gap:0.75rem;margin-top:1.25rem;">
+                        <button class="btn btn-success" style="flex:1;" onclick="saveProfile()">Save Changes</button>
+                        <button class="btn btn-secondary" style="flex:1;" onclick="closeModal('profileModal')">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- MODAL: Class Details (QR + Student List) -->
         <div id="classModal" class="modal">
             <div class="modal-content modal-large" style="max-width:920px;width:92vw;border-radius:16px;overflow:hidden;margin:2rem auto;">
@@ -446,16 +461,19 @@
                         <!-- RIGHT: Student List -->
                         <div style="display:flex;flex-direction:column;gap:0.85rem;">
 
-                            <!-- Section Tabs -->
+                            <!-- Grade Tabs -->
                             <div style="display:flex;gap:0.5rem;">
-                                <button class="cm-tab active" id="tab-SecA" onclick="switchSection('Sec A')">
-                                    Section A <span class="tab-count" id="count-SecA"></span>
+                                <button class="cm-tab active" id="tab-Gr7" onclick="switchGrade(7)">
+                                    Grade 7 <span class="tab-count" id="count-Gr7"></span>
                                 </button>
-                                <button class="cm-tab" id="tab-SecB" onclick="switchSection('Sec B')">
-                                    Section B <span class="tab-count" id="count-SecB"></span>
+                                <button class="cm-tab" id="tab-Gr8" onclick="switchGrade(8)">
+                                    Grade 8 <span class="tab-count" id="count-Gr8">0</span>
                                 </button>
-                                <button class="cm-tab" id="tab-SecC" onclick="switchSection('Sec C')">
-                                    Section C <span class="tab-count" id="count-SecC"></span>
+                                <button class="cm-tab" id="tab-Gr9" onclick="switchGrade(9)">
+                                    Grade 9 <span class="tab-count" id="count-Gr9">0</span>
+                                </button>
+                                <button class="cm-tab" id="tab-Gr10" onclick="switchGrade(10)">
+                                    Grade 10 <span class="tab-count" id="count-Gr10">0</span>
                                 </button>
                             </div>
 
@@ -501,25 +519,24 @@
                 </div>
             </div>
         </div>
-
-        <!-- MODAL: Student Roster -->
+        <!-- MODAL: Student List -->
         <div id="studentListModal" class="modal">
             <div class="modal-content modal-large">
                 <div class="modal-header">
-                    <div class="modal-title">Student Roster</div>
+                    <div class="modal-title">Student List</div>
                     <button class="modal-close" onclick="closeModal('studentListModal')">×</button>
                 </div>
                 <div style="padding-top:0.75rem;">
+                    <!-- Grade Tabs -->
+                    <div style="display:flex;gap:0.45rem;margin-bottom:0.85rem;">
+                        <button id="roster-tab-Gr7"  onclick="switchRosterGrade(7)"  style="flex:1;padding:0.5rem 0.4rem;border-radius:10px;font-family:'Syne',sans-serif;font-weight:700;font-size:0.8rem;cursor:pointer;transition:all 0.2s;border:2px solid #DAA520;background:linear-gradient(135deg,#FFD700,#FFA500);color:#1a1a1a;box-shadow:0 4px 12px rgba(255,215,0,0.4);">Grade 7 <span id="roster-count-Gr7"  style="display:inline-block;background:rgba(0,0,0,0.15);border-radius:20px;padding:1px 7px;font-size:0.68rem;margin-left:3px;">0</span></button>
+                        <button id="roster-tab-Gr8"  onclick="switchRosterGrade(8)"  style="flex:1;padding:0.5rem 0.4rem;border-radius:10px;font-family:'Syne',sans-serif;font-weight:700;font-size:0.8rem;cursor:pointer;transition:all 0.2s;border:2px solid #e8e8e8;background:#f5f5f5;color:#888;">Grade 8 <span id="roster-count-Gr8"  style="display:inline-block;background:rgba(0,0,0,0.1);border-radius:20px;padding:1px 7px;font-size:0.68rem;margin-left:3px;">0</span></button>
+                        <button id="roster-tab-Gr9"  onclick="switchRosterGrade(9)"  style="flex:1;padding:0.5rem 0.4rem;border-radius:10px;font-family:'Syne',sans-serif;font-weight:700;font-size:0.8rem;cursor:pointer;transition:all 0.2s;border:2px solid #e8e8e8;background:#f5f5f5;color:#888;">Grade 9 <span id="roster-count-Gr9"  style="display:inline-block;background:rgba(0,0,0,0.1);border-radius:20px;padding:1px 7px;font-size:0.68rem;margin-left:3px;">0</span></button>
+                        <button id="roster-tab-Gr10" onclick="switchRosterGrade(10)" style="flex:1;padding:0.5rem 0.4rem;border-radius:10px;font-family:'Syne',sans-serif;font-weight:700;font-size:0.8rem;cursor:pointer;transition:all 0.2s;border:2px solid #e8e8e8;background:#f5f5f5;color:#888;">Grade 10 <span id="roster-count-Gr10" style="display:inline-block;background:rgba(0,0,0,0.1);border-radius:20px;padding:1px 7px;font-size:0.68rem;margin-left:3px;">0</span></button>
+                    </div>
                     <div style="display:flex;gap:0.65rem;margin-bottom:0.85rem;flex-wrap:wrap;align-items:center;">
                         <input type="text" id="rosterSearch" placeholder="Search by name or ID…" oninput="filterRoster()"
                             style="flex:1;padding:8px 14px;border:1.5px solid #ddd;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;min-width:180px;">
-                        <select id="rosterSectionFilter" onchange="filterRoster()"
-                            style="padding:8px 14px;border:1.5px solid #ddd;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.88rem;cursor:pointer;outline:none;">
-                            <option value="">All Sections</option>
-                            <option value="Sec A">Sec A</option>
-                            <option value="Sec B">Sec B</option>
-                            <option value="Sec C">Sec C</option>
-                        </select>
                         <button class="btn btn-primary" onclick="openAddStudentForm()" style="padding:8px 18px;font-size:0.85rem;white-space:nowrap;">+ Add Student</button>
                     </div>
                     <!-- Add Student inline form -->
@@ -566,7 +583,6 @@
                 </div>
             </div>
         </div>
-
         <!-- MODAL: Edit Student -->
         <div id="editStudentModal" class="modal">
             <div class="modal-content" style="max-width:420px;">
@@ -603,7 +619,6 @@
                 </div>
             </div>
         </div>
-
         <!-- MODAL: Schedule Click -->
         <div id="detailsModal" class="modal">
             <div class="modal-content">
@@ -614,7 +629,6 @@
                 <div id="modalBody"></div>
             </div>
         </div>
-
         <!-- MODAL: QR Enlarged -->
         <div id="qrEnlargedModal" class="modal">
             <div class="modal-content modal-qr-enlarged">
@@ -627,7 +641,6 @@
                 </div>
             </div>
         </div>
-
         <!-- MODAL: Schedule Details -->
         <div id="scheduleModal" class="modal">
             <div class="modal-content">
@@ -639,19 +652,22 @@
             </div>
         </div>
 
-    </div><!-- /container -->
-
     <!--
         Script load order matters:
         1. students-data.js  — defines SSCR_STUDENTS, attendanceDB, etc.
         2. faculty-scans.js  — defines RECENT_SCANS (depends on nothing)
         3. faculty.js        — app logic (depends on both above)
     -->
+    <!-- Firebase compat SDKs (must load before firebase-config.js) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
     <script src="auth.js"></script>
 <script src="students-data.js"></script>
     <script src="faculty-scans.js"></script>
     <script src="faculty.js"></script>
-    <script type="module" src="faculty-firebase.js"></script>
+    <script src="faculty-firebase.js"></script>
 
     <!-- Pagination for student list modal -->
     <script>
@@ -660,27 +676,8 @@
         let _page = 1;
         let _allRows = [];
 
-        // Hook into switchSection — wrap the original after it loads
-        window.addEventListener('load', function() {
-            const origSwitch = window.switchSection;
-            if (origSwitch) {
-                window.switchSection = function(sec) {
-                    _page = 1;
-                    origSwitch(sec);
-                    _patchTable();
-                };
-            }
-
-            // Also patch openClassModal
-            const origOpen = window.openClassModal;
-            if (origOpen) {
-                window.openClassModal = function(subj) {
-                    _page = 1;
-                    origOpen(subj);
-                    setTimeout(_patchTable, 80);
-                };
-            }
-        });
+        // Observe studentListBody for changes and repatch — no wrapping of window fns
+        // (avoids race with faculty-firebase.js module which loads after window.load)
 
         function _patchTable() {
             const tbody = document.getElementById('studentListBody');
